@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { AnimatedMetrics } from "@/components/home/animated-metrics";
+import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { getPublicClubs } from "@/lib/admin-clubs";
@@ -201,7 +202,8 @@ export default async function HomePage() {
       </section>
 
       {featuredArticle ? (
-        <section className="grid gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
+        <ScrollReveal>
+          <section className="grid gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
           <div className="rounded-lg border border-border bg-card p-6 sm:p-7">
             <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
               <Badge>{featuredArticle.category}</Badge>
@@ -251,11 +253,12 @@ export default async function HomePage() {
               </Link>
             ))}
           </div>
-        </section>
+          </section>
+        </ScrollReveal>
       ) : null}
 
       <section className="grid gap-5 lg:grid-cols-2">
-        <div>
+        <ScrollReveal>
           <div className="mb-4 flex items-center justify-between gap-4">
             <div>
               <p className="text-sm font-medium text-primary">Sport</p>
@@ -287,9 +290,9 @@ export default async function HomePage() {
               </div>
             ))}
           </div>
-        </div>
+        </ScrollReveal>
 
-        <div>
+        <ScrollReveal delay={90}>
           <div className="mb-4 flex items-center justify-between gap-4">
             <div>
               <p className="text-sm font-medium text-primary">Territoire</p>
@@ -319,12 +322,13 @@ export default async function HomePage() {
               </div>
             ))}
           </div>
-        </div>
+        </ScrollReveal>
       </section>
 
       <AnimatedMetrics metrics={homeMetrics} />
 
-      <section className="flex flex-col gap-4 rounded-lg border border-border bg-card p-6 sm:flex-row sm:items-center sm:justify-between">
+      <ScrollReveal>
+        <section className="flex flex-col gap-4 rounded-lg border border-border bg-card p-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-xl font-semibold tracking-tight">
             Besoin d&apos;un document ?
@@ -340,7 +344,8 @@ export default async function HomePage() {
           Accéder aux documents
           <Download className="size-4" />
         </Link>
-      </section>
+        </section>
+      </ScrollReveal>
     </div>
   );
 }

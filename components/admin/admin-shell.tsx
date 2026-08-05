@@ -126,13 +126,29 @@ export function AdminShell({ children, logoutAction }: AdminShellProps) {
                         key={item.href}
                         href={item.href}
                         className={cn(
-                          "flex h-9 items-center gap-2 rounded-md px-2 text-sm transition-colors",
+                          "group relative flex h-9 items-center gap-2 overflow-hidden rounded-md px-3 text-sm transition-[background-color,color,box-shadow,transform] duration-200 ease-out",
                           isActive
-                            ? "bg-foreground text-background"
-                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                            ? "bg-muted text-foreground shadow-sm ring-1 ring-border"
+                            : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
                         )}
                       >
-                        <Icon className="size-4 shrink-0" />
+                        <span
+                          aria-hidden="true"
+                          className={cn(
+                            "absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-primary transition-opacity duration-200 ease-out",
+                            isActive
+                              ? "opacity-100"
+                              : "opacity-0 group-hover:opacity-60",
+                          )}
+                        />
+                        <Icon
+                          className={cn(
+                            "size-4 shrink-0 transition-[color,transform] duration-200 ease-out",
+                            isActive
+                              ? "text-primary"
+                              : "group-hover:translate-x-0.5",
+                          )}
+                        />
                         <span className="truncate">{item.label}</span>
                       </Link>
                     );
@@ -145,14 +161,14 @@ export function AdminShell({ children, logoutAction }: AdminShellProps) {
         <div className="border-t border-border p-3">
           <Link
             href="/"
-            className="flex h-9 items-center rounded-md px-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+            className="flex h-9 items-center rounded-md px-2 text-sm text-muted-foreground transition-[background-color,color,transform] duration-200 ease-out hover:bg-muted/70 hover:text-foreground"
           >
             Voir le site public
           </Link>
           <form action={logoutAction}>
             <button
               type="submit"
-              className="mt-1 flex h-9 w-full items-center gap-2 rounded-md px-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              className="mt-1 flex h-9 w-full items-center gap-2 rounded-md px-2 text-sm text-muted-foreground transition-[background-color,color,transform] duration-200 ease-out hover:bg-muted/70 hover:text-foreground"
             >
               <LogOut className="size-4" />
               Se déconnecter
@@ -224,10 +240,10 @@ export function AdminShell({ children, logoutAction }: AdminShellProps) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "shrink-0 rounded-md px-3 py-1.5 text-sm",
+                    "shrink-0 rounded-md px-3 py-1.5 text-sm transition-[background-color,color,box-shadow] duration-200 ease-out",
                     isActive
-                      ? "bg-foreground text-background"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                      ? "bg-muted text-foreground shadow-sm ring-1 ring-border"
+                      : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
                   )}
                 >
                   {item.label}
@@ -237,7 +253,11 @@ export function AdminShell({ children, logoutAction }: AdminShellProps) {
           </nav>
         </header>
 
-        <main className="px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+        <main className="px-4 py-6 sm:px-6 lg:px-8">
+          <div key={pathname} className="admin-page-transition">
+            {children}
+          </div>
+        </main>
       </div>
     </div>
   );
