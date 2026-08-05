@@ -12,16 +12,18 @@ import {
   Users,
 } from "lucide-react";
 
+import { AnimatedMetrics } from "@/components/home/animated-metrics";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { getPublicClubs } from "@/lib/admin-clubs";
 import { getPublishedNewsArticleCards } from "@/lib/admin-news";
+import { getPublicLicenseeTotal } from "@/lib/admin-stats";
 import { createPageMetadata } from "@/lib/metadata";
 import type { ArticleCardItem } from "@/lib/news";
 import {
   clubs,
   competitions,
   newsArticles,
-  siteMetrics,
 } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
@@ -64,9 +66,28 @@ export const dynamic = "force-dynamic";
 export default async function HomePage() {
   const databaseArticles = await getPublishedNewsArticleCards(3);
   const publishedArticles: ArticleCardItem[] = databaseArticles ?? newsArticles;
+  const databaseClubs = await getPublicClubs();
+  const licenseeTotal = await getPublicLicenseeTotal();
+  const directory = databaseClubs ?? clubs;
   const highlightedArticles = publishedArticles.slice(0, 3);
-  const featuredArticle = highlightedArticles[0];
-  const secondaryArticles = highlightedArticles.slice(1);
+  const featuredArticle = highlightedArticles.find((article) => article.featured);
+  const secondaryArticles = featuredArticle
+    ? highlightedArticles.filter((article) => article.slug !== featuredArticle.slug)
+    : highlightedArticles;
+  const cities = Array.from(new Set(directory.map((club) => club.city)));
+  const homeMetrics = [
+    { label: "Clubs affiliés", value: directory.length, tone: "clubs" as const },
+    ...(licenseeTotal === null
+      ? []
+      : [
+          {
+            label: "Licenciés",
+            value: licenseeTotal,
+            tone: "licensees" as const,
+          },
+        ]),
+    { label: "Villes représentées", value: cities.length, tone: "cities" as const },
+  ];
 
   return (
     <div className="space-y-12">
@@ -126,7 +147,7 @@ export default async function HomePage() {
                   Comité Marne
                 </p>
                 <p className="mt-2 text-3xl font-semibold tracking-tight">
-                  24 clubs affiliés
+                  {directory.length} clubs affiliés
                 </p>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">
                   Retrouvez les informations utiles pour jouer, suivre les
@@ -285,7 +306,7 @@ export default async function HomePage() {
             </Link>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            {clubs.slice(0, 4).map((club) => (
+            {directory.slice(0, 4).map((club) => (
               <div
                 key={club.name}
                 className="rounded-lg border border-border bg-card p-5"
@@ -301,16 +322,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="grid gap-3 border-y border-border py-6 sm:grid-cols-2 lg:grid-cols-4">
-        {siteMetrics.map((metric) => (
-          <div key={metric.label}>
-            <p className="text-3xl font-semibold tracking-tight">
-              {metric.value}
-            </p>
-            <p className="mt-1 text-sm font-medium">{metric.label}</p>
-          </div>
-        ))}
-      </section>
+      <AnimatedMetrics metrics={homeMetrics} />
 
       <section className="flex flex-col gap-4 rounded-lg border border-border bg-card p-6 sm:flex-row sm:items-center sm:justify-between">
         <div>

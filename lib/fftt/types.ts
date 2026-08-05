@@ -8,6 +8,13 @@ export type FfttClubRecord = {
   contact?: string;
 };
 
+export type FfttLicenseeRecord = {
+  licence: string;
+  lastName?: string;
+  firstName?: string;
+  clubId?: string;
+};
+
 export type FfttNewsRecord = {
   id: string;
   title: string;

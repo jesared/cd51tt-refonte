@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  BarChart3,
   Building2,
   FileText,
   Landmark,
@@ -41,6 +42,12 @@ const adminNavigation = [
     href: "/admin/clubs",
     label: "Clubs",
     icon: Building2,
+    section: "data",
+  },
+  {
+    href: "/admin/stats",
+    label: "Stats",
+    icon: BarChart3,
     section: "data",
   },
   {

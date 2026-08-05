@@ -87,6 +87,21 @@ model ClubResource {
   @@index([active, city])
 }
 
+model FfttClubLicenseeStat {
+  id             String   @id @default(cuid())
+  clubFfttId     String   @unique
+  clubName       String
+  city           String
+  licenseeCount  Int      @default(0)
+  syncError      String?
+  syncedAt       DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([syncedAt])
+  @@index([city])
+}
+
 model CommitteeMemberResource {
   id        String   @id @default(cuid())
   name      String

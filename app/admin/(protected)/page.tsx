@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   ArrowRight,
+  BarChart3,
   Building2,
   CheckCircle2,
   CircleDashed,
@@ -13,6 +14,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { getAdminClubs } from "@/lib/admin-clubs";
+import { getAdminStats } from "@/lib/admin-stats";
 import { createPageMetadata } from "@/lib/metadata";
 import {
   actualCommitteeMembers,
@@ -29,7 +31,7 @@ export const metadata = createPageMetadata({
   path: "/admin",
 });
 
-function getModules(clubCount: number) {
+function getModules(clubCount: number, licenseeCount: number | null) {
   return [
   {
     href: "/admin/actualites",
@@ -57,6 +59,15 @@ function getModules(clubCount: number) {
     unit: "clubs",
     state: "Structure",
     icon: Building2,
+  },
+  {
+    href: "/admin/stats",
+    title: "Stats",
+    description: "Synchroniser et suivre les chiffres FFTT.",
+    count: licenseeCount ?? 0,
+    unit: "licenciés",
+    state: "FFTT",
+    icon: BarChart3,
   },
   {
     href: "/admin/comite",
@@ -113,8 +124,9 @@ const checks = [
 
 export default async function AdminDashboardPage() {
   const adminClubs = await getAdminClubs();
+  const stats = await getAdminStats();
   const clubCount = adminClubs.length || clubs.length;
-  const modules = getModules(clubCount);
+  const modules = getModules(clubCount, stats.licenseeTotal);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">

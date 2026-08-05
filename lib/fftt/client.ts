@@ -8,6 +8,7 @@ import type {
   FfttClientConfig,
   FfttClubRecord,
   FfttCompetitionRecord,
+  FfttLicenseeRecord,
   FfttNewsRecord,
 } from "@/lib/fftt/types";
 
@@ -15,6 +16,7 @@ const SMARTPING_CLUB_ENDPOINTS = [
   "xml_initialisation.php",
   "xml_club_dep2.php",
   "xml_club_detail.php",
+  "xml_liste_joueur_o.php",
 ];
 
 const defaultConfig: FfttClientConfig = {
@@ -128,6 +130,21 @@ function toMockClubs(): FfttClubRecord[] {
   }));
 }
 
+function toLicenseeRecord(playerXml: string): FfttLicenseeRecord | null {
+  const licence = readTag(playerXml, "licence") || readTag(playerXml, "numlic");
+
+  if (!licence) {
+    return null;
+  }
+
+  return {
+    licence,
+    lastName: readTag(playerXml, "nom") || undefined,
+    firstName: readTag(playerXml, "prenom") || undefined,
+    clubId: readTag(playerXml, "nclub") || readTag(playerXml, "club") || undefined,
+  };
+}
+
 export class FfttClient {
   private readonly smartpingSerie = randomBytes(12)
     .toString("hex")
@@ -200,7 +217,7 @@ export class FfttClient {
         Accept: "application/xml,text/xml,*/*",
         "User-Agent": "CD51TT Backoffice",
       },
-      next: { revalidate: 3600 },
+      cache: "no-store",
     });
 
     const xml = decodeXml(
@@ -269,6 +286,22 @@ export class FfttClient {
     }
 
     return this.requestJson<FfttClubRecord[]>("/clubs");
+  }
+
+  async getLicenseesByClub(clubId: string): Promise<FfttLicenseeRecord[]> {
+    if (!this.hasSmartpingCredentials) {
+      throw new Error("Les identifiants FFTT ne sont pas configurés.");
+    }
+
+    await this.initialiseSmartping();
+
+    const xml = await this.requestSmartping("xml_liste_joueur_o.php", {
+      club: clubId,
+    });
+
+    return readItems(xml, "joueur")
+      .map(toLicenseeRecord)
+      .filter((player): player is FfttLicenseeRecord => Boolean(player));
   }
 
   async getNews(): Promise<FfttNewsRecord[]> {
