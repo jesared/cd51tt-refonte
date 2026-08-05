@@ -2,6 +2,7 @@ import { Download, FileText, FolderKanban } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { getPublishedDocumentCards } from "@/lib/admin-documents";
 import { createPageMetadata } from "@/lib/metadata";
 import { documents } from "@/lib/mock-data";
 
@@ -12,8 +13,10 @@ export const metadata = createPageMetadata({
   path: "/documents",
 });
 
-export default function DocumentsPage() {
-  const library = documents;
+export const dynamic = "force-dynamic";
+
+export default async function DocumentsPage() {
+  const library = (await getPublishedDocumentCards()) ?? documents;
   const categories = Array.from(
     new Set(library.map((document) => document.category)),
   );
@@ -75,15 +78,21 @@ export default function DocumentsPage() {
               </div>
             </div>
 
-            <a
-              href={document.href ?? "#"}
-              target="_blank"
-              rel="noreferrer"
-              className={buttonVariants({ variant: "outline", size: "lg" })}
-            >
-              Télécharger
-              <Download className="size-4" />
-            </a>
+            {document.href && document.href !== "#" ? (
+              <a
+                href={document.href}
+                target="_blank"
+                rel="noreferrer"
+                className={buttonVariants({ variant: "outline", size: "lg" })}
+              >
+                Télécharger
+                <Download className="size-4" />
+              </a>
+            ) : (
+              <span className="inline-flex h-10 items-center justify-center rounded-lg border border-border px-4 text-sm text-muted-foreground">
+                Fichier à ajouter
+              </span>
+            )}
           </article>
         ))}
       </section>

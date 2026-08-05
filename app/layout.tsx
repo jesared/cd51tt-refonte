@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 
-import { SiteShell } from "@/components/layout/site-shell";
+import { AppFrame } from "@/components/layout/app-frame";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { siteConfig } from "@/lib/site";
+import { getPublicSiteSettings } from "@/lib/site-settings";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -30,7 +31,7 @@ export const metadata: Metadata = {
     "tennis de table",
     "CD51TT",
     "Marne",
-    "comite departemental",
+    "comité départemental",
     "competitions",
     "clubs",
     "documents",
@@ -75,11 +76,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const settings = await getPublicSiteSettings();
+
   return (
     <html
       lang="fr"
@@ -88,7 +91,7 @@ export default function RootLayout({
     >
       <body className="min-h-screen bg-background font-sans text-foreground antialiased">
         <ThemeProvider>
-          <SiteShell>{children}</SiteShell>
+          <AppFrame settings={settings}>{children}</AppFrame>
         </ThemeProvider>
       </body>
     </html>

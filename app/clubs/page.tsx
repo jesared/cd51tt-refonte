@@ -1,6 +1,7 @@
 import { Building2, MapPin, Search, Users } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { getPublicClubs } from "@/lib/admin-clubs";
 import { createPageMetadata } from "@/lib/metadata";
 import { clubs } from "@/lib/mock-data";
 
@@ -11,9 +12,12 @@ export const metadata = createPageMetadata({
   path: "/clubs",
 });
 
-export default function ClubsPage() {
-  const cities = Array.from(new Set(clubs.map((club) => club.city)));
-  const totalTables = clubs.reduce((total, club) => total + club.tables, 0);
+export const dynamic = "force-dynamic";
+
+export default async function ClubsPage() {
+  const directory = (await getPublicClubs()) ?? clubs;
+  const cities = Array.from(new Set(directory.map((club) => club.city)));
+  const totalTables = directory.reduce((total, club) => total + club.tables, 0);
 
   return (
     <div className="space-y-8">
@@ -34,14 +38,14 @@ export default function ClubsPage() {
         </div>
 
         <div className="flex flex-wrap gap-2 lg:justify-end">
-          <Badge variant="secondary">{clubs.length} clubs</Badge>
+          <Badge variant="secondary">{directory.length} clubs</Badge>
           <Badge variant="outline">{cities.length} villes</Badge>
           <Badge variant="outline">{totalTables} tables</Badge>
         </div>
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {clubs.map((club) => (
+        {directory.map((club) => (
           <article
             key={club.name}
             className="flex min-h-56 flex-col justify-between rounded-lg border border-border bg-card p-5 transition-colors hover:border-primary/45 hover:bg-accent"

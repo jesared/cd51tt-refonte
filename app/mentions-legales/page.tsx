@@ -3,7 +3,8 @@ import { Building2, FileText, ShieldCheck } from "lucide-react";
 import { PageIntro } from "@/components/shared/page-intro";
 import { SectionCard } from "@/components/shared/section-card";
 import { createPageMetadata } from "@/lib/metadata";
-import { routeCopy, siteConfig } from "@/lib/site";
+import { routeCopy } from "@/lib/site";
+import { getPublicSiteSettings } from "@/lib/site-settings";
 
 export const metadata = createPageMetadata({
   title: "Mentions légales",
@@ -12,8 +13,9 @@ export const metadata = createPageMetadata({
   path: "/mentions-legales",
 });
 
-export default function MentionsLegalesPage() {
+export default async function MentionsLegalesPage() {
   const intro = routeCopy["/mentions-legales"];
+  const { siteConfig } = await getPublicSiteSettings();
 
   return (
     <div className="space-y-6">

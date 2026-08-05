@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum NewsArticleStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum DocumentResourceStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model SiteSettings {
+  id                 Int      @id
+  siteName           String
+  shortName          String
+  description        String
+  season             String
+  email              String
+  phone              String
+  organization       String
+  publicationDirector String
+  dataContact        String
+  addressLine1       String
+  addressLine2       String
+  postalCode         String
+  city               String
+  officeHours        String
+  affiliations       String
+  partners           String
+  facebookUrl        String
+  instagramUrl       String
+  updatedAt          DateTime @updatedAt
+  createdAt          DateTime @default(now())
+}
+
+model NewsArticle {
+  id          String            @id @default(cuid())
+  slug        String            @unique
+  title       String
+  excerpt     String
+  content     String
+  category    String
+  readTime    String
+  status      NewsArticleStatus @default(DRAFT)
+  featured    Boolean           @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([status, publishedAt(sort: Desc)])
+}
+
+model DocumentResource {
+  id          String                 @id @default(cuid())
+  title       String
+  category    String
+  format      String
+  description String
+  fileUrl     String
+  status      DocumentResourceStatus @default(DRAFT)
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  @@index([status, updatedAt(sort: Desc)])
+}
+
+model ClubResource {
+  id        String   @id @default(cuid())
+  ffttId    String?  @unique
+  name      String
+  city      String
+  venue     String
+  audience  String
+  tables    Int      @default(0)
+  contact   String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active, city])
+}
+
+model CommitteeMemberResource {
+  id        String   @id @default(cuid())
+  name      String
+  role      String
+  initials  String
+  mission   String
+  area      String
+  imageUrl  String?
+  sortOrder Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active, sortOrder])
+}
+
+model TechnicalStaffMemberResource {
+  id        String   @id @default(cuid())
+  name      String
+  role      String?
+  initials  String
+  mission   String?
+  area      String?
+  imageUrl  String?
+  sortOrder Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active, sortOrder])
+}

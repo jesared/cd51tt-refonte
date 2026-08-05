@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 
 type SiteSidebarProps = {
   pathname: string;
+  siteConfig: typeof siteConfig;
   mobile?: boolean;
 };
 
@@ -32,7 +33,11 @@ const navigationIcons: Record<string, LucideIcon> = {
   "/contact": Mail,
 };
 
-export function SiteSidebar({ pathname, mobile = false }: SiteSidebarProps) {
+export function SiteSidebar({
+  pathname,
+  siteConfig,
+  mobile = false,
+}: SiteSidebarProps) {
   return (
     <aside className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
       <div className="border-b border-sidebar-border px-5 py-5">

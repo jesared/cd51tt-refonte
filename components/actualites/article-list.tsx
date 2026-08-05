@@ -2,11 +2,11 @@ import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import type { Article } from "@/lib/mock-data";
+import type { ArticleCardItem } from "@/lib/news";
 import { cn } from "@/lib/utils";
 
 type ArticleListProps = {
-  articles: Article[];
+  articles: ArticleCardItem[];
 };
 
 export function ArticleList({ articles }: ArticleListProps) {

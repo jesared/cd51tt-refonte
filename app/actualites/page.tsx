@@ -2,6 +2,7 @@ import { Newspaper } from "lucide-react";
 
 import { ArticleList } from "@/components/actualites/article-list";
 import { Badge } from "@/components/ui/badge";
+import { getPublishedNewsArticleCards } from "@/lib/admin-news";
 import { createPageMetadata } from "@/lib/metadata";
 import { newsArticles } from "@/lib/mock-data";
 
@@ -12,8 +13,10 @@ export const metadata = createPageMetadata({
   path: "/actualites",
 });
 
-export default function ActualitesPage() {
-  const articles = newsArticles;
+export const dynamic = "force-dynamic";
+
+export default async function ActualitesPage() {
+  const articles = (await getPublishedNewsArticleCards()) ?? newsArticles;
   const categories = Array.from(
     new Set(articles.map((article) => article.category)),
   );

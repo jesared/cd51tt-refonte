@@ -1,9 +1,14 @@
 import Link from "next/link";
 import { ArrowRight, Landmark, UserRoundCheck, Users } from "lucide-react";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import {
+  getPublicCommitteeMembers,
+  getPublicTechnicalStaffMembers,
+} from "@/lib/admin-people";
+import { getCloudinaryCircleAvatarUrl } from "@/lib/cloudinary-url";
 import { createPageMetadata } from "@/lib/metadata";
 import { actualCommitteeMembers, technicalStaffMembers } from "@/lib/mock-data";
 
@@ -14,9 +19,15 @@ export const metadata = createPageMetadata({
   path: "/comite",
 });
 
-export default function ComitePage() {
+export const dynamic = "force-dynamic";
+
+export default async function ComitePage() {
+  const committeeMembers =
+    (await getPublicCommitteeMembers()) ?? actualCommitteeMembers;
+  const staffMembers =
+    (await getPublicTechnicalStaffMembers()) ?? technicalStaffMembers;
   const areas = Array.from(
-    new Set(actualCommitteeMembers.map((member) => member.area)),
+    new Set(committeeMembers.map((member) => member.area)),
   );
 
   return (
@@ -39,7 +50,7 @@ export default function ComitePage() {
 
         <div className="flex flex-wrap gap-2 lg:justify-end">
           <Badge variant="secondary">
-            {actualCommitteeMembers.length} responsables
+            {committeeMembers.length} responsables
           </Badge>
           {areas.map((area) => (
             <Badge key={area} variant="outline">
@@ -59,8 +70,7 @@ export default function ComitePage() {
             Cadres techniques
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Retrouvez les {technicalStaffMembers.length} cadres techniques du
-            comité.
+            Retrouvez les {staffMembers.length} cadres techniques du comité.
           </p>
         </div>
         <Link
@@ -73,25 +83,35 @@ export default function ComitePage() {
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {actualCommitteeMembers.map((member) => (
+        {committeeMembers.map((member) => (
           <article
             key={member.name}
-            className="flex min-h-64 flex-col justify-between rounded-lg border border-border bg-card p-5 transition-colors hover:border-primary/45 hover:bg-accent"
+            className="flex min-h-72 flex-col justify-between rounded-lg border border-border bg-card p-5 transition-colors hover:border-primary/45 hover:bg-accent"
           >
             <div>
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <Avatar className="size-12 border border-border bg-background">
-                    <AvatarFallback>{member.initials}</AvatarFallback>
+              <div className="flex items-start justify-between gap-5">
+                <div className="flex min-w-0 items-center gap-4">
+                  <Avatar className="size-20 border border-border bg-background sm:size-24">
+                    {member.imageUrl ? (
+                      <AvatarImage
+                        src={getCloudinaryCircleAvatarUrl(member.imageUrl)}
+                        alt={member.name}
+                      />
+                    ) : null}
+                    <AvatarFallback className="text-lg font-semibold">
+                      {member.initials}
+                    </AvatarFallback>
                   </Avatar>
-                  <div>
+                  <div className="min-w-0">
                     <h2 className="font-semibold leading-6">{member.name}</h2>
                     <p className="text-sm text-muted-foreground">
                       {member.role}
                     </p>
                   </div>
                 </div>
-                <Badge variant="secondary">{member.area}</Badge>
+                <Badge variant="secondary" className="shrink-0">
+                  {member.area}
+                </Badge>
               </div>
             </div>
 

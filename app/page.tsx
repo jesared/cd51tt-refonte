@@ -14,6 +14,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { getPublishedNewsArticleCards } from "@/lib/admin-news";
 import { createPageMetadata } from "@/lib/metadata";
 import {
   clubs,
@@ -57,8 +58,11 @@ const quickLinks = [
   },
 ];
 
-export default function HomePage() {
-  const highlightedArticles = newsArticles.slice(0, 3);
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const publishedArticles = (await getPublishedNewsArticleCards(3)) ?? newsArticles;
+  const highlightedArticles = publishedArticles.slice(0, 3);
   const featuredArticle = highlightedArticles[0];
   const secondaryArticles = highlightedArticles.slice(1);
 
@@ -103,7 +107,7 @@ export default function HomePage() {
               <div className="relative size-24 overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-border">
                 <Image
                   src="/branding/comite-logo.png"
-                  alt="Logo du Comite de la Marne de Tennis de Table"
+                  alt="Logo du Comité de la Marne de Tennis de Table"
                   fill
                   priority
                   className="object-contain p-1"

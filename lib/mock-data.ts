@@ -46,6 +46,7 @@ export type CommitteeMember = {
   initials: string;
   mission: string;
   area: string;
+  imageUrl?: string | null;
 };
 
 export type TechnicalStaffMember = {
@@ -54,6 +55,7 @@ export type TechnicalStaffMember = {
   initials: string;
   mission?: string;
   area?: string;
+  imageUrl?: string | null;
 };
 
 export const siteMetrics: SiteMetric[] = [

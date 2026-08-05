@@ -16,9 +16,16 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import type { PublicSiteSettings } from "@/lib/site-settings";
 import { cn } from "@/lib/utils";
 
-export function SiteShell({ children }: { children: ReactNode }) {
+export function SiteShell({
+  children,
+  settings,
+}: {
+  children: ReactNode;
+  settings: PublicSiteSettings;
+}) {
   const pathname = usePathname() ?? "/";
 
   const mobileMenuTrigger = (
@@ -39,7 +46,11 @@ export function SiteShell({ children }: { children: ReactNode }) {
             Accédez aux principales rubriques du site.
           </SheetDescription>
         </SheetHeader>
-        <SiteSidebar pathname={pathname} mobile />
+        <SiteSidebar
+          pathname={pathname}
+          siteConfig={settings.siteConfig}
+          mobile
+        />
       </SheetContent>
     </Sheet>
   );
@@ -47,11 +58,15 @@ export function SiteShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen">
       <div className="relative">
-        <SiteHeader pathname={pathname} mobileMenuTrigger={mobileMenuTrigger} />
+        <SiteHeader
+          pathname={pathname}
+          mobileMenuTrigger={mobileMenuTrigger}
+          siteConfig={settings.siteConfig}
+        />
         <main className="relative z-10 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           <div className="mx-auto max-w-7xl">{children}</div>
         </main>
-        <SiteFooter />
+        <SiteFooter settings={settings} />
       </div>
     </div>
   );

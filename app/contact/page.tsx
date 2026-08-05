@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { createPageMetadata } from "@/lib/metadata";
-import { siteConfig } from "@/lib/site";
+import { getPublicSiteSettings } from "@/lib/site-settings";
 
 export const metadata = createPageMetadata({
   title: "Contact",
@@ -13,28 +13,29 @@ export const metadata = createPageMetadata({
   path: "/contact",
 });
 
-const contactItems = [
-  {
-    label: "Email",
-    value: siteConfig.email,
-    href: `mailto:${siteConfig.email}`,
-    icon: Mail,
-  },
-  {
-    label: "Téléphone",
-    value: siteConfig.phone,
-    href: `tel:${siteConfig.phone.replaceAll(" ", "")}`,
-    icon: Phone,
-  },
-  {
-    label: "Adresse",
-    value: `${siteConfig.addressLine1}, ${siteConfig.city}`,
-    href: null,
-    icon: MapPin,
-  },
-];
+export default async function ContactPage() {
+  const { siteConfig } = await getPublicSiteSettings();
+  const contactItems = [
+    {
+      label: "Email",
+      value: siteConfig.email,
+      href: `mailto:${siteConfig.email}`,
+      icon: Mail,
+    },
+    {
+      label: "Téléphone",
+      value: siteConfig.phone,
+      href: `tel:${siteConfig.phone.replaceAll(" ", "")}`,
+      icon: Phone,
+    },
+    {
+      label: "Adresse",
+      value: `${siteConfig.addressLine1}, ${siteConfig.city}`,
+      href: null,
+      icon: MapPin,
+    },
+  ];
 
-export default function ContactPage() {
   return (
     <div className="space-y-8">
       <section className="grid gap-6 border-b border-border pb-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">

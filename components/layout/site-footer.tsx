@@ -9,20 +9,24 @@ import {
 } from "lucide-react";
 
 import {
-  affiliations,
   footerNavigation,
-  partners,
-  quickContactLinks,
-  siteConfig,
-  socialLinks,
 } from "@/lib/site";
+import type { PublicSiteSettings } from "@/lib/site-settings";
 
 const socialIcons = {
   Facebook: MessageCircle,
   Instagram: Camera,
 };
 
-export function SiteFooter() {
+export function SiteFooter({ settings }: { settings: PublicSiteSettings }) {
+  const {
+    affiliations,
+    partners,
+    quickContactLinks,
+    siteConfig,
+    socialLinks,
+  } = settings;
+
   return (
     <footer className="border-t border-border bg-card/80">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -32,7 +36,7 @@ export function SiteFooter() {
               <div className="relative size-12 overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-border">
                 <Image
                   src="/branding/comite-logo.png"
-                  alt="Logo du Comite de la Marne de Tennis de Table"
+                  alt="Logo du Comité de la Marne de Tennis de Table"
                   fill
                   className="object-contain p-1"
                 />

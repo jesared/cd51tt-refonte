@@ -4,6 +4,8 @@ export type FfttClubRecord = {
   city: string;
   venue?: string;
   audience?: string;
+  tables?: number;
+  contact?: string;
 };
 
 export type FfttNewsRecord = {
@@ -25,4 +27,7 @@ export type FfttCompetitionRecord = {
 export type FfttClientConfig = {
   baseUrl: string;
   apiKey?: string;
+  appId?: string;
+  appPassword?: string;
+  department?: string;
 };

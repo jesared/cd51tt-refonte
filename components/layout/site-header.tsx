@@ -9,11 +9,13 @@ import { cn } from "@/lib/utils";
 type SiteHeaderProps = {
   pathname: string;
   mobileMenuTrigger: ReactNode;
+  siteConfig: typeof siteConfig;
 };
 
 export function SiteHeader({
   pathname,
   mobileMenuTrigger,
+  siteConfig,
 }: SiteHeaderProps) {
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-background">
@@ -24,7 +26,7 @@ export function SiteHeader({
             <div className="relative size-14 shrink-0 overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-border">
               <Image
                 src="/branding/comite-logo.png"
-                alt="Logo du Comite de la Marne de Tennis de Table"
+                alt="Logo du Comité de la Marne de Tennis de Table"
                 fill
                 priority
                 className="object-contain p-0.5"
@@ -32,7 +34,7 @@ export function SiteHeader({
             </div>
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold sm:text-base">
-                Comit&eacute; Marne de tennis de table
+                {siteConfig.shortName}
               </p>
               <p className="hidden text-xs text-muted-foreground sm:block">
                 {siteConfig.season}

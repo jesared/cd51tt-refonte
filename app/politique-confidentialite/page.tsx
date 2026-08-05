@@ -3,7 +3,8 @@ import { Database, LockKeyhole, Mail } from "lucide-react";
 import { PageIntro } from "@/components/shared/page-intro";
 import { SectionCard } from "@/components/shared/section-card";
 import { createPageMetadata } from "@/lib/metadata";
-import { routeCopy, siteConfig } from "@/lib/site";
+import { routeCopy } from "@/lib/site";
+import { getPublicSiteSettings } from "@/lib/site-settings";
 
 export const metadata = createPageMetadata({
   title: "Politique de confidentialité",
@@ -12,8 +13,9 @@ export const metadata = createPageMetadata({
   path: "/politique-confidentialite",
 });
 
-export default function PolitiqueConfidentialitePage() {
+export default async function PolitiqueConfidentialitePage() {
   const intro = routeCopy["/politique-confidentialite"];
+  const { siteConfig } = await getPublicSiteSettings();
 
   return (
     <div className="space-y-6">
