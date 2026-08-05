@@ -57,13 +57,13 @@ export function SiteShell({
 
   return (
     <div className="min-h-screen">
-      <div className="relative">
+      <div className="relative flex min-h-screen flex-col">
         <SiteHeader
           pathname={pathname}
           mobileMenuTrigger={mobileMenuTrigger}
           siteConfig={settings.siteConfig}
         />
-        <main className="relative z-10 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <main className="relative z-10 flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           <div className="mx-auto max-w-7xl">{children}</div>
         </main>
         <SiteFooter settings={settings} />

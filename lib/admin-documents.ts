@@ -163,10 +163,6 @@ export async function getPublishedDocumentCards(): Promise<
       orderBy: [{ updatedAt: "desc" }, { createdAt: "desc" }],
     });
 
-    if (entries.length === 0) {
-      return null;
-    }
-
     return entries.map(toDocumentCard);
   } catch {
     return null;

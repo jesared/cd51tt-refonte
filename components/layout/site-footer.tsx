@@ -1,16 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  Camera,
-  ExternalLink,
-  MapPin,
-  MessageCircle,
-  Phone,
-} from "lucide-react";
+import { Camera, ExternalLink, MapPin, MessageCircle, Phone } from "lucide-react";
 
-import {
-  footerNavigation,
-} from "@/lib/site";
+import { footerNavigation } from "@/lib/site";
 import type { PublicSiteSettings } from "@/lib/site-settings";
 
 const socialIcons = {
@@ -29,11 +21,11 @@ export function SiteFooter({ settings }: { settings: PublicSiteSettings }) {
 
   return (
     <footer className="border-t border-border bg-card/80">
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.65fr)]">
-          <div className="space-y-5">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.45fr)] lg:items-start">
+          <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="relative size-12 overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-border">
+              <div className="relative size-10 overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-border">
                 <Image
                   src="/branding/comite-logo.png"
                   alt="Logo du Comité de la Marne de Tennis de Table"
@@ -48,16 +40,15 @@ export function SiteFooter({ settings }: { settings: PublicSiteSettings }) {
                 <p className="max-w-xl truncate text-sm text-muted-foreground">
                   {siteConfig.name}
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs leading-4 text-muted-foreground">
                   {siteConfig.season}
                 </p>
               </div>
             </div>
 
-            <p className="max-w-2xl text-sm leading-6 text-muted-foreground/90">
-              Instance d&eacute;partementale au service des clubs, des
-              comp&eacute;titions et du d&eacute;veloppement du tennis de table
-              dans la Marne.
+            <p className="max-w-2xl text-sm leading-5 text-muted-foreground/90">
+              Instance départementale au service des clubs, des compétitions et
+              du développement du tennis de table dans la Marne.
             </p>
 
             <div className="flex">
@@ -73,8 +64,8 @@ export function SiteFooter({ settings }: { settings: PublicSiteSettings }) {
             </div>
           </div>
 
-          <div className="rounded-lg border border-border bg-background/60 p-5 text-sm text-muted-foreground lg:justify-self-end">
-            <div className="space-y-3">
+          <div className="rounded-lg border border-border bg-background/60 p-4 text-sm text-muted-foreground lg:justify-self-end">
+            <div className="space-y-2.5">
               <div className="flex items-start gap-2">
                 <MapPin className="mt-0.5 size-4 text-primary" />
                 <div>
@@ -94,13 +85,13 @@ export function SiteFooter({ settings }: { settings: PublicSiteSettings }) {
           </div>
         </div>
 
-        <div className="mt-8 grid gap-8 border-t border-border pt-8 md:grid-cols-3 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,0.8fr)_minmax(0,1fr)]">
-          <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-1">
+        <div className="mt-6 grid gap-6 border-t border-border pt-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1">
             <div>
               <p className="text-xs font-semibold uppercase text-foreground">
-                Le comit&eacute;
+                Le comité
               </p>
-              <div className="mt-4 space-y-2.5">
+              <div className="mt-3 space-y-1.5">
                 {footerNavigation.comite.map((item) => (
                   <Link
                     key={item.href}
@@ -117,7 +108,7 @@ export function SiteFooter({ settings }: { settings: PublicSiteSettings }) {
               <p className="text-xs font-semibold uppercase text-foreground">
                 Ressources
               </p>
-              <div className="mt-4 space-y-2.5">
+              <div className="mt-3 space-y-1.5">
                 {footerNavigation.activites.map((item) => (
                   <Link
                     key={item.href}
@@ -131,12 +122,12 @@ export function SiteFooter({ settings }: { settings: PublicSiteSettings }) {
             </div>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-5">
             <div>
               <p className="text-xs font-semibold uppercase text-foreground">
                 Informations
               </p>
-              <div className="mt-4 space-y-2.5">
+              <div className="mt-3 space-y-1.5">
                 {footerNavigation.institutionnel.map((item) => (
                   <Link
                     key={item.href}
@@ -151,9 +142,9 @@ export function SiteFooter({ settings }: { settings: PublicSiteSettings }) {
 
             <div>
               <p className="text-xs font-semibold uppercase text-foreground">
-                Suivre le comit&eacute;
+                Suivre le comité
               </p>
-              <div className="mt-4 space-y-2.5">
+              <div className="mt-3 space-y-1.5">
                 {socialLinks.map((item) => {
                   const Icon =
                     socialIcons[item.label as keyof typeof socialIcons];
@@ -176,39 +167,37 @@ export function SiteFooter({ settings }: { settings: PublicSiteSettings }) {
             </div>
           </div>
 
-          <div className="space-y-5">
-            <div>
-              <p className="text-xs font-semibold uppercase text-foreground">
-                Affiliations
-              </p>
-              <div className="mt-4 space-y-2.5 text-sm leading-6 text-muted-foreground">
-                {affiliations.map((item) => (
-                  <p key={item}>{item}</p>
-                ))}
-              </div>
+          <div>
+            <p className="text-xs font-semibold uppercase text-foreground">
+              Affiliations
+            </p>
+            <div className="mt-3 space-y-1.5 text-sm leading-5 text-muted-foreground">
+              {affiliations.map((item) => (
+                <p key={item}>{item}</p>
+              ))}
             </div>
+          </div>
 
-            <div>
-              <p className="text-xs font-semibold uppercase text-foreground">
-                Partenaires
-              </p>
-              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
-                {partners.map((item) => (
-                  <span key={item}>{item}</span>
-                ))}
-              </div>
+          <div>
+            <p className="text-xs font-semibold uppercase text-foreground">
+              Partenaires
+            </p>
+            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-sm leading-5 text-muted-foreground">
+              {partners.map((item) => (
+                <span key={item}>{item}</span>
+              ))}
             </div>
           </div>
         </div>
 
-        <div className="mt-8 flex flex-col gap-2 border-t border-border pt-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-5 flex flex-col gap-2 border-t border-border pt-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>
-            &copy; 2026 {siteConfig.shortName}. Comit&eacute;
-            D&eacute;partemental de Tennis de Table de la Marne.
+            &copy; 2026 {siteConfig.shortName}. Comité Départemental de Tennis
+            de Table de la Marne.
           </p>
           <p>
-            Informations institutionnelles et coordonn&eacute;es &agrave; confirmer
-            avant mise en ligne officielle.
+            Informations institutionnelles et coordonnées à confirmer avant mise
+            en ligne officielle.
           </p>
         </div>
       </div>

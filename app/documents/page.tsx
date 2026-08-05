@@ -55,8 +55,13 @@ export default async function DocumentsPage() {
         </div>
       </section>
 
-      <section className="divide-y divide-border rounded-lg border border-border bg-card">
-        {library.map((document) => (
+      {library.length === 0 ? (
+        <section className="rounded-lg border border-border bg-card p-8 text-sm leading-6 text-muted-foreground">
+          Aucun document n&apos;est publié pour le moment.
+        </section>
+      ) : (
+        <section className="divide-y divide-border rounded-lg border border-border bg-card">
+          {library.map((document) => (
           <article
             key={document.title}
             className="grid gap-5 p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center"
@@ -100,8 +105,9 @@ export default async function DocumentsPage() {
               </span>
             )}
           </article>
-        ))}
-      </section>
+          ))}
+        </section>
+      )}
     </div>
   );
 }
