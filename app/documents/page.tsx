@@ -3,6 +3,7 @@ import { Download, FileText, FolderKanban } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { getPublishedDocumentCards } from "@/lib/admin-documents";
+import type { DocumentCardItem } from "@/lib/documents";
 import { createPageMetadata } from "@/lib/metadata";
 import { documents } from "@/lib/mock-data";
 
@@ -16,7 +17,12 @@ export const metadata = createPageMetadata({
 export const dynamic = "force-dynamic";
 
 export default async function DocumentsPage() {
-  const library = (await getPublishedDocumentCards()) ?? documents;
+  const databaseDocuments = await getPublishedDocumentCards();
+  const fallbackDocuments: DocumentCardItem[] = documents.map((document) => ({
+    ...document,
+    href: document.href ?? "#",
+  }));
+  const library: DocumentCardItem[] = databaseDocuments ?? fallbackDocuments;
   const categories = Array.from(
     new Set(library.map((document) => document.category)),
   );

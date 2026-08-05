@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { getPublishedNewsArticleCards } from "@/lib/admin-news";
 import { createPageMetadata } from "@/lib/metadata";
+import type { ArticleCardItem } from "@/lib/news";
 import {
   clubs,
   competitions,
@@ -61,7 +62,8 @@ const quickLinks = [
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const publishedArticles = (await getPublishedNewsArticleCards(3)) ?? newsArticles;
+  const databaseArticles = await getPublishedNewsArticleCards(3);
+  const publishedArticles: ArticleCardItem[] = databaseArticles ?? newsArticles;
   const highlightedArticles = publishedArticles.slice(0, 3);
   const featuredArticle = highlightedArticles[0];
   const secondaryArticles = highlightedArticles.slice(1);

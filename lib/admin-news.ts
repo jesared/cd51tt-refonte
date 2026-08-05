@@ -178,7 +178,9 @@ export async function getAdminNewsArticleById(id: string) {
   }
 }
 
-export async function getPublishedNewsArticleCards(limit?: number) {
+export async function getPublishedNewsArticleCards(
+  limit?: number,
+): Promise<ArticleCardItem[] | null> {
   if (!(await hasNewsArticleTable())) {
     return null;
   }

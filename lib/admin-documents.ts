@@ -148,7 +148,9 @@ export async function getAdminDocumentById(id: string) {
   }
 }
 
-export async function getPublishedDocumentCards() {
+export async function getPublishedDocumentCards(): Promise<
+  DocumentCardItem[] | null
+> {
   if (!(await hasDocumentResourceTable())) {
     return null;
   }
