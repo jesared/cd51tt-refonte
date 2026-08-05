@@ -37,6 +37,7 @@ export type DocumentItem = {
   format: string;
   updatedAt: string;
   description: string;
+  href?: string;
 };
 
 export type CommitteeMember = {
@@ -45,6 +46,14 @@ export type CommitteeMember = {
   initials: string;
   mission: string;
   area: string;
+};
+
+export type TechnicalStaffMember = {
+  name: string;
+  role?: string;
+  initials: string;
+  mission?: string;
+  area?: string;
 };
 
 export const siteMetrics: SiteMetric[] = [
@@ -258,6 +267,158 @@ export const committeeMembers: CommitteeMember[] = [
     initials: "EM",
     mission: "Détection, stages, actions scolaires et passerelles de pratique.",
     area: "Jeunesse",
+  },
+];
+
+export const actualCommitteeMembers: CommitteeMember[] = [
+  {
+    name: "ANDRE Blandine",
+    role: "Responsable du suivi sportif",
+    initials: "AB",
+    mission: "Suivi sportif du championnat par équipes (D3, D4, D5).",
+    area: "Sportif",
+  },
+  {
+    name: "BARCELO Emmanuel",
+    role: "Président",
+    initials: "BE",
+    mission:
+      "Président, assistant du challenge Charles Artaud et des championnats de la Marne vétérans.",
+    area: "Direction",
+  },
+  {
+    name: "FILA-TOURNANT Julie",
+    role: "Responsable projets associatifs",
+    initials: "FJ",
+    mission: "Projets associatifs et dossiers de subvention.",
+    area: "Projets",
+  },
+  {
+    name: "FRANCOIS Gauthier",
+    role: "Assistant compétitions",
+    initials: "FG",
+    mission: "Assistant du balbutop et du master féminin.",
+    area: "Competitions",
+  },
+  {
+    name: "GIORIA Julien",
+    role: "Responsable championnat",
+    initials: "GJ",
+    mission: "Création des poules du championnat par équipes.",
+    area: "Sportif",
+  },
+  {
+    name: "GUIRAO Jean-François",
+    role: "Assistant critérium fédéral",
+    initials: "GJ",
+    mission: "Assistant du critérium fédéral.",
+    area: "Competitions",
+  },
+  {
+    name: "HAUTIER Jean Marc",
+    role: "Responsable jeunes",
+    initials: "HJ",
+    mission: "Championnat jeunes et calendrier.",
+    area: "Jeunesse",
+  },
+  {
+    name: "HOCQUELOUX Thomas",
+    role: "Trésorier",
+    initials: "HT",
+    mission: "Trésorerie du comité.",
+    area: "Administration",
+  },
+  {
+    name: "LEGRY Jean-Emmanuel",
+    role: "Responsable commission sportive",
+    initials: "LJ",
+    mission: "Responsable de la commission sportive.",
+    area: "Sportif",
+  },
+  {
+    name: "MANGEOT Karelle",
+    role: "Secrétaire",
+    initials: "MK",
+    mission:
+      "Challenge Charles Artaud, championnats de la Marne Vétérans et assistance à la gestion de la commission départementale d'arbitrage.",
+    area: "Administration",
+  },
+  {
+    name: "MATHIEU Sébastien",
+    role: "Responsable commission technique",
+    initials: "MS",
+    mission: "Responsable de la commission technique.",
+    area: "Technique",
+  },
+  {
+    name: "MAUFFRE Hugo",
+    role: "Responsable adjoint arbitrage",
+    initials: "MH",
+    mission: "Responsable adjoint de la commission départementale d'arbitrage.",
+    area: "Arbitrage",
+  },
+  {
+    name: "PERRON Alain",
+    role: "Vice-Président",
+    initials: "PA",
+    mission:
+      "Vice-Président et responsable de la commission départementale d'arbitrage.",
+    area: "Arbitrage",
+  },
+  {
+    name: "RENAUX Régine",
+    role: "Assistante compétitions",
+    initials: "RR",
+    mission:
+      "Assistante du critérium fédéral, du championnat jeunes, du balbutop et du master féminin.",
+    area: "Competitions",
+  },
+  {
+    name: "SALOMON Thierry",
+    role: "Responsable coupe",
+    initials: "ST",
+    mission: "Responsable de la coupe de la Marne.",
+    area: "Competitions",
+  },
+  {
+    name: "SCHUER Cyril",
+    role: "Responsable critérium fédéral",
+    initials: "SC",
+    mission: "Responsable du critérium fédéral.",
+    area: "Competitions",
+  },
+  {
+    name: "SOUCHON Pierre-François",
+    role: "Médecin",
+    initials: "SP",
+    mission: "Médecin du comité.",
+    area: "Medical",
+  },
+  {
+    name: "VAUCOULEUR Dominique",
+    role: "Secrétaire adjointe",
+    initials: "VD",
+    mission: "Balbutop et master féminin.",
+    area: "Administration",
+  },
+];
+
+export const technicalStaffMembers: TechnicalStaffMember[] = [
+  {
+    name: "ASENCIO TEIXERA Emil",
+    initials: "AE",
+  },
+  {
+    name: "BERTHELOT Maxime",
+    initials: "BM",
+  },
+  {
+    name: "GUILLAUMEE Lucas",
+    initials: "GL",
+  },
+  {
+    name: "VANTOURS Steven",
+    initials: "VS",
   },
 ];
 

@@ -1,88 +1,122 @@
-import { Clock3, Mail, Phone } from "lucide-react";
+import { Mail, MapPin, Phone, Send } from "lucide-react";
 
-import { PageIntro } from "@/components/shared/page-intro";
-import { SectionCard } from "@/components/shared/section-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { createPageMetadata } from "@/lib/metadata";
-import { contactChannels } from "@/lib/mock-data";
-import { routeCopy, siteConfig } from "@/lib/site";
+import { siteConfig } from "@/lib/site";
 
 export const metadata = createPageMetadata({
   title: "Contact",
   description:
-    "Coordonnées, canaux de contact et formulaire pour joindre rapidement le comité.",
+    "Coordonnées et formulaire pour contacter le Comité Marne de tennis de table.",
   path: "/contact",
 });
 
+const contactItems = [
+  {
+    label: "Email",
+    value: siteConfig.email,
+    href: `mailto:${siteConfig.email}`,
+    icon: Mail,
+  },
+  {
+    label: "Téléphone",
+    value: siteConfig.phone,
+    href: `tel:${siteConfig.phone.replaceAll(" ", "")}`,
+    icon: Phone,
+  },
+  {
+    label: "Adresse",
+    value: `${siteConfig.addressLine1}, ${siteConfig.city}`,
+    href: null,
+    icon: MapPin,
+  },
+];
+
 export default function ContactPage() {
-  const intro = routeCopy["/contact"];
-
   return (
-    <div className="space-y-6">
-      <PageIntro
-        eyebrow={intro.eyebrow}
-        title={intro.title}
-        description={intro.description}
-      />
-      <section className="grid gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-        <SectionCard
-          eyebrow="Coordonnées"
-          title="Nous joindre"
-          description="Retrouvez les bons canaux pour joindre le comité selon votre besoin."
-          icon={Mail}
-        >
-          <div className="space-y-4">
-            {contactChannels.map((channel) => (
-              <div
-                key={channel.title}
-                className="rounded-3xl border border-border bg-muted p-5"
-              >
-                <p className="text-sm font-medium text-foreground">
-                  {channel.title}
-                </p>
-                <p className="mt-2 text-base font-semibold">{channel.value}</p>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  {channel.description}
-                </p>
-              </div>
-            ))}
-
-            <div className="grid gap-3 rounded-3xl border border-border bg-card p-5 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Phone className="size-4 text-primary" />
-                Standard comité
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock3 className="size-4 text-primary" />
-                {siteConfig.location}
-              </div>
-            </div>
+    <div className="space-y-8">
+      <section className="grid gap-6 border-b border-border pb-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+        <div className="max-w-3xl space-y-4">
+          <div className="flex items-center gap-2 text-sm font-medium text-primary">
+            <Mail className="size-4" />
+            Nous joindre
           </div>
-        </SectionCard>
+          <div className="space-y-3">
+            <h1 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
+              Contact
+            </h1>
+            <p className="max-w-2xl text-base leading-7 text-muted-foreground">
+              Une question, une demande ou une information à transmettre au
+              comité.
+            </p>
+          </div>
+        </div>
+      </section>
 
-        <SectionCard
-          eyebrow="Formulaire"
-          title="Envoyer une demande"
-          description="Utilisez ce formulaire pour transmettre une question, une demande d'information ou un besoin d'accompagnement."
-          icon={Mail}
-        >
-          <form className="grid gap-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <Input placeholder="Nom du club ou nom complet" />
-              <Input type="email" placeholder="Adresse email" />
+      <section className="grid gap-4 lg:grid-cols-3">
+        {contactItems.map((item) => {
+          const Icon = item.icon;
+          const content = (
+            <>
+              <div className="rounded-md border border-border bg-background p-2 text-primary">
+                <Icon className="size-5" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">{item.label}</p>
+                <p className="mt-1 font-semibold">{item.value}</p>
+              </div>
+            </>
+          );
+
+          return item.href ? (
+            <a
+              key={item.label}
+              href={item.href}
+              className="flex min-h-28 items-center gap-4 rounded-lg border border-border bg-card p-5 transition-colors hover:border-primary/45 hover:bg-accent"
+            >
+              {content}
+            </a>
+          ) : (
+            <div
+              key={item.label}
+              className="flex min-h-28 items-center gap-4 rounded-lg border border-border bg-card p-5"
+            >
+              {content}
             </div>
-            <Input placeholder="Objet de la demande" />
-            <Textarea
-              placeholder="Décrivez votre besoin : compétition, documents, accompagnement club, gouvernance..."
-              className="min-h-40"
-            />
-            <div className="flex justify-end">
-              <Button type="button">Envoyer une demande</Button>
-            </div>
-          </form>
-        </SectionCard>
+          );
+        })}
+      </section>
+
+      <section className="grid gap-6 rounded-lg border border-border bg-card p-5 sm:p-6 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)]">
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight">
+            Envoyer un message
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            Indiquez votre sujet et vos coordonnées. Le formulaire est prêt pour
+            être relié à l’envoi réel.
+          </p>
+        </div>
+
+        <form className="grid gap-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Input placeholder="Nom complet" />
+            <Input type="email" placeholder="Adresse email" />
+          </div>
+          <Input placeholder="Objet" />
+          <Textarea
+            placeholder="Votre message"
+            className="min-h-36"
+          />
+          <div className="flex justify-end">
+            <Button type="button">
+              Envoyer
+              <Send className="size-4" />
+            </Button>
+          </div>
+        </form>
       </section>
     </div>
   );

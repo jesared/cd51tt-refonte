@@ -1,72 +1,55 @@
-import { Newspaper, RadioTower, Sparkles } from "lucide-react";
+import { Newspaper } from "lucide-react";
 
 import { ArticleList } from "@/components/actualites/article-list";
-import { PageIntro } from "@/components/shared/page-intro";
-import { SectionCard } from "@/components/shared/section-card";
 import { Badge } from "@/components/ui/badge";
+import { getPublishedNewsArticleCards } from "@/lib/admin-news";
 import { createPageMetadata } from "@/lib/metadata";
 import { newsArticles } from "@/lib/mock-data";
-import { routeCopy } from "@/lib/site";
 
 export const metadata = createPageMetadata({
   title: "Actualités",
   description:
-    "Toutes les actualités du comité, des clubs et des actions sportives du territoire.",
+    "Les dernières actualités du Comité Marne de tennis de table.",
   path: "/actualites",
 });
 
-export default function ActualitesPage() {
-  const intro = routeCopy["/actualites"];
+export default async function ActualitesPage() {
+  const publishedArticles = await getPublishedNewsArticleCards();
+  const articles = publishedArticles ?? newsArticles;
+  const categories = Array.from(
+    new Set(articles.map((article) => article.category)),
+  );
 
   return (
-    <div className="space-y-6">
-      <PageIntro
-        eyebrow={intro.eyebrow}
-        title={intro.title}
-        description={intro.description}
-      />
-      <section className="grid gap-4 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)]">
-        <SectionCard
-          eyebrow="Publications"
-          title="Annonces, temps forts et informations officielles"
-          description="La page rassemble les informations publiées par le comité pour donner de la visibilité à la saison et à la vie des clubs."
-          icon={Newspaper}
-        >
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="secondary">Annonces officielles</Badge>
-            <Badge variant="secondary">Formation</Badge>
-            <Badge variant="secondary">Jeunes</Badge>
-            <Badge variant="secondary">Vie des clubs</Badge>
+    <div className="space-y-8">
+      <section className="grid gap-6 border-b border-border pb-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+        <div className="max-w-3xl space-y-4">
+          <div className="flex items-center gap-2 text-sm font-medium text-primary">
+            <Newspaper className="size-4" />
+            Informations
           </div>
-        </SectionCard>
+          <div className="space-y-3">
+            <h1 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
+              Actualités
+            </h1>
+            <p className="max-w-2xl text-base leading-7 text-muted-foreground">
+              Les infos importantes du comité, des clubs et de la saison
+              sportive.
+            </p>
+          </div>
+        </div>
 
-        <SectionCard
-          eyebrow="Repères"
-          title="Une lecture claire pour tous les publics"
-          description="Le classement des contenus permet d'identifier rapidement ce qui relève d'une annonce importante, d'une information pratique ou d'un temps fort."
-          icon={RadioTower}
-        >
-          <div className="space-y-3 text-sm leading-6 text-muted-foreground">
-            <p>
-              Hiérarchie claire entre l&apos;information prioritaire et les
-              publications secondaires.
-            </p>
-            <p>
-              Catégories lisibles et présentation sobre pour conserver un ton
-              institutionnel.
-            </p>
-          </div>
-        </SectionCard>
+        <div className="flex flex-wrap gap-2 lg:justify-end">
+          <Badge variant="secondary">{articles.length} publications</Badge>
+          {categories.slice(0, 4).map((category) => (
+            <Badge key={category} variant="outline">
+              {category}
+            </Badge>
+          ))}
+        </div>
       </section>
 
-      <SectionCard
-        eyebrow="Fil d'actualité"
-        title="Publications récentes"
-        description="Les dernières informations à relayer auprès des clubs, des licenciés et des partenaires."
-        icon={Sparkles}
-      >
-        <ArticleList articles={newsArticles} />
-      </SectionCard>
+      <ArticleList articles={articles} />
     </div>
   );
 }

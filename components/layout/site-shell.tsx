@@ -46,11 +46,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen">
-      <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:block lg:w-64 lg:border-r lg:border-sidebar-border">
-        <SiteSidebar pathname={pathname} />
-      </div>
-
-      <div className="relative lg:pl-64">
+      <div className="relative">
         <SiteHeader pathname={pathname} mobileMenuTrigger={mobileMenuTrigger} />
         <main className="relative z-10 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           <div className="mx-auto max-w-7xl">{children}</div>

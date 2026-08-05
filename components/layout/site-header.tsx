@@ -1,18 +1,10 @@
+import Image from "next/image";
 import Link from "next/link";
-import { Fragment, type ReactNode } from "react";
-import { ArrowUpRight, ChevronRight } from "lucide-react";
+import type { ReactNode } from "react";
 
 import { ThemeToggle } from "@/components/theme-toggle";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { buttonVariants } from "@/components/ui/button";
-import { buildBreadcrumbs } from "@/lib/site";
+import { mainNavigation, siteConfig } from "@/lib/site";
+import { cn } from "@/lib/utils";
 
 type SiteHeaderProps = {
   pathname: string;
@@ -23,57 +15,61 @@ export function SiteHeader({
   pathname,
   mobileMenuTrigger,
 }: SiteHeaderProps) {
-  const breadcrumbs = buildBreadcrumbs(pathname);
-
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-background">
-      <div className="px-4 py-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="lg:hidden">{mobileMenuTrigger}</div>
-            <Breadcrumb>
-              <BreadcrumbList className="text-xs">
-                {breadcrumbs.map((crumb, index) => {
-                  const isLast = index === breadcrumbs.length - 1;
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="lg:hidden">{mobileMenuTrigger}</div>
+          <Link href="/" className="flex min-w-0 items-center gap-4">
+            <div className="relative size-14 shrink-0 overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-border">
+              <Image
+                src="/branding/comite-logo.png"
+                alt="Logo du Comite de la Marne de Tennis de Table"
+                fill
+                priority
+                className="object-contain p-0.5"
+              />
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold sm:text-base">
+                Comit&eacute; Marne de tennis de table
+              </p>
+              <p className="hidden text-xs text-muted-foreground sm:block">
+                {siteConfig.season}
+              </p>
+            </div>
+          </Link>
+        </div>
 
-                  return (
-                    <Fragment key={crumb.href}>
-                      <BreadcrumbItem>
-                        {isLast ? (
-                          <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
-                        ) : (
-                          <BreadcrumbLink render={<Link href={crumb.href} />}>
-                            {crumb.label}
-                          </BreadcrumbLink>
-                        )}
-                      </BreadcrumbItem>
-                      {!isLast ? (
-                        <BreadcrumbSeparator>
-                          <ChevronRight className="size-3.5" />
-                        </BreadcrumbSeparator>
-                      ) : null}
-                    </Fragment>
-                  );
-                })}
-              </BreadcrumbList>
-            </Breadcrumb>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link
-              href="/contact"
-              className={buttonVariants({ variant: "outline", size: "sm" })}
-            >
-              Prendre contact
-            </Link>
-            <Link
-              href="/documents"
-              className={buttonVariants({ variant: "default", size: "sm" })}
-            >
-              Ressources clés
-              <ArrowUpRight className="size-3.5" />
-            </Link>
-            <ThemeToggle />
-          </div>
+        <nav aria-label="Navigation principale" className="hidden lg:block">
+          <ul className="flex items-center gap-1">
+            {mainNavigation.map((item) => {
+              const isActive =
+                item.href === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(item.href);
+
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      "flex h-10 items-center rounded-md px-3 text-sm font-medium transition-colors",
+                      isActive
+                        ? "bg-accent text-accent-foreground"
+                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
         </div>
       </div>
     </header>

@@ -1,89 +1,93 @@
-import { Download, FolderKanban, ShieldCheck } from "lucide-react";
+import { Download, FileText, FolderKanban } from "lucide-react";
 
-import { PageIntro } from "@/components/shared/page-intro";
-import { SectionCard } from "@/components/shared/section-card";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { getPublishedDocumentCards } from "@/lib/admin-documents";
 import { createPageMetadata } from "@/lib/metadata";
 import { documents } from "@/lib/mock-data";
-import { routeCopy } from "@/lib/site";
 
 export const metadata = createPageMetadata({
   title: "Documents",
   description:
-    "Guides, règlements et formulaires du comité présentés dans une base documentaire claire et structurée.",
+    "Guides, règlements et formulaires du Comité Marne de tennis de table.",
   path: "/documents",
 });
 
-export default function DocumentsPage() {
-  const intro = routeCopy["/documents"];
+export default async function DocumentsPage() {
+  const publishedDocuments = await getPublishedDocumentCards();
+  const library = publishedDocuments ?? documents;
+  const categories = Array.from(
+    new Set(library.map((document) => document.category)),
+  );
 
   return (
-    <div className="space-y-6">
-      <PageIntro
-        eyebrow={intro.eyebrow}
-        title={intro.title}
-        description={intro.description}
-      />
-      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)]">
-        <SectionCard
-          eyebrow="Bibliothèque"
-          title="Une base documentaire unique"
-          description="Les ressources utiles à la gestion sportive et administrative sont regroupées pour faciliter leur consultation."
-          icon={FolderKanban}
-        >
-          <div className="grid gap-4">
-            {documents.map((document) => (
-              <div
-                key={document.title}
-                className="rounded-3xl border border-border bg-muted p-5"
-              >
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-base font-medium">{document.title}</h3>
-                  <Badge variant="secondary">{document.category}</Badge>
-                  <Badge variant="outline">{document.format}</Badge>
+    <div className="space-y-8">
+      <section className="grid gap-6 border-b border-border pb-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+        <div className="max-w-3xl space-y-4">
+          <div className="flex items-center gap-2 text-sm font-medium text-primary">
+            <FolderKanban className="size-4" />
+            Ressources
+          </div>
+          <div className="space-y-3">
+            <h1 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
+              Documents
+            </h1>
+            <p className="max-w-2xl text-base leading-7 text-muted-foreground">
+              Formulaires, règlements et supports utiles pour les clubs.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2 lg:justify-end">
+          <Badge variant="secondary">{library.length} documents</Badge>
+          {categories.slice(0, 4).map((category) => (
+            <Badge key={category} variant="outline">
+              {category}
+            </Badge>
+          ))}
+        </div>
+      </section>
+
+      <section className="divide-y divide-border rounded-lg border border-border bg-card">
+        {library.map((document) => (
+          <article
+            key={document.title}
+            className="grid gap-5 p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center"
+          >
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="secondary">{document.category}</Badge>
+                <Badge variant="outline">{document.format}</Badge>
+                <span className="text-sm text-muted-foreground">
+                  Mis à jour : {document.updatedAt}
+                </span>
+              </div>
+              <div className="mt-4 flex items-start gap-3">
+                <div className="rounded-md border border-border bg-background p-2 text-primary">
+                  <FileText className="size-5" />
                 </div>
-                <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                  {document.description}
-                </p>
-                <div className="mt-4 flex items-center justify-between gap-3">
-                  <span className="text-sm text-muted-foreground">
-                    Mis à jour : {document.updatedAt}
-                  </span>
-                  <a
-                    href="#"
-                    className={buttonVariants({ variant: "outline", size: "sm" })}
-                  >
-                    Télécharger
-                    <Download className="size-3.5" />
-                  </a>
+                <div className="min-w-0">
+                  <h2 className="text-xl font-semibold tracking-tight">
+                    {document.title}
+                  </h2>
+                  <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+                    {document.description}
+                  </p>
                 </div>
               </div>
-            ))}
-          </div>
-        </SectionCard>
+            </div>
 
-        <SectionCard
-          eyebrow="Organisation"
-          title="Des repères simples pour retrouver le bon document"
-          description="La bibliothèque est structurée pour donner une lecture claire aux clubs, aux bénévoles et aux responsables sportifs."
-          icon={ShieldCheck}
-        >
-          <div className="space-y-3 text-sm leading-6 text-muted-foreground">
-            <p>
-              Catégorisation claire par usage : gestion, réglementation,
-              communication.
-            </p>
-            <p>
-              Présentation homogène pour consulter rapidement un formulaire ou
-              un règlement.
-            </p>
-            <p>
-              Téléchargements lisibles et faciles à enrichir au fil de la
-              saison.
-            </p>
-          </div>
-        </SectionCard>
+            <a
+              href={document.href ?? "#"}
+              target="_blank"
+              rel="noreferrer"
+              className={buttonVariants({ variant: "outline", size: "lg" })}
+            >
+              Télécharger
+              <Download className="size-4" />
+            </a>
+          </article>
+        ))}
       </section>
     </div>
   );
