@@ -86,7 +86,7 @@ function toClub(resource: ClubResource): Club {
   };
 }
 
-export async function getAdminClubs() {
+export async function getAdminClubs(): Promise<ClubResource[]> {
   if (!(await hasClubTable())) {
     return [];
   }
@@ -104,7 +104,7 @@ export async function getAdminClubs() {
   }
 }
 
-export async function getAdminClubById(id: string) {
+export async function getAdminClubById(id: string): Promise<ClubResource | null> {
   if (!(await hasClubTable())) {
     return null;
   }
@@ -112,7 +112,7 @@ export async function getAdminClubById(id: string) {
   return prisma.clubResource.findUnique({ where: { id } });
 }
 
-export async function getPublicClubs() {
+export async function getPublicClubs(): Promise<Club[] | null> {
   if (!(await hasClubTable())) {
     return null;
   }

@@ -112,7 +112,7 @@ function toDocumentCard(document: DocumentResource): DocumentCardItem {
   };
 }
 
-export async function getAdminDocuments() {
+export async function getAdminDocuments(): Promise<DocumentResource[]> {
   if (!(await hasDocumentResourceTable())) {
     return [];
   }
@@ -130,7 +130,9 @@ export async function getAdminDocuments() {
   }
 }
 
-export async function getAdminDocumentById(id: string) {
+export async function getAdminDocumentById(
+  id: string,
+): Promise<DocumentResource | null> {
   if (!(await hasDocumentResourceTable())) {
     return null;
   }

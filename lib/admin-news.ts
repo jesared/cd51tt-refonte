@@ -142,7 +142,7 @@ function toArticleCard(article: NewsArticle): ArticleCardItem {
   };
 }
 
-export async function getAdminNewsArticles() {
+export async function getAdminNewsArticles(): Promise<NewsArticle[]> {
   if (!(await hasNewsArticleTable())) {
     return [];
   }
@@ -160,7 +160,9 @@ export async function getAdminNewsArticles() {
   }
 }
 
-export async function getAdminNewsArticleById(id: string) {
+export async function getAdminNewsArticleById(
+  id: string,
+): Promise<NewsArticle | null> {
   if (!(await hasNewsArticleTable())) {
     return null;
   }

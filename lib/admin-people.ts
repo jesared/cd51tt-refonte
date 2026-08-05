@@ -135,7 +135,9 @@ function toTechnicalStaffMember(
   };
 }
 
-export async function getAdminCommitteeMembers() {
+export async function getAdminCommitteeMembers(): Promise<
+  CommitteeMemberResource[]
+> {
   if (!(await hasCommitteeMemberTable())) {
     return [];
   }
@@ -153,7 +155,9 @@ export async function getAdminCommitteeMembers() {
   }
 }
 
-export async function getAdminTechnicalStaffMembers() {
+export async function getAdminTechnicalStaffMembers(): Promise<
+  TechnicalStaffMemberResource[]
+> {
   if (!(await hasTechnicalStaffTable())) {
     return [];
   }
@@ -171,7 +175,9 @@ export async function getAdminTechnicalStaffMembers() {
   }
 }
 
-export async function getAdminCommitteeMemberById(id: string) {
+export async function getAdminCommitteeMemberById(
+  id: string,
+): Promise<CommitteeMemberResource | null> {
   if (!(await hasCommitteeMemberTable())) {
     return null;
   }
@@ -179,7 +185,9 @@ export async function getAdminCommitteeMemberById(id: string) {
   return prisma.committeeMemberResource.findUnique({ where: { id } });
 }
 
-export async function getAdminTechnicalStaffMemberById(id: string) {
+export async function getAdminTechnicalStaffMemberById(
+  id: string,
+): Promise<TechnicalStaffMemberResource | null> {
   if (!(await hasTechnicalStaffTable())) {
     return null;
   }
@@ -187,7 +195,9 @@ export async function getAdminTechnicalStaffMemberById(id: string) {
   return prisma.technicalStaffMemberResource.findUnique({ where: { id } });
 }
 
-export async function getPublicCommitteeMembers() {
+export async function getPublicCommitteeMembers(): Promise<
+  CommitteeMember[] | null
+> {
   if (!(await hasCommitteeMemberTable())) {
     return null;
   }
@@ -204,7 +214,9 @@ export async function getPublicCommitteeMembers() {
   }
 }
 
-export async function getPublicTechnicalStaffMembers() {
+export async function getPublicTechnicalStaffMembers(): Promise<
+  TechnicalStaffMember[] | null
+> {
   if (!(await hasTechnicalStaffTable())) {
     return null;
   }
