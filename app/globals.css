@@ -4,6 +4,40 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .admin-action {
+    @apply inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border bg-background px-3 text-sm font-medium text-muted-foreground transition duration-200 ease-out hover:-translate-y-px hover:border-primary/35 hover:bg-muted hover:text-foreground active:translate-y-0 disabled:pointer-events-none disabled:opacity-60;
+  }
+
+  .admin-action-primary {
+    @apply h-10 border-primary bg-primary px-4 text-primary-foreground hover:bg-primary hover:text-primary-foreground hover:opacity-90;
+  }
+
+  .admin-action-danger {
+    @apply border-destructive/20 text-destructive hover:border-destructive/35 hover:bg-destructive/10 hover:text-destructive;
+  }
+
+  .admin-action.is-loading {
+    @apply translate-y-0 cursor-wait opacity-80;
+  }
+
+  .admin-list-row {
+    @apply transition duration-200 ease-out hover:bg-muted/35;
+  }
+
+  .admin-list-row:hover .admin-action {
+    @apply border-primary/25 text-foreground;
+  }
+
+  .admin-feedback {
+    @apply rounded-lg border border-primary/20 bg-primary/10 px-4 py-3 text-sm font-medium text-foreground shadow-sm;
+  }
+
+  .admin-delete-form[data-pending="true"] button[type="submit"] {
+    @apply pointer-events-none cursor-wait opacity-70;
+  }
+}
+
 @layer base {
   :root {
     --background: 1 0 0;
@@ -154,17 +188,6 @@
   }
 }
 
-@keyframes metric-rise {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @keyframes metric-card {
   from {
     opacity: 0;
@@ -176,21 +199,21 @@
   }
 }
 
-@keyframes metric-pop {
+@keyframes admin-kpi {
   from {
     opacity: 0;
-    transform: translateY(8px) scale(0.94);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
-@keyframes metric-ring {
+@keyframes metric-icon {
   from {
     opacity: 0;
-    transform: translate3d(12px, -12px, 0) scale(0.72);
+    transform: translate3d(0, 6px, 0);
   }
   to {
     opacity: 1;
@@ -198,7 +221,7 @@
   }
 }
 
-@keyframes metric-line {
+@keyframes metric-progress {
   from {
     transform: scaleX(0);
   }
@@ -208,15 +231,15 @@
 }
 
 .metric-card > :first-child {
-  animation-delay: calc(var(--metric-delay, 0ms) + 150ms);
+  animation-delay: calc(var(--metric-delay, 0ms) + 220ms);
 }
 
 .metric-card > :nth-child(2) {
-  animation-delay: calc(var(--metric-delay, 0ms) + 210ms);
+  animation-delay: calc(var(--metric-delay, 0ms) + 260ms);
 }
 
-.metric-card [class*="metric-pop"] {
-  animation-delay: calc(var(--metric-delay, 0ms) + 260ms);
+.metric-card [class*="metric-icon"] {
+  animation-delay: calc(var(--metric-delay, 0ms) + 320ms);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -224,9 +247,14 @@
     opacity: 1;
   }
 
+  .admin-kpi-card {
+    opacity: 1;
+    transform: none;
+  }
+
   .metric-card > :first-child,
   .metric-card > :nth-child(2),
-  .metric-card [class*="metric-pop"] {
+  .metric-card [class*="metric-icon"] {
     opacity: 1;
     transform: none;
   }

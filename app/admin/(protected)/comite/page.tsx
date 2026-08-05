@@ -1,6 +1,7 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { Landmark, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 
+import { AdminSubmitButton } from "@/components/admin/admin-submit-button";
 import { DeleteConfirmationForm } from "@/components/admin/delete-confirmation-form";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -62,19 +63,19 @@ export default async function AdminComitePage({
         <div className="flex flex-wrap gap-2">
           {members.length === 0 ? (
             <form action={seedCommitteeMembers}>
-              <button
-                type="submit"
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border px-4 text-sm text-muted-foreground transition hover:text-foreground"
+              <AdminSubmitButton
+                icon={<Sparkles className="size-4" />}
+                loadingLabel="Import en cours..."
+                className="h-10 px-4"
               >
-                <Sparkles className="size-4" />
                 Importer la liste actuelle
-              </button>
+              </AdminSubmitButton>
             </form>
           ) : null}
 
           <Link
             href="/admin/comite/nouveau"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:opacity-90"
+            className="admin-action admin-action-primary"
           >
             <Plus className="size-4" />
             Ajouter
@@ -83,7 +84,7 @@ export default async function AdminComitePage({
       </section>
 
       {message ? (
-        <div className="rounded-xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
+        <div className="admin-feedback">
           {message}
         </div>
       ) : null}
@@ -103,7 +104,7 @@ export default async function AdminComitePage({
             {members.map((member) => (
               <article
                 key={member.id}
-                className="grid gap-4 px-6 py-5 lg:grid-cols-[minmax(0,1fr)_8rem_14rem]"
+                className="admin-list-row grid gap-4 px-6 py-5 lg:grid-cols-[minmax(0,1fr)_8rem_14rem]"
               >
                 <div className="space-y-2">
                   <div className="flex flex-wrap items-center gap-2">
@@ -130,7 +131,7 @@ export default async function AdminComitePage({
                 <div className="flex flex-wrap gap-2 lg:justify-end">
                   <Link
                     href={`/admin/comite/${member.id}`}
-                    className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-border px-3 text-sm text-muted-foreground transition hover:text-foreground"
+                    className="admin-action"
                   >
                     <Pencil className="size-4" />
                     Modifier
@@ -143,7 +144,7 @@ export default async function AdminComitePage({
                     <input type="hidden" name="id" value={member.id} />
                     <button
                       type="submit"
-                      className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-destructive/20 px-3 text-sm text-destructive transition hover:bg-destructive/10"
+                      className="admin-action admin-action-danger"
                     >
                       <Trash2 className="size-4" />
                       Supprimer

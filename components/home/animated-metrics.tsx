@@ -21,8 +21,8 @@ const metricIcons: Record<AnimatedMetric["tone"], LucideIcon> = {
   licensees: Users,
 };
 
-function easeOutQuint(progress: number) {
-  return 1 - Math.pow(1 - progress, 5);
+function easeOutQuart(progress: number) {
+  return 1 - Math.pow(1 - progress, 4);
 }
 
 function useReducedMotion() {
@@ -45,11 +45,12 @@ function useReducedMotion() {
 function AnimatedNumber({
   value,
   active,
+  reducedMotion,
 }: {
   value: number;
   active: boolean;
+  reducedMotion: boolean;
 }) {
-  const reducedMotion = useReducedMotion();
   const [displayValue, setDisplayValue] = useState(reducedMotion ? value : 0);
   const formatter = useMemo(() => new Intl.NumberFormat("fr-FR"), []);
 
@@ -61,12 +62,12 @@ function AnimatedNumber({
 
     let frame = 0;
     let start: number | null = null;
-    const duration = 1050;
+    const duration = 1400;
 
     const tick = (time: number) => {
       start ??= time;
       const progress = Math.min((time - start) / duration, 1);
-      const eased = easeOutQuint(progress);
+      const eased = easeOutQuart(progress);
 
       setDisplayValue(Math.round(value * eased));
 
@@ -103,7 +104,7 @@ export function AnimatedMetrics({ metrics }: AnimatedMetricsProps) {
           observer.disconnect();
         }
       },
-      { rootMargin: "0px 0px -18% 0px", threshold: 0.35 },
+      { rootMargin: "0px 0px -20% 0px", threshold: 0.32 },
     );
 
     observer.observe(section);
@@ -120,7 +121,7 @@ export function AnimatedMetrics({ metrics }: AnimatedMetricsProps) {
     >
       {metrics.map((metric, index) => {
         const Icon = metricIcons[metric.tone];
-        const delay = index * 130;
+        const delay = index * 150;
         const cardStyle = {
           animationDelay: `${delay}ms`,
           "--metric-delay": `${delay}ms`,
@@ -129,21 +130,24 @@ export function AnimatedMetrics({ metrics }: AnimatedMetricsProps) {
         return (
           <div
             key={metric.label}
-            className="metric-card group relative overflow-hidden rounded-lg border border-border bg-card p-5 opacity-0 transition-colors hover:border-primary/45 group-data-[visible=true]/metrics:animate-[metric-card_680ms_cubic-bezier(0.22,1,0.36,1)_forwards]"
+            className="metric-card group relative overflow-hidden rounded-lg border border-border bg-card p-5 opacity-0 shadow-sm transition-colors hover:border-primary/35 group-data-[visible=true]/metrics:animate-[metric-card_820ms_cubic-bezier(0.22,1,0.36,1)_forwards]"
             style={cardStyle}
           >
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-px origin-left scale-x-0 bg-primary group-data-[visible=true]/metrics:animate-[metric-line_760ms_cubic-bezier(0.22,1,0.36,1)_forwards]" />
-            <div className="pointer-events-none absolute -right-10 -top-10 size-28 rounded-full border border-primary/15 opacity-0 group-data-[visible=true]/metrics:animate-[metric-ring_900ms_cubic-bezier(0.22,1,0.36,1)_forwards]" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 bg-primary/80 group-data-[visible=true]/metrics:animate-[metric-progress_1400ms_cubic-bezier(0.25,1,0.5,1)_forwards]" />
             <div className="relative flex items-center justify-between gap-4">
               <div>
                 <p className="text-4xl font-semibold tracking-tight tabular-nums">
-                  <AnimatedNumber value={metric.value} active={isVisible} />
+                  <AnimatedNumber
+                    value={metric.value}
+                    active={isVisible}
+                    reducedMotion={reducedMotion}
+                  />
                 </p>
                 <p className="mt-1 text-sm font-medium text-muted-foreground">
                   {metric.label}
                 </p>
               </div>
-              <div className="rounded-md border border-border bg-background p-3 text-primary opacity-0 group-data-[visible=true]/metrics:animate-[metric-pop_520ms_cubic-bezier(0.22,1,0.36,1)_forwards]">
+              <div className="rounded-md border border-border bg-background p-3 text-primary opacity-0 transition-colors group-hover:bg-muted group-data-[visible=true]/metrics:animate-[metric-icon_720ms_cubic-bezier(0.22,1,0.36,1)_forwards]">
                 <Icon className="size-5" />
               </div>
             </div>

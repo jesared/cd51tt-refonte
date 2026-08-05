@@ -1,15 +1,18 @@
 import {
   AlertCircle,
-  ArrowUpRight,
   BarChart3,
   Building2,
-  Clock3,
   MapPinned,
   RefreshCw,
   Trophy,
   Users,
 } from "lucide-react";
 
+import {
+  AnimatedBarList,
+  AnimatedKpiGrid,
+} from "@/components/admin/animated-stats";
+import { AdminSubmitButton } from "@/components/admin/admin-submit-button";
 import { Badge } from "@/components/ui/badge";
 import { getAdminStats, syncFfttLicenseeStats } from "@/lib/admin-stats";
 import { ffttApiReadiness } from "@/lib/fftt/client";
@@ -31,10 +34,6 @@ type AdminStatsPageProps = {
   };
 };
 
-function formatNumber(value: number | null) {
-  return value === null ? "-" : new Intl.NumberFormat("fr-FR").format(value);
-}
-
 function formatDate(value: Date | null) {
   if (!value) {
     return "Jamais synchronisé";
@@ -44,14 +43,6 @@ function formatDate(value: Date | null) {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(value);
-}
-
-function toPercent(value: number, max: number) {
-  if (max <= 0) {
-    return 0;
-  }
-
-  return Math.max(4, Math.round((value / max) * 100));
 }
 
 export default async function AdminStatsPage({
@@ -65,7 +56,6 @@ export default async function AdminStatsPage({
     (first, second) => second.licenseeCount - first.licenseeCount,
   );
   const topClubs = rankedClubs.slice(0, 8);
-  const maxClubCount = topClubs[0]?.licenseeCount ?? 0;
   const cityBreakdown = Array.from(
     successfulLicenseeStats.reduce((cities, stat) => {
       cities.set(stat.city, (cities.get(stat.city) ?? 0) + stat.licenseeCount);
@@ -75,7 +65,6 @@ export default async function AdminStatsPage({
   )
     .sort((first, second) => second.licenseeCount - first.licenseeCount)
     .slice(0, 6);
-  const maxCityCount = cityBreakdown[0]?.licenseeCount ?? 0;
   const averageLicensees =
     successfulLicenseeStats.length > 0 && stats.licenseeTotal !== null
       ? Math.round(stats.licenseeTotal / successfulLicenseeStats.length)
@@ -85,6 +74,45 @@ export default async function AdminStatsPage({
     : searchParams?.synced
       ? `${searchParams.synced} clubs synchronisés, ${searchParams.failed ?? "0"} erreur(s).`
       : null;
+  const kpiItems = [
+    {
+      label: "Licenciés FFTT",
+      value: stats.licenseeTotal,
+      description: "Total issu de la dernière synchro",
+      tone: "licensees" as const,
+    },
+    {
+      label: "Moyenne par club",
+      value: averageLicensees,
+      description: "Sur les clubs synchronisés sans erreur",
+      tone: "average" as const,
+    },
+    {
+      label: "Clubs actifs",
+      value: stats.activeClubCount,
+      description: `${stats.ffttClubCount} avec identifiant FFTT`,
+      tone: "clubs" as const,
+    },
+    {
+      label: "Dernière synchro",
+      value: null,
+      textValue: formatDate(stats.lastSyncedAt),
+      description: `${stats.failedClubCount} erreur(s) détectée(s)`,
+      tone: "sync" as const,
+    },
+  ];
+  const topClubRows = topClubs.map((club, index) => ({
+    id: club.clubFfttId,
+    label: club.clubName,
+    caption: club.city,
+    value: club.licenseeCount,
+    prefix: String(index + 1),
+  }));
+  const cityRows = cityBreakdown.map((city) => ({
+    id: city.city,
+    label: city.city,
+    value: city.licenseeCount,
+  }));
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
@@ -121,20 +149,20 @@ export default async function AdminStatsPage({
           </div>
 
           <form action={syncFfttLicenseeStats}>
-            <button
-              type="submit"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
+            <AdminSubmitButton
+              variant="default"
+              icon={<RefreshCw className="size-4" />}
+              loadingLabel="Synchronisation..."
               disabled={!stats.tableReady || stats.ffttClubCount === 0}
             >
-              <RefreshCw className="size-4" />
               Synchroniser les licenciés
-            </button>
+            </AdminSubmitButton>
           </form>
         </div>
       </section>
 
       {message ? (
-        <div className="rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
+        <div className="admin-feedback">
           {message}
         </div>
       ) : null}
@@ -150,56 +178,7 @@ export default async function AdminStatsPage({
         </div>
       ) : null}
 
-      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-lg border border-border bg-background p-5">
-          <div className="flex items-center justify-between gap-4">
-            <p className="text-sm text-muted-foreground">Licenciés FFTT</p>
-            <Users className="size-4 text-primary" />
-          </div>
-          <p className="mt-3 text-3xl font-semibold">
-            {formatNumber(stats.licenseeTotal)}
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Total issu de la dernière synchro
-          </p>
-        </div>
-        <div className="rounded-lg border border-border bg-background p-5">
-          <div className="flex items-center justify-between gap-4">
-            <p className="text-sm text-muted-foreground">Moyenne par club</p>
-            <ArrowUpRight className="size-4 text-primary" />
-          </div>
-          <p className="mt-3 text-3xl font-semibold">
-            {formatNumber(averageLicensees)}
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Sur les clubs synchronisés sans erreur
-          </p>
-        </div>
-        <div className="rounded-lg border border-border bg-background p-5">
-          <div className="flex items-center justify-between gap-4">
-            <p className="text-sm text-muted-foreground">Clubs actifs</p>
-            <Building2 className="size-4 text-primary" />
-          </div>
-          <p className="mt-3 text-3xl font-semibold">
-            {formatNumber(stats.activeClubCount)}
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {stats.ffttClubCount} avec identifiant FFTT
-          </p>
-        </div>
-        <div className="rounded-lg border border-border bg-background p-5">
-          <div className="flex items-center justify-between gap-4">
-            <p className="text-sm text-muted-foreground">Dernière synchro</p>
-            <Clock3 className="size-4 text-primary" />
-          </div>
-          <p className="mt-3 text-sm font-medium">
-            {formatDate(stats.lastSyncedAt)}
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {stats.failedClubCount} erreur(s) détectée(s)
-          </p>
-        </div>
-      </section>
+      <AnimatedKpiGrid items={kpiItems} />
 
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.8fr)]">
         <div className="rounded-lg border border-border bg-background">
@@ -217,42 +196,10 @@ export default async function AdminStatsPage({
             </div>
           </div>
 
-          {topClubs.length === 0 ? (
-            <div className="px-5 py-8 text-sm text-muted-foreground">
-              Aucune donnée disponible pour le moment.
-            </div>
-          ) : (
-            <div className="space-y-4 p-5">
-              {topClubs.map((club, index) => (
-                <div key={club.clubFfttId} className="space-y-2">
-                  <div className="flex items-center justify-between gap-4 text-sm">
-                    <div className="flex min-w-0 items-center gap-3">
-                      <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-xs font-medium text-muted-foreground">
-                        {index + 1}
-                      </span>
-                      <div className="min-w-0">
-                        <p className="truncate font-medium">{club.clubName}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {club.city}
-                        </p>
-                      </div>
-                    </div>
-                    <p className="shrink-0 font-medium">
-                      {formatNumber(club.licenseeCount)}
-                    </p>
-                  </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full rounded-full bg-primary"
-                      style={{
-                        width: `${toPercent(club.licenseeCount, maxClubCount)}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <AnimatedBarList
+            rows={topClubRows}
+            emptyLabel="Aucune donnée disponible pour le moment."
+          />
         </div>
 
         <div className="rounded-lg border border-border bg-background">
@@ -268,32 +215,11 @@ export default async function AdminStatsPage({
             </div>
           </div>
 
-          {cityBreakdown.length === 0 ? (
-            <div className="px-5 py-8 text-sm text-muted-foreground">
-              Aucune ville synchronisée pour le moment.
-            </div>
-          ) : (
-            <div className="space-y-4 p-5">
-              {cityBreakdown.map((city) => (
-                <div key={city.city} className="space-y-2">
-                  <div className="flex items-center justify-between gap-4 text-sm">
-                    <span className="truncate font-medium">{city.city}</span>
-                    <span className="text-muted-foreground">
-                      {formatNumber(city.licenseeCount)}
-                    </span>
-                  </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full rounded-full bg-foreground"
-                      style={{
-                        width: `${toPercent(city.licenseeCount, maxCityCount)}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <AnimatedBarList
+            rows={cityRows}
+            emptyLabel="Aucune ville synchronisée pour le moment."
+            barTone="foreground"
+          />
         </div>
       </section>
 
@@ -317,7 +243,7 @@ export default async function AdminStatsPage({
             {rankedClubs.map((stat) => (
               <article
                 key={stat.clubFfttId}
-                className="grid gap-4 px-5 py-4 lg:grid-cols-[minmax(0,1fr)_9rem_14rem]"
+                className="admin-list-row grid gap-4 px-5 py-4 lg:grid-cols-[minmax(0,1fr)_9rem_14rem]"
               >
                 <div className="flex min-w-0 gap-3">
                   <div className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-background text-primary">

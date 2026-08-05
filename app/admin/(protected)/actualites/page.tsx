@@ -1,6 +1,7 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { Eye, EyeOff, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 
+import { AdminSubmitButton } from "@/components/admin/admin-submit-button";
 import { DeleteConfirmationForm } from "@/components/admin/delete-confirmation-form";
 import {
   deleteNewsArticle,
@@ -69,19 +70,19 @@ export default async function AdminActualitesPage({
         <div className="flex flex-wrap gap-2">
           {articles.length === 0 ? (
             <form action={seedMockNewsArticles}>
-              <button
-                type="submit"
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border px-4 text-sm text-muted-foreground transition hover:text-foreground"
+              <AdminSubmitButton
+                icon={<Sparkles className="size-4" />}
+                loadingLabel="Import en cours..."
+                className="h-10 px-4"
               >
-                <Sparkles className="size-4" />
                 Importer les mocks
-              </button>
+              </AdminSubmitButton>
             </form>
           ) : null}
 
           <Link
             href="/admin/actualites/nouveau"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:opacity-90"
+            className="admin-action admin-action-primary"
           >
             <Plus className="size-4" />
             Nouvel article
@@ -90,7 +91,7 @@ export default async function AdminActualitesPage({
       </section>
 
       {message ? (
-        <div className="rounded-xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
+        <div className="admin-feedback">
           {message}
         </div>
       ) : null}
@@ -113,7 +114,7 @@ export default async function AdminActualitesPage({
               return (
               <article
                 key={article.id}
-                className="grid gap-4 px-6 py-5 lg:grid-cols-[minmax(0,1fr)_10rem_10rem_18rem]"
+                className="admin-list-row grid gap-4 px-6 py-5 lg:grid-cols-[minmax(0,1fr)_10rem_10rem_18rem]"
               >
                 <div className="space-y-2">
                   <div className="flex flex-wrap items-center gap-2">
@@ -164,21 +165,24 @@ export default async function AdminActualitesPage({
                       name="status"
                       value={isPublished ? "DRAFT" : "PUBLISHED"}
                     />
-                    <button
-                      type="submit"
-                      className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-border px-3 text-sm text-muted-foreground transition hover:text-foreground"
+                    <AdminSubmitButton
+                      icon={
+                        isPublished ? (
+                          <EyeOff className="size-4" />
+                        ) : (
+                          <Eye className="size-4" />
+                        )
+                      }
+                      loadingLabel={
+                        isPublished ? "Dépublication..." : "Publication..."
+                      }
                     >
-                      {isPublished ? (
-                        <EyeOff className="size-4" />
-                      ) : (
-                        <Eye className="size-4" />
-                      )}
                       {isPublished ? "Dépublier" : "Publier"}
-                    </button>
+                    </AdminSubmitButton>
                   </form>
                   <Link
                     href={`/admin/actualites/${article.id}`}
-                    className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-border px-3 text-sm text-muted-foreground transition hover:text-foreground"
+                    className="admin-action"
                   >
                     <Pencil className="size-4" />
                     Modifier
@@ -190,7 +194,7 @@ export default async function AdminActualitesPage({
                     <input type="hidden" name="id" value={article.id} />
                     <button
                       type="submit"
-                      className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-destructive/20 px-3 text-sm text-destructive transition hover:bg-destructive/10"
+                      className="admin-action admin-action-danger"
                     >
                       <Trash2 className="size-4" />
                       Supprimer
