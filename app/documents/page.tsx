@@ -2,7 +2,6 @@ import { Download, FileText, FolderKanban } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import { getPublishedDocumentCards } from "@/lib/admin-documents";
 import { createPageMetadata } from "@/lib/metadata";
 import { documents } from "@/lib/mock-data";
 
@@ -13,9 +12,8 @@ export const metadata = createPageMetadata({
   path: "/documents",
 });
 
-export default async function DocumentsPage() {
-  const publishedDocuments = await getPublishedDocumentCards();
-  const library = publishedDocuments ?? documents;
+export default function DocumentsPage() {
+  const library = documents;
   const categories = Array.from(
     new Set(library.map((document) => document.category)),
   );

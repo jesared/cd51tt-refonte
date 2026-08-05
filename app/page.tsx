@@ -14,7 +14,6 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import { getPublishedNewsArticleCards } from "@/lib/admin-news";
 import { createPageMetadata } from "@/lib/metadata";
 import {
   clubs,
@@ -58,9 +57,8 @@ const quickLinks = [
   },
 ];
 
-export default async function HomePage() {
-  const publishedArticles = await getPublishedNewsArticleCards(3);
-  const highlightedArticles = publishedArticles ?? newsArticles.slice(0, 3);
+export default function HomePage() {
+  const highlightedArticles = newsArticles.slice(0, 3);
   const featuredArticle = highlightedArticles[0];
   const secondaryArticles = highlightedArticles.slice(1);
 
