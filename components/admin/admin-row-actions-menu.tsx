@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { MoreVertical, Pencil, Trash2 } from "lucide-react";
 
 import { DeleteConfirmationForm } from "@/components/admin/delete-confirmation-form";
@@ -14,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 type AdminRowActionsMenuProps = {
+  children?: ReactNode;
   editHref: string;
   deleteAction: (formData: FormData) => void | Promise<void>;
   deleteId: string;
@@ -22,6 +24,7 @@ type AdminRowActionsMenuProps = {
 };
 
 export function AdminRowActionsMenu({
+  children,
   editHref,
   deleteAction,
   deleteFields,
@@ -40,6 +43,12 @@ export function AdminRowActionsMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">
         <DropdownMenuGroup>
+          {children ? (
+            <>
+              {children}
+              <DropdownMenuSeparator />
+            </>
+          ) : null}
           <DropdownMenuItem className="p-0">
             <Link
               href={editHref}

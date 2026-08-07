@@ -1,8 +1,8 @@
 ﻿import Link from "next/link";
-import { Download, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
+import { Download, Plus, Sparkles } from "lucide-react";
 
+import { AdminRowActionsMenu } from "@/components/admin/admin-row-actions-menu";
 import { AdminSubmitButton } from "@/components/admin/admin-submit-button";
-import { DeleteConfirmationForm } from "@/components/admin/delete-confirmation-form";
 import {
   deleteDocument,
   getAdminDocuments,
@@ -103,9 +103,9 @@ export default async function AdminDocumentsPage({
             {entries.map((entry) => (
               <article
                 key={entry.id}
-                className="admin-list-row grid gap-4 px-6 py-5 lg:grid-cols-[minmax(0,1fr)_10rem_10rem_12rem]"
+                className="admin-list-row grid gap-3 px-6 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
               >
-                <div className="space-y-2">
+                <div className="min-w-0 space-y-2">
                   <div className="flex flex-wrap items-center gap-2">
                     <h4 className="font-medium">{entry.title}</h4>
                     <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
@@ -114,54 +114,38 @@ export default async function AdminDocumentsPage({
                     <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
                       {entry.format}
                     </span>
-                  </div>
-                  <p className="text-sm leading-6 text-muted-foreground">
-                    {entry.description}
-                  </p>
-                  <a
-                    href={entry.fileUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
-                  >
-                    <Download className="size-4" />
-                    Ouvrir le document
-                  </a>
-                </div>
-
-                <div className="text-sm text-muted-foreground">
-                  <p className="font-medium text-foreground">Statut</p>
-                  <p className="mt-2">
-                    {entry.status === "PUBLISHED" ? "Publié" : "Brouillon"}
-                  </p>
-                </div>
-
-                <div className="text-sm text-muted-foreground">
-                  <p className="font-medium text-foreground">Mise à jour</p>
-                  <p className="mt-2">{formatFrenchMonthYear(entry.updatedAt)}</p>
-                </div>
-
-                <div className="flex flex-wrap gap-2 lg:justify-end">
-                  <Link
-                    href={`/admin/documents/${entry.id}`}
-                    className="admin-action"
-                  >
-                    <Pencil className="size-4" />
-                    Modifier
-                  </Link>
-                  <DeleteConfirmationForm
-                    action={deleteDocument}
-                    message="Supprimer ce document ? Cette action est définitive."
-                  >
-                    <input type="hidden" name="id" value={entry.id} />
-                    <button
-                      type="submit"
-                      className="admin-action admin-action-danger"
+                    <span
+                      className={
+                        entry.status === "PUBLISHED"
+                          ? "rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-700 dark:text-emerald-300"
+                          : "rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground"
+                      }
                     >
-                      <Trash2 className="size-4" />
-                      Supprimer
-                    </button>
-                  </DeleteConfirmationForm>
+                      {entry.status === "PUBLISHED" ? "Publié" : "Brouillon"}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {formatFrenchMonthYear(entry.updatedAt)}
+                  </p>
+                </div>
+
+                <div className="flex justify-start lg:justify-end">
+                  <AdminRowActionsMenu
+                    editHref={`/admin/documents/${entry.id}`}
+                    deleteAction={deleteDocument}
+                    deleteId={entry.id}
+                    deleteMessage="Supprimer ce document ? Cette action est définitive."
+                  >
+                    <a
+                      href={entry.fileUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-2 rounded-md px-2 py-2 text-sm transition-colors hover:bg-accent"
+                    >
+                      <Download className="size-4" />
+                      Ouvrir
+                    </a>
+                  </AdminRowActionsMenu>
                 </div>
               </article>
             ))}

@@ -1,8 +1,8 @@
 ﻿import Link from "next/link";
-import { Eye, EyeOff, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
+import { Eye, EyeOff, Plus, Sparkles } from "lucide-react";
 
+import { AdminRowActionsMenu } from "@/components/admin/admin-row-actions-menu";
 import { AdminSubmitButton } from "@/components/admin/admin-submit-button";
-import { DeleteConfirmationForm } from "@/components/admin/delete-confirmation-form";
 import {
   deleteNewsArticle,
   getAdminNewsArticles,
@@ -114,9 +114,9 @@ export default async function AdminActualitesPage({
               return (
               <article
                 key={article.id}
-                className="admin-list-row grid gap-4 px-6 py-5 lg:grid-cols-[minmax(0,1fr)_10rem_10rem_18rem]"
+                className="admin-list-row grid gap-3 px-6 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
               >
-                <div className="space-y-2">
+                <div className="min-w-0 space-y-2">
                   <div className="flex flex-wrap items-center gap-2">
                     <h4 className="font-medium">{article.title}</h4>
                     <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
@@ -137,69 +137,40 @@ export default async function AdminActualitesPage({
                       </span>
                     ) : null}
                   </div>
-                  <p className="text-sm leading-6 text-muted-foreground">
-                    {article.excerpt}
-                  </p>
-                  <p className="text-xs text-muted-foreground">/{article.slug}</p>
-                </div>
-
-                <div className="text-sm text-muted-foreground">
-                  <p className="font-medium text-foreground">Statut</p>
-                  <p className="mt-2">
-                    {isPublished ? "Publiée" : "Dépubliée"}
-                  </p>
-                </div>
-
-                <div className="text-sm text-muted-foreground">
-                  <p className="font-medium text-foreground">Date</p>
-                  <p className="mt-2">
+                  <p className="text-sm text-muted-foreground">
                     {formatFrenchDate(article.publishedAt ?? article.createdAt)}
                   </p>
                 </div>
 
-                <div className="flex flex-wrap gap-2 lg:justify-end">
-                  <form action={toggleNewsArticlePublication}>
-                    <input type="hidden" name="id" value={article.id} />
-                    <input
-                      type="hidden"
-                      name="status"
-                      value={isPublished ? "DRAFT" : "PUBLISHED"}
-                    />
-                    <AdminSubmitButton
-                      icon={
-                        isPublished ? (
-                          <EyeOff className="size-4" />
-                        ) : (
-                          <Eye className="size-4" />
-                        )
-                      }
-                      loadingLabel={
-                        isPublished ? "Dépublication..." : "Publication..."
-                      }
-                    >
-                      {isPublished ? "Dépublier" : "Publier"}
-                    </AdminSubmitButton>
-                  </form>
-                  <Link
-                    href={`/admin/actualites/${article.id}`}
-                    className="admin-action"
+                <div className="flex justify-start lg:justify-end">
+                  <AdminRowActionsMenu
+                    editHref={`/admin/actualites/${article.id}`}
+                    deleteAction={deleteNewsArticle}
+                    deleteId={article.id}
+                    deleteMessage="Supprimer cette actualité ? Cette action est définitive."
                   >
-                    <Pencil className="size-4" />
-                    Modifier
-                  </Link>
-                  <DeleteConfirmationForm
-                    action={deleteNewsArticle}
-                    message="Supprimer cette actualité ? Cette action est définitive."
-                  >
-                    <input type="hidden" name="id" value={article.id} />
-                    <button
-                      type="submit"
-                      className="admin-action admin-action-danger"
-                    >
-                      <Trash2 className="size-4" />
-                      Supprimer
-                    </button>
-                  </DeleteConfirmationForm>
+                    <div className="px-1">
+                      <form action={toggleNewsArticlePublication}>
+                        <input type="hidden" name="id" value={article.id} />
+                        <input
+                          type="hidden"
+                          name="status"
+                          value={isPublished ? "DRAFT" : "PUBLISHED"}
+                        />
+                        <button
+                          type="submit"
+                          className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm transition-colors hover:bg-accent"
+                        >
+                          {isPublished ? (
+                            <EyeOff className="size-4" />
+                          ) : (
+                            <Eye className="size-4" />
+                          )}
+                          {isPublished ? "Dépublier" : "Publier"}
+                        </button>
+                      </form>
+                    </div>
+                  </AdminRowActionsMenu>
                 </div>
               </article>
               );
