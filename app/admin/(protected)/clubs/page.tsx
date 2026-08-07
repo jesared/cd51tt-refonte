@@ -1,8 +1,8 @@
 ﻿import Link from "next/link";
-import { Building2, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { Building2, Plus, RefreshCw } from "lucide-react";
 
+import { AdminRowActionsMenu } from "@/components/admin/admin-row-actions-menu";
 import { AdminSubmitButton } from "@/components/admin/admin-submit-button";
-import { DeleteConfirmationForm } from "@/components/admin/delete-confirmation-form";
 import { Badge } from "@/components/ui/badge";
 import {
   deleteClub,
@@ -111,9 +111,9 @@ export default async function AdminClubsPage({
             {clubs.map((club) => (
               <article
                 key={club.id}
-                className="admin-list-row grid gap-4 px-6 py-5 lg:grid-cols-[minmax(0,1fr)_10rem_8rem_14rem]"
+                className="admin-list-row grid gap-3 px-6 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
               >
-                <div className="space-y-2">
+                <div className="min-w-0 space-y-2">
                   <div className="flex flex-wrap items-center gap-2">
                     <h4 className="font-medium">{club.name}</h4>
                     <Badge variant="secondary">{club.city}</Badge>
@@ -123,42 +123,15 @@ export default async function AdminClubsPage({
                     {club.ffttId ? <Badge variant="outline">FFTT</Badge> : null}
                   </div>
                   <p className="text-sm text-muted-foreground">{club.venue}</p>
-                  <p className="text-sm leading-6 text-muted-foreground">
-                    {club.audience}
-                  </p>
                 </div>
 
-                <div className="text-sm text-muted-foreground">
-                  <p className="font-medium text-foreground">Contact</p>
-                  <p className="mt-2 break-all">{club.contact}</p>
-                </div>
-
-                <div className="text-sm text-muted-foreground">
-                  <p className="font-medium text-foreground">Tables</p>
-                  <p className="mt-2">{club.tables}</p>
-                </div>
-
-                <div className="flex flex-wrap gap-2 lg:justify-end">
-                  <Link
-                    href={`/admin/clubs/${club.id}`}
-                    className="admin-action"
-                  >
-                    <Pencil className="size-4" />
-                    Modifier
-                  </Link>
-                  <DeleteConfirmationForm
-                    action={deleteClub}
-                    message="Supprimer ce club ? Cette action est définitive."
-                  >
-                    <input type="hidden" name="id" value={club.id} />
-                    <button
-                      type="submit"
-                      className="admin-action admin-action-danger"
-                    >
-                      <Trash2 className="size-4" />
-                      Supprimer
-                    </button>
-                  </DeleteConfirmationForm>
+                <div className="flex justify-start lg:justify-end">
+                  <AdminRowActionsMenu
+                    editHref={`/admin/clubs/${club.id}`}
+                    deleteAction={deleteClub}
+                    deleteId={club.id}
+                    deleteMessage="Supprimer ce club ? Cette action est définitive."
+                  />
                 </div>
               </article>
             ))}
