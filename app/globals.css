@@ -34,19 +34,47 @@
   }
 
   .admin-calendar-shell {
-    @apply overflow-hidden rounded-xl border border-border bg-background p-2 text-foreground sm:p-4;
+    @apply overflow-hidden rounded-xl border border-border bg-card p-2 text-foreground sm:p-4;
   }
 
   .admin-calendar-shell .fc {
     font-family: var(--font-sans);
+    --fc-border-color: oklch(var(--border));
+    --fc-page-bg-color: transparent;
+    --fc-neutral-bg-color: color-mix(
+      in oklab,
+      oklch(var(--muted)) 72%,
+      transparent
+    );
+    --fc-list-event-hover-bg-color: color-mix(
+      in oklab,
+      oklch(var(--muted)) 55%,
+      transparent
+    );
   }
 
   .admin-calendar-shell .fc-header-toolbar {
     @apply flex-col gap-3 sm:flex-row;
   }
 
+  .admin-calendar-shell .fc-header-toolbar .fc-toolbar-chunk {
+    @apply flex justify-center;
+  }
+
+  .admin-calendar-shell .fc-header-toolbar .fc-toolbar-chunk:nth-child(1) {
+    @apply order-2 sm:order-none;
+  }
+
+  .admin-calendar-shell .fc-header-toolbar .fc-toolbar-chunk:nth-child(2) {
+    @apply order-1 sm:order-none;
+  }
+
+  .admin-calendar-shell .fc-header-toolbar .fc-toolbar-chunk:nth-child(3) {
+    @apply order-3 sm:order-none;
+  }
+
   .admin-calendar-shell .fc-toolbar-title {
-    @apply text-lg font-semibold capitalize sm:text-xl;
+    @apply text-center text-lg font-semibold capitalize sm:text-xl;
   }
 
   .admin-calendar-shell .fc-button {
@@ -62,10 +90,22 @@
     @apply cursor-not-allowed border-border bg-muted text-muted-foreground opacity-70;
   }
 
+  .admin-calendar-shell .fc-button-group {
+    @apply overflow-hidden rounded-xl border border-border;
+  }
+
+  .admin-calendar-shell .fc-button-group .fc-button {
+    @apply rounded-none border-0 border-r border-border last:border-r-0;
+  }
+
   .admin-calendar-shell .fc-scrollgrid,
   .admin-calendar-shell .fc-theme-standard td,
   .admin-calendar-shell .fc-theme-standard th {
     @apply border-border;
+  }
+
+  .admin-calendar-shell .fc-scrollgrid {
+    @apply overflow-hidden rounded-lg bg-background;
   }
 
   .admin-calendar-shell .fc-col-header-cell,
@@ -80,12 +120,37 @@
     @apply text-foreground no-underline;
   }
 
+  .admin-calendar-shell .fc-col-header-cell-cushion {
+    @apply py-2 text-xs font-semibold uppercase text-muted-foreground sm:text-sm;
+  }
+
+  .admin-calendar-shell .fc-daygrid-day-number {
+    @apply p-2 text-sm font-semibold;
+  }
+
+  .admin-calendar-shell .fc-day-other .fc-daygrid-day-number {
+    @apply text-muted-foreground opacity-55;
+  }
+
+  .admin-calendar-shell .fc-daygrid-day-frame {
+    @apply min-h-20 sm:min-h-24;
+  }
+
   .admin-calendar-shell .fc-day-today {
     @apply bg-primary/10;
   }
 
   .admin-calendar-shell .fc-event {
     @apply rounded-md border-0 shadow-none;
+  }
+
+  .admin-calendar-shell .fc-daygrid-event {
+    @apply mx-1 mb-1 overflow-hidden rounded-md;
+    min-width: 0;
+  }
+
+  .admin-calendar-shell .fc-event-main {
+    @apply min-w-0;
   }
 
   .admin-calendar-shell .fc-list-event:hover td {
@@ -95,6 +160,71 @@
   .admin-calendar-shell .fc-list-event-title,
   .admin-calendar-shell .fc-list-event-time {
     @apply text-foreground;
+  }
+
+  .dark .admin-calendar-shell {
+    @apply border-white/10 bg-[#101216] shadow-[0_18px_45px_rgba(0,0,0,0.35)];
+  }
+
+  .dark .admin-calendar-shell .fc {
+    --fc-border-color: rgba(255, 255, 255, 0.1);
+    --fc-neutral-bg-color: rgba(255, 255, 255, 0.07);
+    --fc-list-event-hover-bg-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .dark .admin-calendar-shell .fc-scrollgrid {
+    @apply bg-[#080a0d];
+  }
+
+  .dark .admin-calendar-shell .fc-col-header-cell,
+  .dark .admin-calendar-shell .fc-list-day-cushion {
+    @apply bg-white/10;
+  }
+
+  .dark .admin-calendar-shell .fc-col-header-cell-cushion {
+    @apply text-zinc-200;
+  }
+
+  .dark .admin-calendar-shell .fc-daygrid-day {
+    background-color: rgba(255, 255, 255, 0.015);
+  }
+
+  .dark .admin-calendar-shell .fc-daygrid-day-number {
+    @apply text-zinc-100;
+  }
+
+  .dark .admin-calendar-shell .fc-day-other {
+    background-color: rgba(255, 255, 255, 0.025);
+  }
+
+  .dark .admin-calendar-shell .fc-day-other .fc-daygrid-day-number {
+    @apply text-zinc-500 opacity-80;
+  }
+
+  .dark .admin-calendar-shell .fc-day-today {
+    @apply bg-sky-500/15;
+  }
+
+  .dark .admin-calendar-shell .fc-button {
+    @apply border-white/10 bg-white/[0.03] text-zinc-300 hover:border-sky-400/40 hover:bg-white/10 hover:text-white;
+  }
+
+  .dark .admin-calendar-shell .fc-button-primary:not(:disabled).fc-button-active,
+  .dark .admin-calendar-shell .fc-button-primary:not(:disabled):active {
+    @apply border-sky-400 bg-sky-500 text-white;
+  }
+
+  .dark .admin-calendar-shell .fc-button-primary:disabled {
+    @apply border-white/10 bg-white/5 text-zinc-500;
+  }
+
+  .dark .admin-calendar-shell .fc-event {
+    @apply shadow-[0_6px_14px_rgba(0,0,0,0.22)];
+  }
+
+  .dark .admin-calendar-shell .fc-list,
+  .dark .admin-calendar-shell .fc-list-table {
+    @apply bg-[#080a0d];
   }
 
   .admin-delete-form[data-pending="true"] button[type="submit"] {

@@ -73,11 +73,11 @@ export function SportsCalendar({ events }: SportsCalendarProps) {
           list: "Liste",
         }}
         eventContent={(eventInfo) => (
-          <div className="min-w-0 px-1 py-0.5">
-            <p className="truncate text-xs font-semibold">
+          <div className="min-w-0 px-1.5 py-1">
+            <p className="truncate text-[11px] font-semibold leading-4 sm:text-xs">
               {eventInfo.event.title}
             </p>
-            <p className="truncate text-[11px] opacity-85">
+            <p className="hidden truncate text-[11px] leading-4 opacity-85 sm:block">
               {eventInfo.event.extendedProps.competitionTitle}
             </p>
           </div>
