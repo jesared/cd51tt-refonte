@@ -1,4 +1,4 @@
-import { Building2, MapPin, Users } from "lucide-react";
+import { Building2, MapPin } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import type { Club } from "@/lib/mock-data";
@@ -25,10 +25,6 @@ export function ClubsList({ clubs }: ClubsListProps) {
             <div className="flex items-center gap-2">
               <MapPin className="size-4 text-primary" />
               <span>{club.venue}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Users className="size-4 text-primary" />
-              <span>{club.tables} tables</span>
             </div>
           </div>
         </div>

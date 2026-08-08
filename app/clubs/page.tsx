@@ -1,4 +1,4 @@
-import { Building2, Mail, MapPin, Phone, Search, Users } from "lucide-react";
+import { Building2, Mail, MapPin, Phone, Search } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { getPublicClubs } from "@/lib/admin-clubs";
@@ -28,7 +28,6 @@ function parseClubContact(contact: string) {
 export default async function ClubsPage() {
   const directory = (await getPublicClubs()) ?? clubs;
   const cities = Array.from(new Set(directory.map((club) => club.city)));
-  const totalTables = directory.reduce((total, club) => total + club.tables, 0);
 
   return (
     <div className="space-y-8">
@@ -51,7 +50,6 @@ export default async function ClubsPage() {
         <div className="flex flex-wrap gap-2 lg:justify-end">
           <Badge variant="secondary">{directory.length} clubs</Badge>
           <Badge variant="outline">{cities.length} villes</Badge>
-          <Badge variant="outline">{totalTables} tables</Badge>
         </div>
       </section>
 
@@ -83,10 +81,6 @@ export default async function ClubsPage() {
                 <div className="flex items-start gap-2">
                   <MapPin className="mt-0.5 size-4 shrink-0 text-primary" />
                   <span>{club.venue}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users className="size-4 shrink-0 text-primary" />
-                  <span>{club.tables} tables disponibles</span>
                 </div>
                 {contact.email ? (
                   <a
