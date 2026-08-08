@@ -13,7 +13,7 @@ import { z } from "zod";
 import { requireAdminSession } from "@/lib/admin-auth";
 import { uploadFileToCloudinary } from "@/lib/cloudinary";
 import { formatFrenchMonthYear, type DocumentCardItem } from "@/lib/documents";
-import { documents } from "@/lib/mock-data";
+import { competitions, documents } from "@/lib/mock-data";
 import { prisma } from "@/lib/prisma";
 
 const documentFormSchema = z.object({
@@ -34,6 +34,7 @@ const documentFormSchema = z.object({
       "Indiquez une URL valide ou un chemin interne commençant par /.",
     ),
   status: z.nativeEnum(DocumentResourceStatus),
+  competitionId: z.string().trim().optional(),
   updatedAt: z.string().trim().optional(),
 });
 
@@ -64,13 +65,13 @@ function toUpdatedDate(rawDate: string) {
 function isDocumentsTableMissingError(error: unknown) {
   return (
     error instanceof Prisma.PrismaClientKnownRequestError &&
-    error.code === "P2021"
+    (error.code === "P2021" || error.code === "P2022")
   );
 }
 
 function serializeErrorMessage(error: unknown) {
   if (isDocumentsTableMissingError(error)) {
-    return "La table des documents n'existe pas encore. Lancez d'abord prisma db push.";
+    return "Le schéma des documents n'est pas à jour. Lancez d'abord prisma db push.";
   }
 
   if (error instanceof z.ZodError) {
@@ -109,6 +110,7 @@ function toDocumentCard(document: DocumentResource): DocumentCardItem {
     updatedAt: formatFrenchMonthYear(document.updatedAt),
     description: document.description,
     href: document.fileUrl,
+    competitionId: document.competitionId,
   };
 }
 
@@ -192,6 +194,7 @@ export async function saveDocument(formData: FormData) {
       description: getStringValue(formData, "description"),
       fileUrl,
       status,
+      competitionId: getStringValue(formData, "competitionId"),
       updatedAt: getStringValue(formData, "updatedAt"),
     });
 
@@ -205,6 +208,7 @@ export async function saveDocument(formData: FormData) {
       format: values.format,
       description: values.description,
       fileUrl: values.fileUrl,
+      competitionId: values.competitionId || null,
       status: values.status,
       updatedAt: toUpdatedDate(values.updatedAt ?? ""),
     };
@@ -276,6 +280,13 @@ export async function seedMockDocuments() {
       format: document.format,
       description: document.description,
       fileUrl: document.href ?? "#",
+      competitionId:
+        competitions.find((competition) =>
+          competition.documents.some(
+            (competitionDocument) =>
+              competitionDocument.title === document.title,
+          ),
+        )?.id ?? null,
       status: DocumentResourceStatus.PUBLISHED,
     })),
     skipDuplicates: false,

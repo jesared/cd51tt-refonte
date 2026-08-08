@@ -28,9 +28,11 @@ export type CompetitionDocument = {
   category: string;
   format: string;
   href: string;
+  competitionId?: string;
 };
 
 export type Competition = {
+  id: string;
   title: string;
   summary: string;
   period: string;
@@ -147,6 +149,7 @@ export const newsArticles: Article[] = [
 
 export const competitions: Competition[] = [
   {
+    id: "championnat-equipes",
     title: "Championnat par équipes",
     summary:
       "Feuilles de route, phases, montées-descentes et arbitrage pour les rencontres départementales.",
@@ -183,22 +186,26 @@ export const competitions: Competition[] = [
         category: "Calendrier",
         format: "PDF",
         href: "/documents?categorie=calendrier",
+        competitionId: "championnat-equipes",
       },
       {
         title: "Règlement sportif championnat",
         category: "Règlement",
         format: "PDF",
         href: "/documents?categorie=reglement",
+        competitionId: "championnat-equipes",
       },
       {
         title: "Feuille de rencontre",
         category: "Support club",
         format: "PDF",
         href: "/documents?categorie=support-club",
+        competitionId: "championnat-equipes",
       },
     ],
   },
   {
+    id: "criterium-federal",
     title: "Critérium fédéral",
     summary:
       "Repères pour les engagements, les montées et l'organisation des tours départementaux.",
@@ -235,22 +242,26 @@ export const competitions: Competition[] = [
         category: "Convocation",
         format: "PDF",
         href: "/documents?categorie=convocation",
+        competitionId: "criterium-federal",
       },
       {
         title: "Liste des inscrits",
         category: "Engagements",
         format: "PDF",
         href: "/documents?categorie=engagements",
+        competitionId: "criterium-federal",
       },
       {
         title: "Règlement du critérium fédéral",
         category: "Règlement",
         format: "PDF",
         href: "/documents?categorie=reglement",
+        competitionId: "criterium-federal",
       },
     ],
   },
   {
+    id: "coupe-finales-departementales",
     title: "Coupe et finales départementales",
     summary:
       "Temps forts de fin de saison avec un focus sur la valorisation des clubs organisateurs.",
@@ -287,18 +298,21 @@ export const competitions: Competition[] = [
         category: "Inscription",
         format: "PDF",
         href: "/contact",
+        competitionId: "coupe-finales-departementales",
       },
       {
         title: "Programme des finales",
         category: "Calendrier",
         format: "PDF",
         href: "/documents?categorie=calendrier",
+        competitionId: "coupe-finales-departementales",
       },
       {
         title: "Règlement coupe et finales",
         category: "Règlement",
         format: "PDF",
         href: "/documents?categorie=reglement",
+        competitionId: "coupe-finales-departementales",
       },
     ],
   },

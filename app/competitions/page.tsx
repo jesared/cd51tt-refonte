@@ -4,6 +4,7 @@ import { ArrowRight, CalendarDays, FileText, Trophy } from "lucide-react";
 import { CompetitionsList } from "@/components/competitions/competitions-list";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { getPublishedDocumentCards } from "@/lib/admin-documents";
 import { createPageMetadata } from "@/lib/metadata";
 import { competitions } from "@/lib/mock-data";
 
@@ -14,15 +15,39 @@ export const metadata = createPageMetadata({
   path: "/competitions",
 });
 
-export default function CompetitionsPage() {
-  const activeCompetitions = competitions.filter(
+export const dynamic = "force-dynamic";
+
+export default async function CompetitionsPage() {
+  const databaseDocuments = await getPublishedDocumentCards();
+  const competitionDocuments =
+    databaseDocuments?.filter((document) => document.competitionId) ?? [];
+  const displayCompetitions = competitions.map((competition) => {
+    const linkedDocuments = competitionDocuments.filter(
+      (document) => document.competitionId === competition.id,
+    );
+
+    return {
+      ...competition,
+      documents:
+        linkedDocuments.length > 0
+          ? linkedDocuments.map((document) => ({
+              title: document.title,
+              category: document.category,
+              format: document.format,
+              href: document.href,
+              competitionId: document.competitionId ?? undefined,
+            }))
+          : competition.documents,
+    };
+  });
+  const activeCompetitions = displayCompetitions.filter(
     (competition) => competition.status === "En cours",
   );
-  const upcomingCompetitions = competitions.filter(
+  const upcomingCompetitions = displayCompetitions.filter(
     (competition) => competition.status === "À venir",
   );
   const nextCompetition =
-    activeCompetitions[0] ?? upcomingCompetitions[0] ?? competitions[0];
+    activeCompetitions[0] ?? upcomingCompetitions[0] ?? displayCompetitions[0];
   const nextCompetitionPrimaryAction = nextCompetition?.actions.find(
     (action) => action.primary,
   );
@@ -47,7 +72,9 @@ export default function CompetitionsPage() {
         </div>
 
         <div className="flex flex-wrap gap-2 lg:justify-end">
-          <Badge variant="secondary">{competitions.length} épreuves</Badge>
+          <Badge variant="secondary">
+            {displayCompetitions.length} épreuves
+          </Badge>
           <Badge variant="outline">{activeCompetitions.length} en cours</Badge>
           <Badge variant="outline">{upcomingCompetitions.length} à venir</Badge>
         </div>
@@ -84,7 +111,7 @@ export default function CompetitionsPage() {
         </section>
       ) : null}
 
-      <CompetitionsList competitions={competitions} />
+      <CompetitionsList competitions={displayCompetitions} />
 
       <section className="space-y-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
@@ -101,7 +128,7 @@ export default function CompetitionsPage() {
         </div>
 
         <div className="grid gap-4 lg:grid-cols-3">
-          {competitions.map((competition) => (
+          {displayCompetitions.map((competition) => (
             <article
               key={`${competition.title}-documents`}
               className="rounded-lg border border-border bg-card p-5"

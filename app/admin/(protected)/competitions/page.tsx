@@ -45,10 +45,13 @@ export default function AdminCompetitionsPage() {
           </p>
         </div>
 
-        <button type="button" className="admin-action admin-action-primary" disabled>
+        <Link
+          href="/admin/competitions/nouveau"
+          className="admin-action admin-action-primary"
+        >
           <Plus className="size-4" />
           Nouvelle compétition
-        </button>
+        </Link>
       </section>
 
       <div className="admin-feedback">

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import {
   BarChart3,
@@ -11,6 +12,7 @@ import {
   Landmark,
   LayoutDashboard,
   LogOut,
+  Menu,
   Newspaper,
   Settings2,
   Trophy,
@@ -19,6 +21,14 @@ import {
 
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Badge } from "@/components/ui/badge";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
 const adminNavigation = [
@@ -99,6 +109,7 @@ type AdminShellProps = {
 
 export function AdminShell({ children, logoutAction }: AdminShellProps) {
   const pathname = usePathname() ?? "/admin";
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-muted/35 text-foreground">
@@ -195,7 +206,7 @@ export function AdminShell({ children, logoutAction }: AdminShellProps) {
       <div className="lg:pl-64">
         <header className="sticky top-0 z-30 border-b border-border bg-background/90 px-4 backdrop-blur lg:px-8">
           <div className="flex min-h-16 flex-col justify-center gap-3 py-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3 lg:hidden">
+            <div className="flex w-full items-center justify-between gap-3 lg:hidden">
               <div className="relative size-8 overflow-hidden rounded-md border border-border bg-white">
                 <Image
                   src="/branding/comite-logo.png"
@@ -208,6 +219,112 @@ export function AdminShell({ children, logoutAction }: AdminShellProps) {
                 <p className="text-sm font-semibold">Comité Marne TT</p>
                 <p className="text-xs text-muted-foreground">Back-office</p>
               </div>
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger
+                  aria-label="Ouvrir le menu admin"
+                  className="ml-auto inline-flex size-9 items-center justify-center rounded-md border border-border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  <Menu className="size-4" />
+                </SheetTrigger>
+                <SheetContent
+                  side="left"
+                  className="w-[88vw] max-w-sm border-r border-border bg-background p-0"
+                >
+                  <SheetHeader className="sr-only">
+                    <SheetTitle>Menu administration</SheetTitle>
+                    <SheetDescription>
+                      Accéder aux modules du tableau de bord.
+                    </SheetDescription>
+                  </SheetHeader>
+
+                  <div className="flex h-full flex-col">
+                    <div className="border-b border-border px-5 py-5">
+                      <div className="flex items-center gap-3">
+                        <div className="relative size-10 overflow-hidden rounded-lg border border-border bg-white">
+                          <Image
+                            src="/branding/comite-logo.png"
+                            alt="Logo du Comité de la Marne de Tennis de Table"
+                            fill
+                            className="object-contain p-1"
+                          />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold">
+                            Dashboard CD51TT
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Pilotage du site
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <nav className="flex-1 overflow-y-auto px-3 py-4">
+                      {sections.map((section) => (
+                        <div key={section.id} className="mb-5">
+                          <p className="mb-1 px-2 text-[11px] font-medium uppercase text-muted-foreground">
+                            {section.label}
+                          </p>
+                          <div className="space-y-1">
+                            {adminNavigation
+                              .filter((item) => item.section === section.id)
+                              .map((item) => {
+                                const Icon = item.icon;
+                                const isActive =
+                                  item.href === "/admin"
+                                    ? pathname === item.href
+                                    : pathname.startsWith(item.href);
+
+                                return (
+                                  <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className={cn(
+                                      "flex min-h-10 items-center gap-3 rounded-lg border px-3 text-sm transition-colors",
+                                      isActive
+                                        ? "border-border bg-muted text-foreground"
+                                        : "border-transparent text-muted-foreground hover:bg-muted/70 hover:text-foreground",
+                                    )}
+                                  >
+                                    <Icon
+                                      className={cn(
+                                        "size-4 shrink-0",
+                                        isActive ? "text-primary" : null,
+                                      )}
+                                    />
+                                    <span className="min-w-0 flex-1 truncate font-medium">
+                                      {item.label}
+                                    </span>
+                                  </Link>
+                                );
+                              })}
+                          </div>
+                        </div>
+                      ))}
+                    </nav>
+
+                    <div className="border-t border-border p-3">
+                      <Link
+                        href="/"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex h-10 items-center rounded-lg px-3 text-sm text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
+                      >
+                        Voir le site public
+                      </Link>
+                      <form action={logoutAction}>
+                        <button
+                          type="submit"
+                          className="mt-1 flex h-10 w-full items-center gap-2 rounded-lg px-3 text-sm text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
+                        >
+                          <LogOut className="size-4" />
+                          Se déconnecter
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
 
             <div className="hidden lg:block">
@@ -243,29 +360,6 @@ export function AdminShell({ children, logoutAction }: AdminShellProps) {
             </div>
           </div>
 
-          <nav className="flex gap-1 overflow-x-auto pb-3 lg:hidden">
-            {adminNavigation.map((item) => {
-              const isActive =
-                item.href === "/admin"
-                  ? pathname === item.href
-                  : pathname.startsWith(item.href);
-
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "shrink-0 rounded-md px-3 py-1.5 text-sm transition-[background-color,color,box-shadow] duration-200 ease-out",
-                    isActive
-                      ? "bg-muted text-foreground shadow-sm ring-1 ring-border"
-                      : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
-                  )}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
         </header>
 
         <main className="px-4 py-6 sm:px-6 lg:px-8">

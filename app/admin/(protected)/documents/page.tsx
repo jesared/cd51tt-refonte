@@ -10,6 +10,7 @@ import {
 } from "@/lib/admin-documents";
 import { formatFrenchMonthYear } from "@/lib/documents";
 import { createPageMetadata } from "@/lib/metadata";
+import { competitions } from "@/lib/mock-data";
 
 export const metadata = createPageMetadata({
   title: "Admin documents",
@@ -123,6 +124,14 @@ export default async function AdminDocumentsPage({
                     >
                       {entry.status === "PUBLISHED" ? "Publié" : "Brouillon"}
                     </span>
+                    {entry.competitionId ? (
+                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
+                        {competitions.find(
+                          (competition) =>
+                            competition.id === entry.competitionId,
+                        )?.title ?? "Compétition liée"}
+                      </span>
+                    ) : null}
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {formatFrenchMonthYear(entry.updatedAt)}

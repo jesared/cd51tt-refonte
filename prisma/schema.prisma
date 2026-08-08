@@ -64,10 +64,12 @@ model DocumentResource {
   format      String
   description String
   fileUrl     String
+  competitionId String?
   status      DocumentResourceStatus @default(DRAFT)
   createdAt   DateTime               @default(now())
   updatedAt   DateTime               @updatedAt
 
+  @@index([competitionId])
   @@index([status, updatedAt(sort: Desc)])
 }
 

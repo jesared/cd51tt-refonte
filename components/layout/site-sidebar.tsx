@@ -21,6 +21,7 @@ type SiteSidebarProps = {
   pathname: string;
   siteConfig: typeof siteConfig;
   mobile?: boolean;
+  onNavigate?: () => void;
 };
 
 const navigationIcons: Record<string, LucideIcon> = {
@@ -37,11 +38,12 @@ export function SiteSidebar({
   pathname,
   siteConfig,
   mobile = false,
+  onNavigate,
 }: SiteSidebarProps) {
   return (
     <aside className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
       <div className="border-b border-sidebar-border px-5 py-5">
-        <Link href="/" className="flex items-center gap-3">
+        <Link href="/" onClick={onNavigate} className="flex items-center gap-3">
           <div className="relative size-12 overflow-hidden rounded-xl border border-sidebar-border bg-card">
             <Image
               src="/branding/comite-logo.png"
@@ -78,6 +80,7 @@ export function SiteSidebar({
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={onNavigate}
                 className={cn(
                   "flex items-center gap-3 rounded-xl border px-3 py-2.5 text-sm transition-colors",
                   isActive

@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Menu } from "lucide-react";
 import { usePathname } from "next/navigation";
 
@@ -27,9 +27,10 @@ export function SiteShell({
   settings: PublicSiteSettings;
 }) {
   const pathname = usePathname() ?? "/";
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const mobileMenuTrigger = (
-    <Sheet>
+    <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
       <SheetTrigger
         aria-label="Ouvrir la navigation"
         className={cn(buttonVariants({ variant: "outline", size: "icon-sm" }))}
@@ -50,6 +51,7 @@ export function SiteShell({
           pathname={pathname}
           siteConfig={settings.siteConfig}
           mobile
+          onNavigate={() => setMobileMenuOpen(false)}
         />
       </SheetContent>
     </Sheet>

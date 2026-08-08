@@ -3,6 +3,7 @@ import type { DocumentResource } from "@prisma/client";
 import { ArrowLeft, Save } from "lucide-react";
 
 import { saveDocument } from "@/lib/admin-documents";
+import { competitions } from "@/lib/mock-data";
 
 type DocumentResourceFormProps = {
   mode: "create" | "edit";
@@ -134,6 +135,29 @@ export function DocumentResourceForm({
                 placeholder="https://... ou /documents/fichier.pdf"
                 className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
               />
+            </div>
+
+            <div className="grid gap-2">
+              <label htmlFor="competitionId" className="text-sm font-medium">
+                Compétition liée
+              </label>
+              <select
+                id="competitionId"
+                name="competitionId"
+                defaultValue={document?.competitionId ?? ""}
+                className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
+              >
+                <option value="">Document global</option>
+                {competitions.map((competition) => (
+                  <option key={competition.id} value={competition.id}>
+                    {competition.title}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-muted-foreground">
+                Un document lié apparaît aussi dans les ressources de la
+                compétition publique.
+              </p>
             </div>
 
             <div className="grid gap-2">
