@@ -99,19 +99,19 @@ export default async function CompetitionsPage() {
       </section>
 
       {nextCalendarEvent ? (
-        <section className="grid gap-4 rounded-lg border border-primary/20 bg-accent p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-          <div className="flex min-w-0 gap-4">
-            <div className="hidden rounded-md border border-primary/20 bg-background p-3 text-primary sm:block">
-              <CalendarDays className="size-5" />
+        <section className="grid gap-5 rounded-lg border border-primary/35 bg-card p-5 shadow-sm ring-1 ring-primary/10 sm:p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+          <div className="flex min-w-0 gap-4 sm:gap-5">
+            <div className="hidden h-16 w-16 shrink-0 items-center justify-center rounded-lg border border-primary/25 bg-primary/10 text-primary sm:flex">
+              <CalendarDays className="size-7" />
             </div>
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-primary">
+            <div className="min-w-0 space-y-2">
+              <p className="text-xs font-semibold uppercase text-primary">
                 Prochaine échéance
               </p>
-              <h2 className="mt-1 text-balance text-2xl font-semibold tracking-tight">
+              <h2 className="text-balance text-2xl font-semibold tracking-tight sm:text-3xl">
                 {nextCalendarEvent.title} · {formatEventDate(nextCalendarEvent.date)}
               </h2>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              <p className="text-sm leading-6 text-muted-foreground">
                 {nextCalendarCompetitionTitle} · {nextCalendarEvent.location}
               </p>
             </div>
@@ -119,26 +119,26 @@ export default async function CompetitionsPage() {
 
           <Link
             href="/calendrier"
-            className={buttonVariants({ variant: "default", size: "lg" })}
+            className={`${buttonVariants({ variant: "default", size: "lg" })} w-full sm:w-fit`}
           >
             Voir le calendrier
             <ArrowRight className="size-4" />
           </Link>
         </section>
       ) : nextCompetition ? (
-        <section className="grid gap-4 rounded-lg border border-primary/20 bg-accent p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-          <div className="flex min-w-0 gap-4">
-            <div className="hidden rounded-md border border-primary/20 bg-background p-3 text-primary sm:block">
-              <CalendarDays className="size-5" />
+        <section className="grid gap-5 rounded-lg border border-primary/35 bg-card p-5 shadow-sm ring-1 ring-primary/10 sm:p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+          <div className="flex min-w-0 gap-4 sm:gap-5">
+            <div className="hidden h-16 w-16 shrink-0 items-center justify-center rounded-lg border border-primary/25 bg-primary/10 text-primary sm:flex">
+              <CalendarDays className="size-7" />
             </div>
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-primary">
+            <div className="min-w-0 space-y-2">
+              <p className="text-xs font-semibold uppercase text-primary">
                 Prochaine échéance
               </p>
-              <h2 className="mt-1 text-balance text-2xl font-semibold tracking-tight">
+              <h2 className="text-balance text-2xl font-semibold tracking-tight sm:text-3xl">
                 {nextCompetition.nextDate}
               </h2>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              <p className="text-sm leading-6 text-muted-foreground">
                 {nextCompetition.title} · {nextCompetition.location}
               </p>
             </div>
@@ -147,7 +147,7 @@ export default async function CompetitionsPage() {
           {nextCompetitionPrimaryAction ? (
             <Link
               href={nextCompetitionPrimaryAction.href}
-              className={buttonVariants({ variant: "default", size: "lg" })}
+              className={`${buttonVariants({ variant: "default", size: "lg" })} w-full sm:w-fit`}
             >
               {nextCompetitionPrimaryAction.label}
               <ArrowRight className="size-4" />

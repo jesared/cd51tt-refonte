@@ -188,18 +188,66 @@ function CompetitionCard({ competition }: { competition: Competition }) {
 
 function CompetitionListRow({ competition }: { competition: Competition }) {
   return (
-    <article className="grid gap-5 rounded-lg border border-border bg-card p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
-      <div className="min-w-0">
-        <CompetitionBadges competition={competition} />
-        <h2 className="mt-4 text-2xl font-semibold tracking-tight">
-          {competition.title}
-        </h2>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-          {competition.summary}
-        </p>
+    <article className="rounded-lg border border-border bg-card p-4 transition-colors hover:border-primary/45 hover:bg-accent sm:p-5">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+        <div className="min-w-0">
+          <CompetitionBadges competition={competition} />
+          <h2 className="mt-3 text-xl font-semibold tracking-tight">
+            {competition.title}
+          </h2>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">
+            {competition.summary}
+          </p>
+        </div>
+
+        <div className="grid gap-3 text-sm sm:grid-cols-3 lg:min-w-[520px]">
+          <div>
+            <p className="text-xs font-medium uppercase text-muted-foreground">
+              Prochaine date
+            </p>
+            <p className="mt-1 font-medium">{competition.nextDate}</p>
+          </div>
+          <div>
+            <p className="text-xs font-medium uppercase text-muted-foreground">
+              Limite
+            </p>
+            <p className="mt-1">{competition.registrationDeadline}</p>
+          </div>
+          <div>
+            <p className="text-xs font-medium uppercase text-muted-foreground">
+              Responsable
+            </p>
+            <p className="mt-1">{competition.manager}</p>
+          </div>
+        </div>
       </div>
 
-      <CompetitionDetails competition={competition} />
+      <div className="mt-4 flex flex-col gap-3 border-t border-border pt-4 lg:flex-row lg:items-center lg:justify-between">
+        <p className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground">
+          <MapPin className="size-4 shrink-0 text-primary" />
+          <span className="truncate">{competition.location}</span>
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {competition.actions.map((action) => {
+            const Icon = actionIcons[action.type];
+
+            return (
+              <Link
+                key={`${competition.title}-${action.label}`}
+                href={action.href}
+                className={buttonVariants({
+                  variant: action.primary ? "default" : "outline",
+                  size: "sm",
+                  className: "min-w-0",
+                })}
+              >
+                <Icon className="size-4" />
+                <span>{action.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
     </article>
   );
 }
