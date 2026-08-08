@@ -14,12 +14,36 @@ export type Article = {
   featured?: boolean;
 };
 
+export type CompetitionAction = {
+  label: string;
+  href: string;
+  type: "calendar" | "results" | "convocation" | "rules" | "registration";
+  primary?: boolean;
+};
+
+export type CompetitionTag = "Équipes" | "Individuel" | "Jeunes" | "Seniors";
+
+export type CompetitionDocument = {
+  title: string;
+  category: string;
+  format: string;
+  href: string;
+};
+
 export type Competition = {
   title: string;
   summary: string;
   period: string;
   status: "Ouvert" | "À venir" | "En cours";
+  statusDetail: string;
   format: string;
+  nextDate: string;
+  registrationDeadline: string;
+  location: string;
+  manager: string;
+  tags: CompetitionTag[];
+  actions: CompetitionAction[];
+  documents: CompetitionDocument[];
 };
 
 export type Club = {
@@ -128,7 +152,51 @@ export const competitions: Competition[] = [
       "Feuilles de route, phases, montées-descentes et arbitrage pour les rencontres départementales.",
     period: "Septembre 2025 - Juin 2026",
     status: "En cours",
+    statusDetail: "Phase 2 en cours",
     format: "Équipes seniors",
+    nextDate: "Journée 4 - 14 septembre 2026",
+    registrationDeadline: "Engagements clôturés",
+    location: "Salles des clubs recevants",
+    manager: "Julien GIORIA",
+    tags: ["Équipes", "Seniors"],
+    actions: [
+      {
+        label: "Voir le calendrier",
+        href: "/documents?categorie=calendrier",
+        type: "calendar",
+        primary: true,
+      },
+      {
+        label: "Résultats",
+        href: "/documents?categorie=resultats",
+        type: "results",
+      },
+      {
+        label: "Règlement",
+        href: "/documents?categorie=reglement",
+        type: "rules",
+      },
+    ],
+    documents: [
+      {
+        title: "Calendrier championnat par équipes",
+        category: "Calendrier",
+        format: "PDF",
+        href: "/documents?categorie=calendrier",
+      },
+      {
+        title: "Règlement sportif championnat",
+        category: "Règlement",
+        format: "PDF",
+        href: "/documents?categorie=reglement",
+      },
+      {
+        title: "Feuille de rencontre",
+        category: "Support club",
+        format: "PDF",
+        href: "/documents?categorie=support-club",
+      },
+    ],
   },
   {
     title: "Critérium fédéral",
@@ -136,7 +204,51 @@ export const competitions: Competition[] = [
       "Repères pour les engagements, les montées et l'organisation des tours départementaux.",
     period: "4 tours / saison",
     status: "En cours",
+    statusDetail: "Tour départemental à préparer",
     format: "Individuel",
+    nextDate: "Tour 1 - 11 octobre 2026",
+    registrationDeadline: "28 septembre 2026",
+    location: "Complexe René Tys, Reims",
+    manager: "Cyril SCHUER",
+    tags: ["Individuel", "Jeunes", "Seniors"],
+    actions: [
+      {
+        label: "Convocation",
+        href: "/documents?categorie=convocation",
+        type: "convocation",
+        primary: true,
+      },
+      {
+        label: "Résultats",
+        href: "/documents?categorie=resultats",
+        type: "results",
+      },
+      {
+        label: "Règlement",
+        href: "/documents?categorie=reglement",
+        type: "rules",
+      },
+    ],
+    documents: [
+      {
+        title: "Convocation du prochain tour",
+        category: "Convocation",
+        format: "PDF",
+        href: "/documents?categorie=convocation",
+      },
+      {
+        title: "Liste des inscrits",
+        category: "Engagements",
+        format: "PDF",
+        href: "/documents?categorie=engagements",
+      },
+      {
+        title: "Règlement du critérium fédéral",
+        category: "Règlement",
+        format: "PDF",
+        href: "/documents?categorie=reglement",
+      },
+    ],
   },
   {
     title: "Coupe et finales départementales",
@@ -144,7 +256,51 @@ export const competitions: Competition[] = [
       "Temps forts de fin de saison avec un focus sur la valorisation des clubs organisateurs.",
     period: "Mai - Juin 2026",
     status: "À venir",
+    statusDetail: "Inscriptions bientôt ouvertes",
     format: "Épreuves finales",
+    nextDate: "Finales - 30 mai 2027",
+    registrationDeadline: "15 mai 2027",
+    location: "Lieu à confirmer",
+    manager: "Thierry SALOMON",
+    tags: ["Équipes", "Jeunes", "Seniors"],
+    actions: [
+      {
+        label: "Inscription",
+        href: "/contact",
+        type: "registration",
+        primary: true,
+      },
+      {
+        label: "Voir le calendrier",
+        href: "/documents?categorie=calendrier",
+        type: "calendar",
+      },
+      {
+        label: "Règlement",
+        href: "/documents?categorie=reglement",
+        type: "rules",
+      },
+    ],
+    documents: [
+      {
+        title: "Formulaire d'inscription",
+        category: "Inscription",
+        format: "PDF",
+        href: "/contact",
+      },
+      {
+        title: "Programme des finales",
+        category: "Calendrier",
+        format: "PDF",
+        href: "/documents?categorie=calendrier",
+      },
+      {
+        title: "Règlement coupe et finales",
+        category: "Règlement",
+        format: "PDF",
+        href: "/documents?categorie=reglement",
+      },
+    ],
   },
 ];
 

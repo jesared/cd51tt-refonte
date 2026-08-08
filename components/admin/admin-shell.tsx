@@ -6,12 +6,14 @@ import { usePathname } from "next/navigation";
 import {
   BarChart3,
   Building2,
+  CalendarDays,
   FileText,
   Landmark,
   LayoutDashboard,
   LogOut,
   Newspaper,
   Settings2,
+  Trophy,
   UserRoundCheck,
 } from "lucide-react";
 
@@ -37,6 +39,18 @@ const adminNavigation = [
     label: "Documents",
     icon: FileText,
     section: "Contenu",
+  },
+  {
+    href: "/admin/competitions",
+    label: "Compétitions",
+    icon: Trophy,
+    section: "Sportif",
+  },
+  {
+    href: "/admin/calendrier",
+    label: "Calendrier",
+    icon: CalendarDays,
+    section: "Sportif",
   },
   {
     href: "/admin/clubs",
@@ -73,6 +87,7 @@ const adminNavigation = [
 const sections = [
   { id: "Pilotage", label: "Pilotage" },
   { id: "Contenu", label: "Contenu" },
+  { id: "Sportif", label: "Sportif" },
   { id: "data", label: "Données" },
   { id: "settings", label: "Réglages" },
 ];
