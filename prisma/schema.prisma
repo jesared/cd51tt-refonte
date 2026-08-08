@@ -16,6 +16,13 @@ enum DocumentResourceStatus {
   PUBLISHED
 }
 
+enum CalendarEventType {
+  JOURNEE
+  CONVOCATION
+  INSCRIPTION
+  RESULTAT
+}
+
 model SiteSettings {
   id                 Int      @id
   siteName           String
@@ -71,6 +78,23 @@ model DocumentResource {
 
   @@index([competitionId])
   @@index([status, updatedAt(sort: Desc)])
+}
+
+model CalendarEvent {
+  id            String            @id @default(cuid())
+  competitionId String?
+  title         String
+  type          CalendarEventType
+  date          DateTime
+  location      String
+  published     Boolean           @default(false)
+  sortOrder     Int               @default(0)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@index([competitionId])
+  @@index([published, date(sort: Asc)])
+  @@index([date(sort: Asc), sortOrder])
 }
 
 model ClubResource {

@@ -33,6 +33,70 @@
     @apply rounded-lg border border-primary/20 bg-primary/10 px-4 py-3 text-sm font-medium text-foreground shadow-sm;
   }
 
+  .admin-calendar-shell {
+    @apply overflow-hidden rounded-xl border border-border bg-background p-2 text-foreground sm:p-4;
+  }
+
+  .admin-calendar-shell .fc {
+    font-family: var(--font-sans);
+  }
+
+  .admin-calendar-shell .fc-header-toolbar {
+    @apply flex-col gap-3 sm:flex-row;
+  }
+
+  .admin-calendar-shell .fc-toolbar-title {
+    @apply text-lg font-semibold capitalize sm:text-xl;
+  }
+
+  .admin-calendar-shell .fc-button {
+    @apply rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-muted-foreground shadow-none transition hover:border-primary/35 hover:bg-muted hover:text-foreground focus:ring-2 focus:ring-ring/20;
+  }
+
+  .admin-calendar-shell .fc-button-primary:not(:disabled).fc-button-active,
+  .admin-calendar-shell .fc-button-primary:not(:disabled):active {
+    @apply border-primary bg-primary text-primary-foreground;
+  }
+
+  .admin-calendar-shell .fc-button-primary:disabled {
+    @apply cursor-not-allowed border-border bg-muted text-muted-foreground opacity-70;
+  }
+
+  .admin-calendar-shell .fc-scrollgrid,
+  .admin-calendar-shell .fc-theme-standard td,
+  .admin-calendar-shell .fc-theme-standard th {
+    @apply border-border;
+  }
+
+  .admin-calendar-shell .fc-col-header-cell,
+  .admin-calendar-shell .fc-list-day-cushion {
+    @apply bg-muted/40;
+  }
+
+  .admin-calendar-shell .fc-daygrid-day-number,
+  .admin-calendar-shell .fc-col-header-cell-cushion,
+  .admin-calendar-shell .fc-list-day-text,
+  .admin-calendar-shell .fc-list-day-side-text {
+    @apply text-foreground no-underline;
+  }
+
+  .admin-calendar-shell .fc-day-today {
+    @apply bg-primary/10;
+  }
+
+  .admin-calendar-shell .fc-event {
+    @apply rounded-md border-0 shadow-none;
+  }
+
+  .admin-calendar-shell .fc-list-event:hover td {
+    @apply bg-muted/50;
+  }
+
+  .admin-calendar-shell .fc-list-event-title,
+  .admin-calendar-shell .fc-list-event-time {
+    @apply text-foreground;
+  }
+
   .admin-delete-form[data-pending="true"] button[type="submit"] {
     @apply pointer-events-none cursor-wait opacity-70;
   }

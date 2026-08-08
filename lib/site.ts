@@ -77,6 +77,11 @@ export const mainNavigation: NavigationItem[] = [
     description: "Calendriers, phases et résultats",
   },
   {
+    href: "/calendrier",
+    label: "Calendrier",
+    description: "Agenda des échéances sportives",
+  },
+  {
     href: "/clubs",
     label: "Clubs",
     description: "Annuaire départemental",
@@ -100,7 +105,7 @@ export const mainNavigation: NavigationItem[] = [
 
 export const secondaryNavigation: NavigationItem[] = [
   {
-    href: "/competitions",
+    href: "/calendrier",
     label: "Calendrier sportif",
     description: "Épreuves et rendez-vous",
   },
@@ -130,6 +135,7 @@ export const footerNavigation = {
   activites: [
     { href: "/actualites", label: "Actualités" },
     { href: "/competitions", label: "Compétitions" },
+    { href: "/calendrier", label: "Calendrier" },
     { href: "/clubs", label: "Clubs" },
     { href: "/documents", label: "Documents" },
   ],
@@ -171,6 +177,12 @@ export const routeCopy = {
     eyebrow: "Calendrier sportif",
     description:
       "Retrouvez les épreuves, les phases en cours et les rendez-vous sportifs qui rythment la saison départementale.",
+  },
+  "/calendrier": {
+    title: "Calendrier",
+    eyebrow: "Agenda sportif",
+    description:
+      "Consultez les journées, convocations, limites d'inscription et résultats publiés par le comité.",
   },
   "/clubs": {
     title: "Clubs",
