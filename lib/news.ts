@@ -8,6 +8,10 @@ export type ArticleCardItem = {
   featured?: boolean;
 };
 
+export type ArticleDetailItem = ArticleCardItem & {
+  content: string;
+};
+
 export function formatFrenchDate(date: Date | string | null | undefined) {
   if (!date) {
     return "A definir";

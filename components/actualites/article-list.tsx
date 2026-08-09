@@ -12,7 +12,7 @@ type ArticleListProps = {
 function ArticleRow({ article }: { article: ArticleCardItem }) {
   return (
     <Link
-      href="/actualites"
+      href={`/actualites/${article.slug}`}
       className={cn(
         "group grid gap-4 p-5 transition-colors hover:bg-accent sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center",
         article.featured ? "bg-accent/50" : undefined,
@@ -63,7 +63,7 @@ export function ArticleList({ articles }: ArticleListProps) {
     <div className="space-y-4">
       {featuredArticle ? (
         <Link
-          href="/actualites"
+          href={`/actualites/${featuredArticle.slug}`}
           className="group block rounded-lg border border-border bg-card p-6 transition-colors hover:border-primary/45 hover:bg-accent sm:p-7"
         >
           <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">

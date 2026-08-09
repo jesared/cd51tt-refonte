@@ -91,7 +91,12 @@ function CompetitionActions({
   compact?: boolean;
 }) {
   return (
-    <div className="flex flex-wrap gap-2 border-t border-border pt-4">
+    <div
+      className={cn(
+        "flex flex-wrap gap-1.5 border-t border-border pt-3",
+        compact ? "justify-end" : "justify-start lg:justify-end",
+      )}
+    >
       {competition.actions.map((action) => {
         const Icon = actionIcons[action.type];
 
@@ -99,14 +104,15 @@ function CompetitionActions({
           <Link
             key={`${competition.title}-${action.label}`}
             href={action.href}
+            aria-label={action.label}
+            title={action.label}
             className={buttonVariants({
               variant: action.primary ? "default" : "outline",
-              size: "sm",
-              className: cn("min-w-0", compact ? "flex-1" : "flex-1 sm:flex-none"),
+              size: "icon-sm",
+              className: "h-8 w-8",
             })}
           >
             <Icon className="size-4" />
-            <span className="truncate">{action.label}</span>
           </Link>
         );
       })}
@@ -227,26 +233,7 @@ function CompetitionListRow({ competition }: { competition: Competition }) {
           <MapPin className="size-4 shrink-0 text-primary" />
           <span className="truncate">{competition.location}</span>
         </p>
-        <div className="flex flex-wrap gap-2">
-          {competition.actions.map((action) => {
-            const Icon = actionIcons[action.type];
-
-            return (
-              <Link
-                key={`${competition.title}-${action.label}`}
-                href={action.href}
-                className={buttonVariants({
-                  variant: action.primary ? "default" : "outline",
-                  size: "sm",
-                  className: "min-w-0",
-                })}
-              >
-                <Icon className="size-4" />
-                <span>{action.label}</span>
-              </Link>
-            );
-          })}
-        </div>
+        <CompetitionActions competition={competition} />
       </div>
     </article>
   );

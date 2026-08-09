@@ -217,13 +217,13 @@ export default async function HomePage() {
               {featuredArticle.excerpt}
             </p>
             <Link
-              href="/actualites"
+              href={`/actualites/${featuredArticle.slug}`}
               className={cn(
                 buttonVariants({ variant: "outline", size: "sm" }),
                 "mt-6",
               )}
             >
-              Toutes les actualités
+              Lire l&apos;actualité
               <ArrowRight className="size-3.5" />
             </Link>
           </div>
@@ -238,7 +238,7 @@ export default async function HomePage() {
             {secondaryArticles.map((article) => (
               <Link
                 key={article.slug}
-                href="/actualites"
+                href={`/actualites/${article.slug}`}
                 className="block rounded-lg border border-border bg-card p-5 transition-colors hover:border-primary/45 hover:bg-accent"
               >
                 <p className="text-sm font-medium text-primary">

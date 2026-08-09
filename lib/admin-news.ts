@@ -8,7 +8,12 @@ import { z } from "zod";
 
 import { requireAdminSession } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
-import { formatFrenchDate, slugifyArticleTitle, type ArticleCardItem } from "@/lib/news";
+import {
+  formatFrenchDate,
+  slugifyArticleTitle,
+  type ArticleCardItem,
+  type ArticleDetailItem,
+} from "@/lib/news";
 import { newsArticles } from "@/lib/mock-data";
 
 const articleFormSchema = z.object({
@@ -142,6 +147,13 @@ function toArticleCard(article: NewsArticle): ArticleCardItem {
   };
 }
 
+function toArticleDetail(article: NewsArticle): ArticleDetailItem {
+  return {
+    ...toArticleCard(article),
+    content: article.content,
+  };
+}
+
 export async function getAdminNewsArticles(): Promise<NewsArticle[]> {
   if (!(await hasNewsArticleTable())) {
     return [];
@@ -205,6 +217,27 @@ export async function getPublishedNewsArticleCards(
     }
 
     return articles.map(toArticleCard);
+  } catch {
+    return null;
+  }
+}
+
+export async function getPublishedNewsArticleBySlug(
+  slug: string,
+): Promise<ArticleDetailItem | null> {
+  if (!(await hasNewsArticleTable())) {
+    return null;
+  }
+
+  try {
+    const article = await prisma.newsArticle.findFirst({
+      where: {
+        slug,
+        status: NewsArticleStatus.PUBLISHED,
+      },
+    });
+
+    return article ? toArticleDetail(article) : null;
   } catch {
     return null;
   }
