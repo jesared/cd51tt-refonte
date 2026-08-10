@@ -3,7 +3,12 @@ import type { DocumentResource } from "@prisma/client";
 import { ArrowLeft, Download, Eye, ExternalLink, Save } from "lucide-react";
 
 import { saveDocument } from "@/lib/admin-documents";
+import { SaveResultActions } from "@/components/admin/save-result-actions";
 import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
+import {
+  DOCUMENT_CATEGORY_OPTIONS,
+  normalizeDocumentCategory,
+} from "@/lib/content-categories";
 import { competitions } from "@/lib/mock-data";
 
 type DocumentResourceFormProps = {
@@ -30,6 +35,9 @@ export function DocumentResourceForm({
   const isEdit = mode === "edit";
   const previewHref = document ? `/admin/documents/${document.id}/preview` : null;
   const publicHref = document?.status === "PUBLISHED" ? "/documents" : null;
+  const selectedCategory = document?.category
+    ? normalizeDocumentCategory(document.category)
+    : null;
 
   return (
     <div className="space-y-6">
@@ -92,18 +100,12 @@ export function DocumentResourceForm({
       </section>
 
       {saved ? (
-        <div className="flex flex-col gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300 sm:flex-row sm:items-center sm:justify-between">
-          <span>Document enregistré. Vérifiez l’aperçu avant publication.</span>
-          {previewHref ? (
-            <Link
-              href={previewHref}
-              className="inline-flex items-center gap-2 font-medium text-emerald-800 underline-offset-4 hover:underline dark:text-emerald-200"
-            >
-              <Eye className="size-4" />
-              Prévisualiser
-            </Link>
-          ) : null}
-        </div>
+        <SaveResultActions
+          message="Document enregistré."
+          publicHref={publicHref ?? "/documents"}
+          createHref="/admin/documents/nouveau"
+          listHref="/admin/documents"
+        />
       ) : null}
 
       {errorMessage ? (
@@ -141,13 +143,28 @@ export function DocumentResourceForm({
                 <label htmlFor="category" className="text-sm font-medium">
                   Catégorie
                 </label>
-                <input
+                <select
                   id="category"
                   name="category"
                   required
-                  defaultValue={document?.category ?? ""}
+                  defaultValue={selectedCategory ?? ""}
                   className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
-                />
+                >
+                  <option value="" disabled>
+                    Choisir une catégorie
+                  </option>
+                  {DOCUMENT_CATEGORY_OPTIONS.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+                {document?.category && !selectedCategory ? (
+                  <p className="text-xs text-amber-700 dark:text-amber-300">
+                    Catégorie actuelle non harmonisée : {document.category}.
+                    Choisissez une valeur de la liste avant d’enregistrer.
+                  </p>
+                ) : null}
               </div>
 
               <div className="grid gap-2">

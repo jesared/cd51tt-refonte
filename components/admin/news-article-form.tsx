@@ -3,7 +3,12 @@ import type { NewsArticle } from "@prisma/client";
 import { ArrowLeft, Eye, ExternalLink, Save } from "lucide-react";
 
 import { saveNewsArticle } from "@/lib/admin-news";
+import { SaveResultActions } from "@/components/admin/save-result-actions";
 import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
+import {
+  NEWS_CATEGORY_OPTIONS,
+  normalizeNewsCategory,
+} from "@/lib/content-categories";
 
 type NewsArticleFormProps = {
   mode: "create" | "edit";
@@ -34,6 +39,9 @@ export function NewsArticleForm({
   const previewHref = article ? `/admin/actualites/${article.id}/preview` : null;
   const publicHref =
     article?.status === "PUBLISHED" ? `/actualites/${article.slug}` : null;
+  const selectedCategory = article?.category
+    ? normalizeNewsCategory(article.category)
+    : null;
 
   return (
     <div className="space-y-6">
@@ -84,18 +92,12 @@ export function NewsArticleForm({
       </section>
 
       {saved ? (
-        <div className="flex flex-col gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300 sm:flex-row sm:items-center sm:justify-between">
-          <span>Actualité enregistrée. Relisez l’aperçu avant publication.</span>
-          {previewHref ? (
-            <Link
-              href={previewHref}
-              className="inline-flex items-center gap-2 font-medium text-emerald-800 underline-offset-4 hover:underline dark:text-emerald-200"
-            >
-              <Eye className="size-4" />
-              Prévisualiser
-            </Link>
-          ) : null}
-        </div>
+        <SaveResultActions
+          message="Actualité enregistrée."
+          publicHref={publicHref ?? "/actualites"}
+          createHref="/admin/actualites/nouveau"
+          listHref="/admin/actualites"
+        />
       ) : null}
 
       {errorMessage ? (
@@ -132,14 +134,28 @@ export function NewsArticleForm({
               <label htmlFor="category" className="text-sm font-medium">
                 Catégorie
               </label>
-              <input
+              <select
                 id="category"
                 name="category"
                 required
-                defaultValue={article?.category ?? ""}
-                placeholder="Competition, club, formation..."
+                defaultValue={selectedCategory ?? ""}
                 className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
-              />
+              >
+                <option value="" disabled>
+                  Choisir une catégorie
+                </option>
+                {NEWS_CATEGORY_OPTIONS.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+              {article?.category && !selectedCategory ? (
+                <p className="text-xs text-amber-700 dark:text-amber-300">
+                  Catégorie actuelle non harmonisée : {article.category}.
+                  Choisissez une valeur de la liste avant d’enregistrer.
+                </p>
+              ) : null}
             </div>
 
             <div className="grid gap-2">

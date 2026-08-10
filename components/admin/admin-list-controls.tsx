@@ -25,7 +25,15 @@ type AdminListControlsProps = {
   sortOptions: FilterOption[];
 };
 
-const CONTROL_PARAMS = new Set(["q", "tri", "statut", "categorie", "ville", "type"]);
+const CONTROL_PARAMS = new Set([
+  "q",
+  "tri",
+  "statut",
+  "categorie",
+  "ville",
+  "type",
+  "competition",
+]);
 
 export function AdminListControls({
   searchPlaceholder,
@@ -85,7 +93,7 @@ export function AdminListControls({
   }
 
   return (
-    <div className="grid gap-3 rounded-lg border border-border bg-background p-3 lg:grid-cols-[minmax(260px,1fr)_repeat(3,minmax(10rem,0.26fr))] lg:items-end xl:grid-cols-[minmax(260px,1fr)_repeat(3,minmax(10rem,0.24fr))_auto]">
+    <div className="grid gap-3 rounded-lg border border-border bg-background p-3 lg:grid-cols-[minmax(260px,1fr)_repeat(2,minmax(10rem,0.28fr))] lg:items-end xl:grid-cols-[minmax(260px,1fr)_repeat(4,minmax(10rem,0.22fr))_auto]">
       <label className="grid gap-1">
         <span className="text-xs font-medium text-muted-foreground">
           Recherche
@@ -155,7 +163,7 @@ export function AdminListControls({
         </select>
       </label>
 
-      <div className="flex min-h-10 flex-wrap items-center gap-2 lg:col-span-4 lg:justify-end xl:col-span-1">
+      <div className="flex min-h-10 flex-wrap items-center gap-2 lg:col-span-full lg:justify-end xl:col-span-1">
         <button
           type="button"
           onClick={applySearch}

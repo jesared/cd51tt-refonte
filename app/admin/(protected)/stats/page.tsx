@@ -74,6 +74,13 @@ export default async function AdminStatsPage({
     : searchParams?.synced
       ? `${searchParams.synced} clubs synchronisés, ${searchParams.failed ?? "0"} erreur(s).`
       : null;
+  const feedbackTone = searchParams?.error
+    ? "error"
+    : searchParams?.synced
+      ? Number(searchParams.failed ?? "0") > 0
+        ? "partial"
+        : "success"
+      : "default";
   const kpiItems = [
     {
       label: "Licenciés FFTT",
@@ -117,8 +124,8 @@ export default async function AdminStatsPage({
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       <section className="rounded-lg border border-border bg-background">
-        <div className="grid gap-6 p-6 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-start">
-          <div className="space-y-3">
+        <div className="grid gap-6 p-6 xl:grid-cols-[minmax(0,1fr)_minmax(240px,300px)] xl:items-stretch">
+          <div className="flex min-w-0 flex-col justify-between gap-5">
             <div className="flex items-center gap-2 text-sm font-medium text-primary">
               <BarChart3 className="size-4" />
               Observatoire FFTT
@@ -139,6 +146,11 @@ export default async function AdminStatsPage({
                   ? `configurée, dép. ${ffttApiReadiness.department}`
                   : "non configurée"}
               </Badge>
+              <Badge variant={ffttApiReadiness.hasAppCredentials ? "secondary" : "outline"}>
+                {ffttApiReadiness.hasAppCredentials
+                  ? "Données réelles FFTT"
+                  : "Synchro impossible"}
+              </Badge>
               <Badge variant={stats.tableReady ? "secondary" : "outline"}>
                 {stats.tableReady ? "Table prête" : "Table à créer"}
               </Badge>
@@ -148,12 +160,16 @@ export default async function AdminStatsPage({
             </div>
           </div>
 
-          <form action={syncFfttLicenseeStats}>
+          <form
+            action={syncFfttLicenseeStats}
+            className="flex flex-col justify-center border-t border-border pt-5 xl:border-l xl:border-t-0 xl:pl-6 xl:pt-0"
+          >
             <AdminSubmitButton
               variant="default"
               icon={<RefreshCw className="size-4" />}
               loadingLabel="Synchronisation..."
               disabled={!stats.tableReady || stats.ffttClubCount === 0}
+              className="h-11 w-full px-4"
             >
               Synchroniser les licenciés
             </AdminSubmitButton>
@@ -162,7 +178,26 @@ export default async function AdminStatsPage({
       </section>
 
       {message ? (
-        <div className="admin-feedback">
+        <div
+          className={
+            feedbackTone === "error"
+              ? "rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive shadow-sm"
+              : feedbackTone === "partial"
+                ? "rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm font-medium text-amber-900 shadow-sm dark:text-amber-200"
+                : feedbackTone === "success"
+                  ? "rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm font-medium text-emerald-800 shadow-sm dark:text-emerald-200"
+                  : "admin-feedback"
+          }
+        >
+          <span className="mr-2 rounded-full border border-current/20 px-2 py-0.5 text-xs">
+            {feedbackTone === "error"
+              ? "Synchro impossible"
+              : feedbackTone === "partial"
+                ? "Synchro partielle"
+                : feedbackTone === "success"
+                  ? "Synchro réussie"
+                  : "Données réelles"}
+          </span>
           {message}
         </div>
       ) : null}

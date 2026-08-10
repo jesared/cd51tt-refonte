@@ -16,6 +16,7 @@ type AdminEditTechnicalStaffPageProps = {
   };
   searchParams?: {
     error?: string;
+    saved?: string;
   };
 };
 
@@ -37,6 +38,7 @@ export default async function AdminEditTechnicalStaffPage({
       errorMessage={
         searchParams?.error ? decodeURIComponent(searchParams.error) : null
       }
+      saved={searchParams?.saved === "1"}
     />
   );
 }

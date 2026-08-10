@@ -96,20 +96,25 @@ export default async function AdminActualitesPage({
         ? "L'article a été supprimé."
         : searchParams?.published === "1"
           ? "L'actualité est publiée."
-          : searchParams?.unpublished === "1"
-            ? "L'actualité est dépubliée."
-            : searchParams?.seeded === "1"
-              ? "Les articles mockés ont été importés."
+            : searchParams?.unpublished === "1"
+              ? "L'actualité est dépubliée."
+              : searchParams?.seeded === "1"
+              ? "Articles de démonstration importés depuis le mock local."
               : searchParams?.seeded === "0"
-                ? "Des articles existent déjà. Import mock ignoré."
+                ? "Des articles existent déjà en base admin. Import mock local ignoré."
                 : searchParams?.error
                   ? decodeURIComponent(searchParams.error)
                   : null;
+  const feedbackTone = searchParams?.error
+    ? "error"
+    : searchParams?.seeded === "1"
+      ? "mock"
+      : "default";
 
   return (
     <div className="space-y-6">
-      <section className="flex flex-col gap-4 rounded-[1.5rem] border border-border bg-background p-6 lg:flex-row lg:items-start lg:justify-between">
-        <div className="space-y-2">
+      <section className="grid gap-6 rounded-[1.5rem] border border-border bg-background p-6 lg:grid-cols-[minmax(0,1fr)_minmax(220px,280px)] lg:items-stretch">
+        <div className="flex min-w-0 flex-col justify-between gap-5">
           <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
             Actualités
           </p>
@@ -120,24 +125,34 @@ export default async function AdminActualitesPage({
             Créez, modifiez, publiez ou dépubliez les informations visibles sur
             le site public.
           </p>
+          <div className="flex flex-wrap gap-2">
+            <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
+              Base admin réelle
+            </span>
+            {articles.length === 0 ? (
+              <span className="rounded-full border border-amber-500/25 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-800 dark:text-amber-200">
+                Mock local disponible
+              </span>
+            ) : null}
+          </div>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col justify-center gap-3 border-t border-border pt-5 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
           {articles.length === 0 ? (
-            <form action={seedMockNewsArticles}>
+            <form action={seedMockNewsArticles} className="contents">
               <AdminSubmitButton
                 icon={<Sparkles className="size-4" />}
                 loadingLabel="Import en cours..."
-                className="h-10 px-4"
+                className="h-11 w-full px-4"
               >
-                Importer les mocks
+                Importer mock local
               </AdminSubmitButton>
             </form>
           ) : null}
 
           <Link
             href="/admin/actualites/nouveau"
-            className="admin-action admin-action-primary"
+            className="admin-action admin-action-primary h-11 w-full"
           >
             <Plus className="size-4" />
             Nouvel article
@@ -145,7 +160,24 @@ export default async function AdminActualitesPage({
         </div>
       </section>
 
-      {message ? <div className="admin-feedback">{message}</div> : null}
+      {message ? (
+        <div
+          className={
+            feedbackTone === "error"
+              ? "rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive shadow-sm"
+              : feedbackTone === "mock"
+                ? "rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm font-medium text-amber-900 shadow-sm dark:text-amber-200"
+                : "admin-feedback"
+          }
+        >
+          {feedbackTone === "mock" ? (
+            <span className="mr-2 rounded-full border border-current/20 px-2 py-0.5 text-xs">
+              Mock local
+            </span>
+          ) : null}
+          {message}
+        </div>
+      ) : null}
 
       <section className="rounded-[1.5rem] border border-border bg-background">
         <div className="space-y-4 border-b border-border px-6 py-4">

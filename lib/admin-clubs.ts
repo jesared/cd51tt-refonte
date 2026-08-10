@@ -7,7 +7,7 @@ import { cache } from "react";
 import { z } from "zod";
 
 import { requireAdminSession } from "@/lib/admin-auth";
-import { ffttClient } from "@/lib/fftt/client";
+import { ffttApiReadiness, ffttClient } from "@/lib/fftt/client";
 import { clubs, type Club } from "@/lib/mock-data";
 import { prisma } from "@/lib/prisma";
 
@@ -133,6 +133,7 @@ export async function saveClub(formData: FormData) {
   await requireAdminSession();
 
   const id = getStringValue(formData, "id") || undefined;
+  let redirectPath = "/admin/clubs";
 
   try {
     const values = clubFormSchema.parse({
@@ -158,25 +159,24 @@ export async function saveClub(formData: FormData) {
       active: values.active,
     };
 
-    if (values.id) {
-      await prisma.clubResource.update({
+    const savedClub = values.id
+      ? await prisma.clubResource.update({
         where: { id: values.id },
         data: payload,
-      });
-    } else {
-      await prisma.clubResource.create({ data: payload });
-    }
+      })
+      : await prisma.clubResource.create({ data: payload });
 
     revalidatePath("/admin");
     revalidatePath("/admin/clubs");
     revalidatePath("/clubs");
     revalidatePath("/");
+    redirectPath = `/admin/clubs/${savedClub.id}?saved=1`;
   } catch (error) {
     const message = encodeURIComponent(serializeErrorMessage(error));
     redirect(`${buildClubPath(id)}?error=${message}`);
   }
 
-  redirect("/admin/clubs?saved=1");
+  redirect(redirectPath);
 }
 
 export async function deleteClub(formData: FormData) {
@@ -213,10 +213,14 @@ export async function syncFfttClubs() {
   }
 
   let syncedCount = 0;
+  let source = ffttApiReadiness.hasAppCredentials ? "fftt" : "mock";
 
   try {
     const records = await ffttClient.getClubs();
     syncedCount = records.length;
+    source = records.every((record) => record.id.startsWith("mock-club-"))
+      ? "mock"
+      : "fftt";
 
     for (let index = 0; index < records.length; index += 1) {
       const record = records[index];
@@ -248,5 +252,5 @@ export async function syncFfttClubs() {
     redirect(`/admin/clubs?error=${message}`);
   }
 
-  redirect(`/admin/clubs?fftt=${syncedCount}`);
+  redirect(`/admin/clubs?fftt=${syncedCount}&source=${source}`);
 }

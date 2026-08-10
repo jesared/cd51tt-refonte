@@ -16,6 +16,7 @@ type AdminEditCommitteeMemberPageProps = {
   };
   searchParams?: {
     error?: string;
+    saved?: string;
   };
 };
 
@@ -37,6 +38,7 @@ export default async function AdminEditCommitteeMemberPage({
       errorMessage={
         searchParams?.error ? decodeURIComponent(searchParams.error) : null
       }
+      saved={searchParams?.saved === "1"}
     />
   );
 }

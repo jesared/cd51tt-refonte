@@ -30,6 +30,7 @@ type AdminCalendrierPageProps = {
     seeded?: string;
     published?: string;
     q?: string;
+    competition?: string;
     statut?: string;
     type?: string;
     tri?: string;
@@ -66,9 +67,18 @@ export default async function AdminCalendrierPage({
     status: event.published ? ("published" as const) : ("draft" as const),
   }));
   const query = normalizeSearchValue(searchParams?.q ?? "");
+  const competitionFilter = searchParams?.competition;
   const statusFilter = searchParams?.statut;
   const typeFilter = searchParams?.type;
   const sortMode = searchParams?.tri ?? "date-asc";
+  const competitionOptions = Array.from(
+    new Map(
+      calendarEvents.map((event) => [
+        event.competitionId ?? "general",
+        getCompetitionTitle(event.competitionId),
+      ]),
+    ),
+  ).sort(([, first], [, second]) => first.localeCompare(second, "fr"));
   const typeOptions = Array.from(
     new Map(
       calendarEvents.map((event) => [
@@ -86,13 +96,19 @@ export default async function AdminCalendrierPage({
         normalizeSearchValue(
           `${competitionTitle} ${event.title} ${typeLabel} ${event.location}`,
         ).includes(query);
+      const matchesCompetition =
+        !competitionFilter ||
+        (competitionFilter === "general" && !event.competitionId) ||
+        event.competitionId === competitionFilter;
       const matchesStatus =
         !statusFilter ||
         (statusFilter === "published" && event.published) ||
         (statusFilter === "draft" && !event.published);
       const matchesType = !typeFilter || event.type === typeFilter;
 
-      return matchesSearch && matchesStatus && matchesType;
+      return (
+        matchesSearch && matchesCompetition && matchesStatus && matchesType
+      );
     })
     .sort((first, second) => {
       if (sortMode === "title-asc") {
@@ -110,8 +126,8 @@ export default async function AdminCalendrierPage({
 
   return (
     <div className="space-y-6">
-      <section className="flex flex-col gap-4 rounded-[1.5rem] border border-border bg-background p-6 lg:flex-row lg:items-start lg:justify-between">
-        <div className="space-y-2">
+      <section className="grid gap-6 rounded-[1.5rem] border border-border bg-background p-6 lg:grid-cols-[minmax(0,1fr)_minmax(220px,280px)] lg:items-stretch">
+        <div className="flex min-w-0 flex-col justify-center gap-3">
           <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
             Sportif
           </p>
@@ -124,10 +140,10 @@ export default async function AdminCalendrierPage({
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col justify-center gap-3 border-t border-border pt-5 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
           {calendarEvents.length === 0 ? (
-            <form action={seedMockCalendarEvents}>
-              <button type="submit" className="admin-action">
+            <form action={seedMockCalendarEvents} className="contents">
+              <button type="submit" className="admin-action h-11 w-full">
                 <Sparkles className="size-4" />
                 Charger un exemple
               </button>
@@ -135,7 +151,7 @@ export default async function AdminCalendrierPage({
           ) : null}
           <Link
             href="/admin/calendrier/nouveau"
-            className="admin-action admin-action-primary"
+            className="admin-action admin-action-primary h-11 w-full"
           >
             <Plus className="size-4" />
             Nouvelle échéance
@@ -189,6 +205,15 @@ export default async function AdminCalendrierPage({
           <AdminListControls
             searchPlaceholder="Compétition, libellé, type ou lieu"
             filters={[
+              {
+                name: "competition",
+                label: "Compétition",
+                defaultLabel: "Toutes les compétitions",
+                options: competitionOptions.map(([value, label]) => ({
+                  label,
+                  value,
+                })),
+              },
               {
                 name: "statut",
                 label: "Publication",

@@ -16,6 +16,7 @@ type AdminEditClubPageProps = {
   };
   searchParams?: {
     error?: string;
+    saved?: string;
   };
 };
 
@@ -36,6 +37,7 @@ export default async function AdminEditClubPage({
       errorMessage={
         searchParams?.error ? decodeURIComponent(searchParams.error) : null
       }
+      saved={searchParams?.saved === "1"}
     />
   );
 }

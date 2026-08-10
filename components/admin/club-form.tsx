@@ -3,15 +3,22 @@ import type { ClubResource } from "@prisma/client";
 import { ArrowLeft, Save } from "lucide-react";
 
 import { saveClub } from "@/lib/admin-clubs";
+import { SaveResultActions } from "@/components/admin/save-result-actions";
 import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
 
 type ClubFormProps = {
   mode: "create" | "edit";
   club?: ClubResource;
   errorMessage?: string | null;
+  saved?: boolean;
 };
 
-export function ClubForm({ mode, club, errorMessage }: ClubFormProps) {
+export function ClubForm({
+  mode,
+  club,
+  errorMessage,
+  saved = false,
+}: ClubFormProps) {
   const isEdit = mode === "edit";
 
   return (
@@ -40,6 +47,15 @@ export function ClubForm({ mode, club, errorMessage }: ClubFormProps) {
           </Link>
         </div>
       </section>
+
+      {saved ? (
+        <SaveResultActions
+          message="Club enregistré."
+          publicHref="/clubs"
+          createHref="/admin/clubs/nouveau"
+          listHref="/admin/clubs"
+        />
+      ) : null}
 
       {errorMessage ? (
         <div className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">

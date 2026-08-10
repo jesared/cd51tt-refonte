@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AtSign, ExternalLink, Save, Settings2, Share2 } from "lucide-react";
 
+import { SaveResultActions } from "@/components/admin/save-result-actions";
 import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
 import { getSiteSettings, updateSiteSettings } from "@/lib/admin-site-settings";
 import { createPageMetadata } from "@/lib/metadata";
@@ -79,7 +80,7 @@ export default async function AdminSiteSettingsPage({
   return (
     <div className="space-y-6">
       <section className="rounded-[1.5rem] border border-border bg-background p-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(220px,280px)] lg:items-stretch">
           <div className="flex items-start gap-4">
             <div className="rounded-2xl border border-border bg-muted p-3 text-primary">
               <Settings2 className="size-5" />
@@ -98,11 +99,11 @@ export default async function AdminSiteSettingsPage({
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2 lg:justify-end">
+          <div className="flex flex-col justify-center border-t border-border pt-5 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
             <Link
               href="/"
               target="_blank"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-primary/30 px-4 text-sm font-medium text-primary transition hover:bg-primary/10"
+              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-primary/30 px-4 text-sm font-medium text-primary transition hover:bg-primary/10"
             >
               <ExternalLink className="size-4" />
               Prévisualiser le site
@@ -112,17 +113,11 @@ export default async function AdminSiteSettingsPage({
       </section>
 
       {updated ? (
-        <div className="flex flex-col gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300 sm:flex-row sm:items-center sm:justify-between">
-          <span>Paramètres enregistrés. Vérifiez le rendu côté public.</span>
-          <Link
-            href="/"
-            target="_blank"
-            className="inline-flex items-center gap-2 font-medium text-emerald-800 underline-offset-4 hover:underline dark:text-emerald-200"
-          >
-            <ExternalLink className="size-4" />
-            Voir sur le site
-          </Link>
-        </div>
+        <SaveResultActions
+          message="Paramètres enregistrés."
+          publicHref="/"
+          listHref="/admin"
+        />
       ) : null}
 
       <form action={updateSiteSettings} className="grid gap-6">

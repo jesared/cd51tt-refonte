@@ -24,6 +24,7 @@ type AdminClubsPageProps = {
     saved?: string;
     deleted?: string;
     fftt?: string;
+    source?: string;
     error?: string;
     q?: string;
     statut?: string;
@@ -88,21 +89,31 @@ export default async function AdminClubsPage({
 
       return first.name.localeCompare(second.name, "fr");
     });
+  const syncSource = searchParams?.source === "mock" ? "mock" : "fftt";
   const message =
     searchParams?.saved === "1"
       ? "Le club a été enregistré."
       : searchParams?.deleted === "1"
         ? "Le club a été supprimé."
         : searchParams?.fftt
-          ? `${searchParams.fftt} clubs synchronisés depuis la FFTT.`
+          ? syncSource === "mock"
+            ? `${searchParams.fftt} clubs importés depuis le mock local. Synchro FFTT non utilisée.`
+            : `${searchParams.fftt} clubs synchronisés depuis la FFTT.`
           : searchParams?.error
             ? decodeURIComponent(searchParams.error)
             : null;
+  const feedbackTone = searchParams?.error
+    ? "error"
+    : searchParams?.fftt
+      ? syncSource === "mock"
+        ? "mock"
+        : "success"
+      : "default";
 
   return (
     <div className="space-y-6">
-      <section className="flex flex-col gap-4 rounded-[1.5rem] border border-border bg-background p-6 lg:flex-row lg:items-start lg:justify-between">
-        <div className="space-y-2">
+      <section className="grid gap-6 rounded-[1.5rem] border border-border bg-background p-6 lg:grid-cols-[minmax(0,1fr)_minmax(220px,280px)] lg:items-stretch">
+        <div className="flex min-w-0 flex-col justify-between gap-5">
           <div className="flex items-center gap-2 text-sm font-medium text-primary">
             <Building2 className="size-4" />
             Annuaire FFTT
@@ -114,39 +125,69 @@ export default async function AdminClubsPage({
             Synchronisez la base FFTT, puis complétez les informations affichées
             sur le site : salle, public, nombre de tables et contact.
           </p>
-          <div className="flex flex-wrap gap-2 pt-1">
+          <div className="flex flex-wrap gap-2">
             <Badge variant="outline">
               API FFTT{" "}
               {ffttApiReadiness.hasAppCredentials
                 ? `configurée, dép. ${ffttApiReadiness.department}`
-                : "mock local"}
+                : "non configurée"}
+            </Badge>
+            <Badge variant={ffttApiReadiness.hasAppCredentials ? "secondary" : "outline"}>
+              {ffttApiReadiness.hasAppCredentials
+                ? "Données réelles possibles"
+                : "Mock local si synchro"}
             </Badge>
             <Badge variant="secondary">{activeClubs.length} clubs actifs</Badge>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          <form action={syncFfttClubs}>
+        <div className="flex flex-col justify-center gap-3 border-t border-border pt-5 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
+          <form action={syncFfttClubs} className="contents">
             <AdminSubmitButton
               icon={<RefreshCw className="size-4" />}
               loadingLabel="Synchronisation..."
-              className="h-10 px-4"
+              className="h-11 w-full px-4"
             >
-              Synchroniser FFTT
+              {ffttApiReadiness.hasAppCredentials
+                ? "Synchroniser FFTT"
+                : "Importer mock local"}
             </AdminSubmitButton>
           </form>
 
           <Link
             href="/admin/clubs/nouveau"
-            className="admin-action admin-action-primary"
+            className="admin-action admin-action-primary h-11 w-full"
           >
             <Plus className="size-4" />
-            Ajouter
+            Ajouter un club
           </Link>
         </div>
       </section>
 
-      {message ? <div className="admin-feedback">{message}</div> : null}
+      {message ? (
+        <div
+          className={
+            feedbackTone === "error"
+              ? "rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive shadow-sm"
+              : feedbackTone === "mock"
+                ? "rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm font-medium text-amber-900 shadow-sm dark:text-amber-200"
+                : feedbackTone === "success"
+                  ? "rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm font-medium text-emerald-800 shadow-sm dark:text-emerald-200"
+                  : "admin-feedback"
+          }
+        >
+          <span className="mr-2 rounded-full border border-current/20 px-2 py-0.5 text-xs">
+            {feedbackTone === "error"
+              ? "Synchro impossible"
+              : feedbackTone === "mock"
+                ? "Mock local"
+                : feedbackTone === "success"
+                  ? "Synchro réussie"
+                  : "Données réelles"}
+          </span>
+          {message}
+        </div>
+      ) : null}
 
       <section className="rounded-[1.5rem] border border-border bg-background">
         <div className="space-y-4 border-b border-border px-6 py-4">

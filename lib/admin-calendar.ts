@@ -139,6 +139,7 @@ export async function saveCalendarEvent(formData: FormData) {
   await requireAdminSession();
 
   const id = getStringValue(formData, "id") || undefined;
+  let redirectPath = "/admin/calendrier";
 
   try {
     const values = calendarEventFormSchema.parse({
@@ -162,22 +163,21 @@ export async function saveCalendarEvent(formData: FormData) {
       sortOrder: values.sortOrder,
     };
 
-    if (values.id) {
-      await prisma.calendarEvent.update({
+    const savedEvent = values.id
+      ? await prisma.calendarEvent.update({
         where: { id: values.id },
         data: payload,
-      });
-    } else {
-      await prisma.calendarEvent.create({ data: payload });
-    }
+      })
+      : await prisma.calendarEvent.create({ data: payload });
 
     revalidateCalendarPaths();
+    redirectPath = `/admin/calendrier/${savedEvent.id}?saved=1`;
   } catch (error) {
     const message = encodeURIComponent(serializeErrorMessage(error));
     redirect(`${buildCalendarEventPath(id)}?error=${message}`);
   }
 
-  redirect("/admin/calendrier?saved=1");
+  redirect(redirectPath);
 }
 
 export async function deleteCalendarEvent(formData: FormData) {

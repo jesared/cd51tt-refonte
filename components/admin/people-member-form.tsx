@@ -6,6 +6,7 @@ import type {
 import { ArrowLeft, Save } from "lucide-react";
 
 import { savePeopleMember } from "@/lib/admin-people";
+import { SaveResultActions } from "@/components/admin/save-result-actions";
 import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
 
 type PeopleKind = "committee" | "technical";
@@ -19,6 +20,7 @@ type PeopleMemberFormProps = {
   mode: "create" | "edit";
   member?: PeopleMember;
   errorMessage?: string | null;
+  saved?: boolean;
 };
 
 const labels = {
@@ -30,6 +32,8 @@ const labels = {
     rolePlaceholder: "Président, secrétaire, responsable...",
     areaPlaceholder: "Sportif, administration, arbitrage...",
     activeLabel: "Afficher ce membre sur le site",
+    publicHref: "/comite",
+    createHref: "/admin/comite/nouveau",
   },
   technical: {
     section: "Cadres techniques",
@@ -39,6 +43,8 @@ const labels = {
     rolePlaceholder: "Cadre technique, entraîneur...",
     areaPlaceholder: "Technique, formation, jeunes...",
     activeLabel: "Afficher ce cadre sur le site",
+    publicHref: "/cadres-techniques",
+    createHref: "/admin/cadres-techniques/nouveau",
   },
 };
 
@@ -47,6 +53,7 @@ export function PeopleMemberForm({
   mode,
   member,
   errorMessage,
+  saved = false,
 }: PeopleMemberFormProps) {
   const copy = labels[kind];
   const isEdit = mode === "edit";
@@ -77,6 +84,15 @@ export function PeopleMemberForm({
           </Link>
         </div>
       </section>
+
+      {saved ? (
+        <SaveResultActions
+          message="Fiche enregistrée."
+          publicHref={copy.publicHref}
+          createHref={copy.createHref}
+          listHref={copy.backHref}
+        />
+      ) : null}
 
       {errorMessage ? (
         <div className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">

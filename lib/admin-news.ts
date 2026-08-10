@@ -8,6 +8,7 @@ import { z } from "zod";
 
 import { requireAdminSession } from "@/lib/admin-auth";
 import { uploadFileToCloudinary } from "@/lib/cloudinary";
+import { normalizeNewsCategory } from "@/lib/content-categories";
 import { prisma } from "@/lib/prisma";
 import {
   formatFrenchDate,
@@ -121,6 +122,16 @@ function serializeErrorMessage(error: unknown) {
   }
 
   return "Une erreur est survenue.";
+}
+
+function toCanonicalNewsCategory(value: string) {
+  const category = normalizeNewsCategory(value);
+
+  if (!category) {
+    throw new Error("Choisissez une catégorie d'actualité dans la liste proposée.");
+  }
+
+  return category;
 }
 
 function isNewsTableMissingError(error: unknown) {
@@ -297,7 +308,7 @@ export async function saveNewsArticle(formData: FormData) {
       slug: normalizedSlug,
       excerpt: values.excerpt,
       content: values.content,
-      category: values.category,
+      category: toCanonicalNewsCategory(values.category),
       imageUrl: imageUrl || null,
       readTime: estimateReadTime(values.content),
       status: values.status,
@@ -391,7 +402,7 @@ export async function seedMockNewsArticles() {
       title: article.title,
       excerpt: article.excerpt,
       content: `${article.excerpt}\n\nContenu de démonstration à enrichir dans l'administration.`,
-      category: article.category,
+      category: normalizeNewsCategory(article.category) ?? article.category,
       imageUrl: article.imageUrl ?? null,
       readTime: article.readTime,
       featured: Boolean(article.featured),

@@ -239,6 +239,7 @@ export async function savePeopleMember(formData: FormData) {
   const rawKind = getStringValue(formData, "kind") as PeopleKind;
   const id = getStringValue(formData, "id") || undefined;
   const kind: PeopleKind = rawKind === "technical" ? "technical" : "committee";
+  let redirectPath = getListPath(kind);
 
   try {
     const uploadedImageUrl = await uploadFileToCloudinary(
@@ -272,14 +273,13 @@ export async function savePeopleMember(formData: FormData) {
         active: values.active,
       };
 
-      if (values.id) {
-        await prisma.committeeMemberResource.update({
+      const savedMember = values.id
+        ? await prisma.committeeMemberResource.update({
           where: { id: values.id },
           data: payload,
-        });
-      } else {
-        await prisma.committeeMemberResource.create({ data: payload });
-      }
+        })
+        : await prisma.committeeMemberResource.create({ data: payload });
+      redirectPath = `${buildPeoplePath(values.kind, savedMember.id)}?saved=1`;
     } else {
       const payload = {
         name: values.name,
@@ -292,14 +292,13 @@ export async function savePeopleMember(formData: FormData) {
         active: values.active,
       };
 
-      if (values.id) {
-        await prisma.technicalStaffMemberResource.update({
+      const savedMember = values.id
+        ? await prisma.technicalStaffMemberResource.update({
           where: { id: values.id },
           data: payload,
-        });
-      } else {
-        await prisma.technicalStaffMemberResource.create({ data: payload });
-      }
+        })
+        : await prisma.technicalStaffMemberResource.create({ data: payload });
+      redirectPath = `${buildPeoplePath(values.kind, savedMember.id)}?saved=1`;
     }
 
     revalidatePath("/admin");
@@ -315,7 +314,7 @@ export async function savePeopleMember(formData: FormData) {
     redirect(`${buildPeoplePath(kind, id)}?error=${message}`);
   }
 
-  redirect(`${getListPath(kind)}?saved=1`);
+  redirect(redirectPath);
 }
 
 export async function deletePeopleMember(formData: FormData) {

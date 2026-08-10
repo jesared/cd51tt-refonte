@@ -96,8 +96,8 @@ export default async function AdminCadresTechniquesPage({
 
   return (
     <div className="space-y-6">
-      <section className="flex flex-col gap-4 rounded-[1.5rem] border border-border bg-background p-6 lg:flex-row lg:items-start lg:justify-between">
-        <div className="space-y-2">
+      <section className="grid gap-6 rounded-[1.5rem] border border-border bg-background p-6 lg:grid-cols-[minmax(0,1fr)_minmax(220px,280px)] lg:items-stretch">
+        <div className="flex min-w-0 flex-col justify-center gap-3">
           <div className="flex items-center gap-2 text-sm font-medium text-primary">
             <UserRoundCheck className="size-4" />
             Encadrement
@@ -111,13 +111,13 @@ export default async function AdminCadresTechniquesPage({
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col justify-center gap-3 border-t border-border pt-5 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
           {members.length === 0 ? (
-            <form action={seedTechnicalStaffMembers}>
+            <form action={seedTechnicalStaffMembers} className="contents">
               <AdminSubmitButton
                 icon={<Sparkles className="size-4" />}
                 loadingLabel="Import en cours..."
-                className="h-10 px-4"
+                className="h-11 w-full px-4"
               >
                 Importer la liste actuelle
               </AdminSubmitButton>
@@ -126,10 +126,10 @@ export default async function AdminCadresTechniquesPage({
 
           <Link
             href="/admin/cadres-techniques/nouveau"
-            className="admin-action admin-action-primary"
+            className="admin-action admin-action-primary h-11 w-full"
           >
             <Plus className="size-4" />
-            Ajouter
+            Ajouter un cadre
           </Link>
         </div>
       </section>

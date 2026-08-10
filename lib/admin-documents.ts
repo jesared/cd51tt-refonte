@@ -12,6 +12,7 @@ import { z } from "zod";
 
 import { requireAdminSession } from "@/lib/admin-auth";
 import { uploadFileToCloudinary } from "@/lib/cloudinary";
+import { normalizeDocumentCategory } from "@/lib/content-categories";
 import { formatFrenchMonthYear, type DocumentCardItem } from "@/lib/documents";
 import { competitions, documents } from "@/lib/mock-data";
 import { prisma } from "@/lib/prisma";
@@ -83,6 +84,16 @@ function serializeErrorMessage(error: unknown) {
   }
 
   return "Une erreur est survenue.";
+}
+
+function toCanonicalDocumentCategory(value: string) {
+  const category = normalizeDocumentCategory(value);
+
+  if (!category) {
+    throw new Error("Choisissez une catégorie de document dans la liste proposée.");
+  }
+
+  return category;
 }
 
 const hasDocumentResourceTable = cache(async () => {
@@ -205,7 +216,7 @@ export async function saveDocument(formData: FormData) {
 
     const payload = {
       title: values.title,
-      category: values.category,
+      category: toCanonicalDocumentCategory(values.category),
       format: values.format,
       description: values.description,
       fileUrl: values.fileUrl,
@@ -311,7 +322,7 @@ export async function seedMockDocuments() {
   await prisma.documentResource.createMany({
     data: documents.map((document) => ({
       title: document.title,
-      category: document.category,
+      category: normalizeDocumentCategory(document.category) ?? document.category,
       format: document.format,
       description: document.description,
       fileUrl: document.href ?? "#",

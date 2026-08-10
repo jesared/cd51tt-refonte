@@ -3,6 +3,7 @@ import { CalendarEventType, type CalendarEvent } from "@prisma/client";
 import { ArrowLeft, Save } from "lucide-react";
 
 import { saveCalendarEvent } from "@/lib/admin-calendar";
+import { SaveResultActions } from "@/components/admin/save-result-actions";
 import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
 import { competitions } from "@/lib/mock-data";
 
@@ -10,6 +11,7 @@ type CalendarEventFormProps = {
   event?: CalendarEvent;
   mode: "create" | "edit";
   errorMessage?: string | null;
+  saved?: boolean;
 };
 
 function toDateInputValue(date: Date | null | undefined) {
@@ -31,6 +33,7 @@ export function CalendarEventForm({
   event,
   errorMessage,
   mode,
+  saved = false,
 }: CalendarEventFormProps) {
   const isEdit = mode === "edit";
 
@@ -60,6 +63,15 @@ export function CalendarEventForm({
           </Link>
         </div>
       </section>
+
+      {saved ? (
+        <SaveResultActions
+          message="Échéance enregistrée."
+          publicHref="/calendrier"
+          createHref="/admin/calendrier/nouveau"
+          listHref="/admin/calendrier"
+        />
+      ) : null}
 
       {errorMessage ? (
         <div className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
