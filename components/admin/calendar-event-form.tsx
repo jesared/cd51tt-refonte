@@ -3,6 +3,7 @@ import { CalendarEventType, type CalendarEvent } from "@prisma/client";
 import { ArrowLeft, Save } from "lucide-react";
 
 import { saveCalendarEvent } from "@/lib/admin-calendar";
+import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
 import { competitions } from "@/lib/mock-data";
 
 type CalendarEventFormProps = {
@@ -67,6 +68,7 @@ export function CalendarEventForm({
       ) : null}
 
       <form action={saveCalendarEvent} className="grid gap-6">
+        <UnsavedChangesGuard />
         {event ? <input type="hidden" name="id" value={event.id} /> : null}
 
         <section className="rounded-[1.5rem] border border-border bg-background p-6">

@@ -157,7 +157,7 @@ export default async function HomePage() {
               </div>
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                 <Link
-                  href="/competitions"
+                  href="/calendrier"
                   className="flex items-center justify-between rounded-md border border-border bg-background px-4 py-3 text-sm font-medium transition-colors hover:bg-accent"
                 >
                   Calendrier
@@ -204,7 +204,20 @@ export default async function HomePage() {
       {featuredArticle ? (
         <ScrollReveal>
           <section className="grid gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
-          <div className="rounded-lg border border-border bg-card p-6 sm:p-7">
+          <div className="overflow-hidden rounded-lg border border-border bg-card">
+            {featuredArticle.imageUrl ? (
+              <div className="relative aspect-[16/9] bg-muted">
+                <Image
+                  src={featuredArticle.imageUrl}
+                  alt=""
+                  fill
+                  sizes="(min-width: 1024px) 46rem, 100vw"
+                  className="object-cover"
+                />
+              </div>
+            ) : null}
+
+            <div className="p-6 sm:p-7">
             <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
               <Badge>{featuredArticle.category}</Badge>
               <span>{featuredArticle.date}</span>
@@ -226,6 +239,7 @@ export default async function HomePage() {
               Lire l&apos;actualité
               <ArrowRight className="size-3.5" />
             </Link>
+            </div>
           </div>
 
           <div className="space-y-3">
@@ -267,7 +281,7 @@ export default async function HomePage() {
               </h2>
             </div>
             <Link
-              href="/competitions"
+              href="/calendrier"
               className={buttonVariants({ variant: "ghost", size: "sm" })}
             >
               Calendrier

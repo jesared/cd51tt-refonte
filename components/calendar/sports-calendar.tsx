@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import type { EventInput } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -30,6 +31,8 @@ const typeColors: Record<string, string> = {
   Résultat: "#10b981",
 };
 
+const mobileCalendarQuery = "(max-width: 639px)";
+
 function toCalendarEvents(events: SportsCalendarEvent[]): EventInput[] {
   return events.map((event) => ({
     id: event.id,
@@ -49,9 +52,30 @@ function toCalendarEvents(events: SportsCalendarEvent[]): EventInput[] {
 }
 
 export function SportsCalendar({ events }: SportsCalendarProps) {
+  const calendarRef = useRef<FullCalendar>(null);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(mobileCalendarQuery);
+
+    function syncCalendarView() {
+      const calendarApi = calendarRef.current?.getApi();
+      const nextView = mediaQuery.matches ? "listMonth" : "dayGridMonth";
+
+      if (calendarApi && calendarApi.view.type !== nextView) {
+        calendarApi.changeView(nextView);
+      }
+    }
+
+    syncCalendarView();
+    mediaQuery.addEventListener("change", syncCalendarView);
+
+    return () => mediaQuery.removeEventListener("change", syncCalendarView);
+  }, []);
+
   return (
     <div className="admin-calendar-shell">
       <FullCalendar
+        ref={calendarRef}
         plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         locale="fr"

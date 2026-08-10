@@ -1,5 +1,6 @@
-import { Building2, Mail, MapPin, Phone, Search } from "lucide-react";
+import { Search } from "lucide-react";
 
+import { ClubsList } from "@/components/clubs/clubs-list";
 import { Badge } from "@/components/ui/badge";
 import { getPublicClubs } from "@/lib/admin-clubs";
 import { createPageMetadata } from "@/lib/metadata";
@@ -13,17 +14,6 @@ export const metadata = createPageMetadata({
 });
 
 export const dynamic = "force-dynamic";
-
-function parseClubContact(contact: string) {
-  const parts = contact
-    .split("/")
-    .map((part) => part.trim())
-    .filter(Boolean);
-  const email = parts.find((part) => /\S+@\S+\.\S+/.test(part));
-  const phone = parts.find((part) => /(?:\+33|0)\s*\d/.test(part));
-
-  return { email, phone };
-}
 
 export default async function ClubsPage() {
   const directory = (await getPublicClubs()) ?? clubs;
@@ -53,55 +43,7 @@ export default async function ClubsPage() {
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {directory.map((club) => {
-          const contact = parseClubContact(club.contact);
-
-          return (
-            <article
-              key={club.name}
-              className="flex min-h-56 flex-col justify-between rounded-lg border border-border bg-card p-5 transition-colors hover:border-primary/45 hover:bg-accent"
-            >
-              <div>
-                <div className="flex items-start justify-between gap-4">
-                  <div className="rounded-md border border-border bg-background p-2 text-primary">
-                    <Building2 className="size-5" />
-                  </div>
-                  <Badge variant="secondary">{club.city}</Badge>
-                </div>
-                <h2 className="mt-5 text-xl font-semibold tracking-tight">
-                  {club.name}
-                </h2>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {club.audience}
-                </p>
-              </div>
-
-              <div className="mt-6 space-y-3 text-sm text-muted-foreground">
-                <div className="flex items-start gap-2">
-                  <MapPin className="mt-0.5 size-4 shrink-0 text-primary" />
-                  <span>{club.venue}</span>
-                </div>
-                {contact.email ? (
-                  <a
-                    href={`mailto:${contact.email}`}
-                    className="flex min-w-0 items-center gap-2 text-sm font-medium text-primary transition-colors hover:text-foreground"
-                  >
-                    <Mail className="size-4 shrink-0" />
-                    <span className="truncate">{contact.email}</span>
-                  </a>
-                ) : null}
-                {contact.phone ? (
-                  <div className="flex items-center gap-2">
-                    <Phone className="size-4 shrink-0 text-primary" />
-                    <span>{contact.phone}</span>
-                  </div>
-                ) : null}
-              </div>
-            </article>
-          );
-        })}
-      </section>
+      <ClubsList clubs={directory} />
     </div>
   );
 }

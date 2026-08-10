@@ -1,5 +1,7 @@
-import { AtSign, Save, Settings2, Share2 } from "lucide-react";
+import Link from "next/link";
+import { AtSign, ExternalLink, Save, Settings2, Share2 } from "lucide-react";
 
+import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
 import { getSiteSettings, updateSiteSettings } from "@/lib/admin-site-settings";
 import { createPageMetadata } from "@/lib/metadata";
 
@@ -96,15 +98,35 @@ export default async function AdminSiteSettingsPage({
             </div>
           </div>
 
-          {updated ? (
-            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300">
-              Paramètres enregistrés.
-            </div>
-          ) : null}
+          <div className="flex flex-wrap gap-2 lg:justify-end">
+            <Link
+              href="/"
+              target="_blank"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-primary/30 px-4 text-sm font-medium text-primary transition hover:bg-primary/10"
+            >
+              <ExternalLink className="size-4" />
+              Prévisualiser le site
+            </Link>
+          </div>
         </div>
       </section>
 
+      {updated ? (
+        <div className="flex flex-col gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300 sm:flex-row sm:items-center sm:justify-between">
+          <span>Paramètres enregistrés. Vérifiez le rendu côté public.</span>
+          <Link
+            href="/"
+            target="_blank"
+            className="inline-flex items-center gap-2 font-medium text-emerald-800 underline-offset-4 hover:underline dark:text-emerald-200"
+          >
+            <ExternalLink className="size-4" />
+            Voir sur le site
+          </Link>
+        </div>
+      ) : null}
+
       <form action={updateSiteSettings} className="grid gap-6">
+        <UnsavedChangesGuard message="Les paramètres du site ont été modifiés." />
         <HiddenSettings settings={settings} />
 
         <section className="rounded-[1.5rem] border border-border bg-background p-6">

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, CalendarDays, Clock } from "lucide-react";
@@ -98,6 +99,19 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             {article.excerpt}
           </p>
         </div>
+
+        {article.imageUrl ? (
+          <div className="relative aspect-[16/9] overflow-hidden rounded-lg bg-muted">
+            <Image
+              src={article.imageUrl}
+              alt=""
+              fill
+              priority
+              sizes="(min-width: 768px) 48rem, 100vw"
+              className="object-cover"
+            />
+          </div>
+        ) : null}
       </header>
 
       <div className="space-y-5 text-base leading-8 text-foreground">

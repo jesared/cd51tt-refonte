@@ -3,6 +3,7 @@ import type { ClubResource } from "@prisma/client";
 import { ArrowLeft, Save } from "lucide-react";
 
 import { saveClub } from "@/lib/admin-clubs";
+import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
 
 type ClubFormProps = {
   mode: "create" | "edit";
@@ -47,6 +48,7 @@ export function ClubForm({ mode, club, errorMessage }: ClubFormProps) {
       ) : null}
 
       <form action={saveClub} className="grid gap-6">
+        <UnsavedChangesGuard />
         {club ? <input type="hidden" name="id" value={club.id} /> : null}
 
         <section className="rounded-[1.5rem] border border-border bg-background p-6">

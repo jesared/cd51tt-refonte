@@ -178,6 +178,7 @@ export async function saveDocument(formData: FormData) {
   const status = getBooleanValue(formData, "published")
     ? DocumentResourceStatus.PUBLISHED
     : DocumentResourceStatus.DRAFT;
+  let redirectPath = "/admin/documents";
 
   try {
     const uploadedFileUrl = await uploadFileToCloudinary(
@@ -213,26 +214,26 @@ export async function saveDocument(formData: FormData) {
       updatedAt: toUpdatedDate(values.updatedAt ?? ""),
     };
 
-    if (values.id) {
-      await prisma.documentResource.update({
+    const savedDocument = values.id
+      ? await prisma.documentResource.update({
         where: { id: values.id },
         data: payload,
-      });
-    } else {
-      await prisma.documentResource.create({
+      })
+      : await prisma.documentResource.create({
         data: payload,
       });
-    }
 
     revalidatePath("/admin");
     revalidatePath("/admin/documents");
     revalidatePath("/documents");
+    revalidatePath("/competitions");
+    redirectPath = `/admin/documents/${savedDocument.id}?saved=1`;
   } catch (error) {
     const message = encodeURIComponent(serializeErrorMessage(error));
     redirect(`${buildDocumentPath(id)}?error=${message}`);
   }
 
-  redirect("/admin/documents?saved=1");
+  redirect(redirectPath);
 }
 
 export async function deleteDocument(formData: FormData) {
@@ -258,6 +259,40 @@ export async function deleteDocument(formData: FormData) {
   revalidatePath("/documents");
 
   redirect("/admin/documents?deleted=1");
+}
+
+export async function toggleDocumentPublication(formData: FormData) {
+  await requireAdminSession();
+
+  const id = getStringValue(formData, "id");
+  const status = getBooleanValue(formData, "published")
+    ? DocumentResourceStatus.PUBLISHED
+    : DocumentResourceStatus.DRAFT;
+
+  if (!id) {
+    redirect("/admin/documents?error=missing-id");
+  }
+
+  try {
+    await prisma.documentResource.update({
+      where: { id },
+      data: { status },
+    });
+  } catch (error) {
+    const message = encodeURIComponent(serializeErrorMessage(error));
+    redirect(`/admin/documents?error=${message}`);
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/documents");
+  revalidatePath("/documents");
+  revalidatePath("/competitions");
+
+  redirect(
+    status === DocumentResourceStatus.PUBLISHED
+      ? "/admin/documents?published=1"
+      : "/admin/documents?unpublished=1",
+  );
 }
 
 export async function seedMockDocuments() {

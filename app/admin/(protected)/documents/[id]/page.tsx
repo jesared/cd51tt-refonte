@@ -16,6 +16,7 @@ type AdminEditDocumentPageProps = {
   };
   searchParams?: {
     error?: string;
+    saved?: string;
   };
 };
 
@@ -36,6 +37,7 @@ export default async function AdminEditDocumentPage({
       errorMessage={
         searchParams?.error ? decodeURIComponent(searchParams.error) : null
       }
+      saved={searchParams?.saved === "1"}
     />
   );
 }

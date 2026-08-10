@@ -1,13 +1,15 @@
 import Link from "next/link";
 import type { NewsArticle } from "@prisma/client";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Eye, ExternalLink, Save } from "lucide-react";
 
 import { saveNewsArticle } from "@/lib/admin-news";
+import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
 
 type NewsArticleFormProps = {
   mode: "create" | "edit";
   article?: NewsArticle;
   errorMessage?: string | null;
+  saved?: boolean;
 };
 
 function toDatetimeLocalValue(date: Date | null | undefined) {
@@ -26,8 +28,12 @@ export function NewsArticleForm({
   mode,
   article,
   errorMessage,
+  saved = false,
 }: NewsArticleFormProps) {
   const isEdit = mode === "edit";
+  const previewHref = article ? `/admin/actualites/${article.id}/preview` : null;
+  const publicHref =
+    article?.status === "PUBLISHED" ? `/actualites/${article.slug}` : null;
 
   return (
     <div className="space-y-6">
@@ -46,15 +52,51 @@ export function NewsArticleForm({
             </p>
           </div>
 
-          <Link
-            href="/admin/actualites"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border px-4 text-sm text-muted-foreground transition hover:text-foreground"
-          >
-            <ArrowLeft className="size-4" />
-            Retour à la liste
-          </Link>
+          <div className="flex flex-wrap gap-2 lg:justify-end">
+            {previewHref ? (
+              <Link
+                href={previewHref}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-primary/30 px-4 text-sm font-medium text-primary transition hover:bg-primary/10"
+              >
+                <Eye className="size-4" />
+                Prévisualiser
+              </Link>
+            ) : null}
+            {publicHref ? (
+              <Link
+                href={publicHref}
+                target="_blank"
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border px-4 text-sm text-muted-foreground transition hover:text-foreground"
+              >
+                <ExternalLink className="size-4" />
+                Voir sur le site
+              </Link>
+            ) : null}
+            <Link
+              href="/admin/actualites"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border px-4 text-sm text-muted-foreground transition hover:text-foreground"
+            >
+              <ArrowLeft className="size-4" />
+              Retour à la liste
+            </Link>
+          </div>
         </div>
       </section>
+
+      {saved ? (
+        <div className="flex flex-col gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300 sm:flex-row sm:items-center sm:justify-between">
+          <span>Actualité enregistrée. Relisez l’aperçu avant publication.</span>
+          {previewHref ? (
+            <Link
+              href={previewHref}
+              className="inline-flex items-center gap-2 font-medium text-emerald-800 underline-offset-4 hover:underline dark:text-emerald-200"
+            >
+              <Eye className="size-4" />
+              Prévisualiser
+            </Link>
+          ) : null}
+        </div>
+      ) : null}
 
       {errorMessage ? (
         <div className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -62,7 +104,12 @@ export function NewsArticleForm({
         </div>
       ) : null}
 
-      <form action={saveNewsArticle} className="grid gap-6">
+      <form
+        action={saveNewsArticle}
+        encType="multipart/form-data"
+        className="grid gap-6"
+      >
+        <UnsavedChangesGuard />
         {article ? <input type="hidden" name="id" value={article.id} /> : null}
 
         <section className="rounded-[1.5rem] border border-border bg-background p-6">
@@ -121,6 +168,34 @@ export function NewsArticleForm({
                 defaultValue={article?.content ?? ""}
                 className="rounded-xl border border-input bg-background px-3 py-3 text-sm leading-6 outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
               />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-2">
+                <label htmlFor="imageUrl" className="text-sm font-medium">
+                  Image existante
+                </label>
+                <input
+                  id="imageUrl"
+                  name="imageUrl"
+                  defaultValue={article?.imageUrl ?? ""}
+                  placeholder="https://res.cloudinary.com/... ou /images/actu.jpg"
+                  className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <label htmlFor="imageUpload" className="text-sm font-medium">
+                  Image Cloudinary
+                </label>
+                <input
+                  id="imageUpload"
+                  name="imageUpload"
+                  type="file"
+                  accept="image/*"
+                  className="h-11 rounded-xl border border-input bg-background px-3 py-2 text-sm outline-none transition file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1 file:text-sm file:text-foreground focus:border-ring focus:ring-2 focus:ring-ring/20"
+                />
+              </div>
             </div>
           </div>
         </section>

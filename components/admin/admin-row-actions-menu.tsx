@@ -20,6 +20,7 @@ type AdminRowActionsMenuProps = {
   deleteAction: (formData: FormData) => void | Promise<void>;
   deleteId: string;
   deleteFields?: Record<string, string>;
+  deleteLabel: string;
   deleteMessage: string;
 };
 
@@ -29,6 +30,7 @@ export function AdminRowActionsMenu({
   deleteAction,
   deleteFields,
   deleteId,
+  deleteLabel,
   deleteMessage,
 }: AdminRowActionsMenuProps) {
   const hiddenFields = deleteFields ?? { id: deleteId };
@@ -62,6 +64,7 @@ export function AdminRowActionsMenu({
           <div className="px-1">
             <DeleteConfirmationForm
               action={deleteAction}
+              itemName={deleteLabel}
               message={deleteMessage}
             >
               {Object.entries(hiddenFields).map(([name, value]) => (

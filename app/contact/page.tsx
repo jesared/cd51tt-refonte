@@ -1,8 +1,6 @@
 import { Mail, MapPin, Phone, Send } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { buttonVariants } from "@/components/ui/button";
 import { createPageMetadata } from "@/lib/metadata";
 import { getPublicSiteSettings } from "@/lib/site-settings";
 
@@ -13,28 +11,53 @@ export const metadata = createPageMetadata({
   path: "/contact",
 });
 
+type SiteConfig = Awaited<
+  ReturnType<typeof getPublicSiteSettings>
+>["siteConfig"];
+
+function formatAddress(siteConfig: SiteConfig) {
+  const cityLine = [siteConfig.postalCode, siteConfig.city]
+    .map((part) => part?.trim())
+    .filter(Boolean)
+    .join(" ");
+
+  return [siteConfig.addressLine1, siteConfig.addressLine2, cityLine]
+    .map((part) => part?.trim())
+    .filter(Boolean)
+    .join(", ");
+}
+
 export default async function ContactPage() {
   const { siteConfig } = await getPublicSiteSettings();
+  const email = siteConfig.email.trim();
+  const phone = siteConfig.phone.trim();
+  const address = formatAddress(siteConfig);
   const contactItems = [
-    {
-      label: "Email",
-      value: siteConfig.email,
-      href: `mailto:${siteConfig.email}`,
-      icon: Mail,
-    },
-    {
-      label: "Téléphone",
-      value: siteConfig.phone,
-      href: `tel:${siteConfig.phone.replaceAll(" ", "")}`,
-      icon: Phone,
-    },
-    {
-      label: "Adresse",
-      value: `${siteConfig.addressLine1}, ${siteConfig.city}`,
-      href: null,
-      icon: MapPin,
-    },
-  ];
+    email
+      ? {
+          label: "Email",
+          value: email,
+          href: `mailto:${email}`,
+          icon: Mail,
+        }
+      : null,
+    phone
+      ? {
+          label: "Téléphone",
+          value: phone,
+          href: `tel:${phone.replaceAll(" ", "")}`,
+          icon: Phone,
+        }
+      : null,
+    address
+      ? {
+          label: "Adresse",
+          value: address,
+          href: null,
+          icon: MapPin,
+        }
+      : null,
+  ].filter((item) => item !== null);
 
   return (
     <div className="space-y-8">
@@ -96,28 +119,29 @@ export default async function ContactPage() {
             Envoyer un message
           </h2>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Indiquez votre sujet et vos coordonnées. Le formulaire est prêt pour
-            être relié à l’envoi réel.
+            Le formulaire en ligne n&apos;est pas encore activé. Pour envoyer
+            une demande au comité, utilisez l&apos;adresse email officielle.
           </p>
         </div>
 
-        <form className="grid gap-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <Input placeholder="Nom complet" />
-            <Input type="email" placeholder="Adresse email" />
-          </div>
-          <Input placeholder="Objet" />
-          <Textarea
-            placeholder="Votre message"
-            className="min-h-36"
-          />
-          <div className="flex justify-end">
-            <Button type="button">
-              Envoyer
-              <Send className="size-4" />
-            </Button>
-          </div>
-        </form>
+        <div className="grid gap-4 rounded-md border border-border bg-background p-4">
+          {email ? (
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm font-medium">{email}</p>
+              <a
+                href={`mailto:${email}?subject=Demande%20depuis%20le%20site%20CD51TT`}
+                className={buttonVariants({ variant: "default", size: "lg" })}
+              >
+                Écrire au comité
+                <Send className="size-4" />
+              </a>
+            </div>
+          ) : (
+            <p className="text-sm font-medium text-muted-foreground">
+              Aucune adresse email n&apos;est configurée pour le moment.
+            </p>
+          )}
+        </div>
       </section>
     </div>
   );

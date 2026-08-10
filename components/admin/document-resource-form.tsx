@@ -1,14 +1,16 @@
 import Link from "next/link";
 import type { DocumentResource } from "@prisma/client";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Download, Eye, ExternalLink, Save } from "lucide-react";
 
 import { saveDocument } from "@/lib/admin-documents";
+import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
 import { competitions } from "@/lib/mock-data";
 
 type DocumentResourceFormProps = {
   mode: "create" | "edit";
   document?: DocumentResource;
   errorMessage?: string | null;
+  saved?: boolean;
 };
 
 function toDateInputValue(date: Date | null | undefined) {
@@ -23,8 +25,11 @@ export function DocumentResourceForm({
   mode,
   document,
   errorMessage,
+  saved = false,
 }: DocumentResourceFormProps) {
   const isEdit = mode === "edit";
+  const previewHref = document ? `/admin/documents/${document.id}/preview` : null;
+  const publicHref = document?.status === "PUBLISHED" ? "/documents" : null;
 
   return (
     <div className="space-y-6">
@@ -44,15 +49,62 @@ export function DocumentResourceForm({
             </p>
           </div>
 
-          <Link
-            href="/admin/documents"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border px-4 text-sm text-muted-foreground transition hover:text-foreground"
-          >
-            <ArrowLeft className="size-4" />
-            Retour à la liste
-          </Link>
+          <div className="flex flex-wrap gap-2 lg:justify-end">
+            {previewHref ? (
+              <Link
+                href={previewHref}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-primary/30 px-4 text-sm font-medium text-primary transition hover:bg-primary/10"
+              >
+                <Eye className="size-4" />
+                Prévisualiser
+              </Link>
+            ) : null}
+            {document?.fileUrl ? (
+              <a
+                href={document.fileUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border px-4 text-sm text-muted-foreground transition hover:text-foreground"
+              >
+                <Download className="size-4" />
+                Ouvrir le fichier
+              </a>
+            ) : null}
+            {publicHref ? (
+              <Link
+                href={publicHref}
+                target="_blank"
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border px-4 text-sm text-muted-foreground transition hover:text-foreground"
+              >
+                <ExternalLink className="size-4" />
+                Voir sur le site
+              </Link>
+            ) : null}
+            <Link
+              href="/admin/documents"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border px-4 text-sm text-muted-foreground transition hover:text-foreground"
+            >
+              <ArrowLeft className="size-4" />
+              Retour à la liste
+            </Link>
+          </div>
         </div>
       </section>
+
+      {saved ? (
+        <div className="flex flex-col gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300 sm:flex-row sm:items-center sm:justify-between">
+          <span>Document enregistré. Vérifiez l’aperçu avant publication.</span>
+          {previewHref ? (
+            <Link
+              href={previewHref}
+              className="inline-flex items-center gap-2 font-medium text-emerald-800 underline-offset-4 hover:underline dark:text-emerald-200"
+            >
+              <Eye className="size-4" />
+              Prévisualiser
+            </Link>
+          ) : null}
+        </div>
+      ) : null}
 
       {errorMessage ? (
         <div className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -65,6 +117,7 @@ export function DocumentResourceForm({
         encType="multipart/form-data"
         className="grid gap-6"
       >
+        <UnsavedChangesGuard />
         {document ? <input type="hidden" name="id" value={document.id} /> : null}
 
         <section className="rounded-[1.5rem] border border-border bg-background p-6">

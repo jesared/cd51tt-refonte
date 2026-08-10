@@ -54,6 +54,7 @@ model NewsArticle {
   excerpt     String
   content     String
   category    String
+  imageUrl    String?
   readTime    String
   status      NewsArticleStatus @default(DRAFT)
   featured    Boolean           @default(false)

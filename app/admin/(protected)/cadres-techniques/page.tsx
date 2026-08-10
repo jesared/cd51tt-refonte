@@ -1,6 +1,7 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { Plus, Sparkles, UserRoundCheck } from "lucide-react";
 
+import { AdminListControls } from "@/components/admin/admin-list-controls";
 import { AdminRowActionsMenu } from "@/components/admin/admin-row-actions-menu";
 import { AdminSubmitButton } from "@/components/admin/admin-submit-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -25,13 +26,61 @@ type AdminCadresTechniquesPageProps = {
     deleted?: string;
     seeded?: string;
     error?: string;
+    q?: string;
+    statut?: string;
+    categorie?: string;
+    tri?: string;
   };
 };
+
+function normalizeSearchValue(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
 
 export default async function AdminCadresTechniquesPage({
   searchParams,
 }: AdminCadresTechniquesPageProps) {
   const members = await getAdminTechnicalStaffMembers();
+  const areas = Array.from(
+    new Set(members.map((member) => member.area ?? "Technique")),
+  ).sort((a, b) => a.localeCompare(b, "fr"));
+  const query = normalizeSearchValue(searchParams?.q ?? "");
+  const statusFilter = searchParams?.statut;
+  const areaFilter = searchParams?.categorie;
+  const sortMode = searchParams?.tri ?? "order-asc";
+  const filteredMembers = members
+    .filter((member) => {
+      const area = member.area ?? "Technique";
+      const matchesSearch =
+        !query ||
+        normalizeSearchValue(
+          `${member.name} ${member.role ?? ""} ${area} ${member.mission ?? ""}`,
+        ).includes(query);
+      const matchesStatus =
+        !statusFilter ||
+        (statusFilter === "active" && member.active) ||
+        (statusFilter === "hidden" && !member.active) ||
+        (statusFilter === "photo" && Boolean(member.imageUrl));
+      const matchesArea = !areaFilter || area === areaFilter;
+
+      return matchesSearch && matchesStatus && matchesArea;
+    })
+    .sort((first, second) => {
+      if (sortMode === "name-asc") {
+        return first.name.localeCompare(second.name, "fr");
+      }
+
+      if (sortMode === "name-desc") {
+        return second.name.localeCompare(first.name, "fr");
+      }
+
+      return sortMode === "order-desc"
+        ? second.sortOrder - first.sortOrder
+        : first.sortOrder - second.sortOrder;
+    });
   const message =
     searchParams?.saved === "1"
       ? "Le cadre technique a été enregistré."
@@ -85,15 +134,43 @@ export default async function AdminCadresTechniquesPage({
         </div>
       </section>
 
-      {message ? (
-        <div className="admin-feedback">
-          {message}
-        </div>
-      ) : null}
+      {message ? <div className="admin-feedback">{message}</div> : null}
 
       <section className="rounded-[1.5rem] border border-border bg-background">
-        <div className="border-b border-border px-6 py-4">
-          <h3 className="font-medium">Liste des cadres</h3>
+        <div className="space-y-4 border-b border-border px-6 py-4">
+          <div>
+            <h3 className="font-medium">Liste des cadres</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {filteredMembers.length} sur {members.length} cadre(s)
+            </p>
+          </div>
+          <AdminListControls
+            searchPlaceholder="Nom, rôle, mission ou zone"
+            filters={[
+              {
+                name: "statut",
+                label: "Statut",
+                defaultLabel: "Tous les statuts",
+                options: [
+                  { label: "Actifs", value: "active" },
+                  { label: "Masqués", value: "hidden" },
+                  { label: "Avec photo", value: "photo" },
+                ],
+              },
+              {
+                name: "categorie",
+                label: "Zone",
+                defaultLabel: "Toutes les zones",
+                options: areas.map((area) => ({ label: area, value: area })),
+              },
+            ]}
+            sortOptions={[
+              { label: "Ordre croissant", value: "order-asc" },
+              { label: "Ordre décroissant", value: "order-desc" },
+              { label: "Nom A-Z", value: "name-asc" },
+              { label: "Nom Z-A", value: "name-desc" },
+            ]}
+          />
         </div>
 
         {members.length === 0 ? (
@@ -103,7 +180,12 @@ export default async function AdminCadresTechniquesPage({
           </div>
         ) : (
           <div className="divide-y divide-border">
-            {members.map((member) => (
+            {filteredMembers.length === 0 ? (
+              <div className="px-6 py-8 text-sm leading-6 text-muted-foreground">
+                Aucun cadre ne correspond aux filtres.
+              </div>
+            ) : null}
+            {filteredMembers.map((member) => (
               <article
                 key={member.id}
                 className="admin-list-row grid gap-3 px-6 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
@@ -129,9 +211,7 @@ export default async function AdminCadresTechniquesPage({
                       <Badge variant={member.active ? "outline" : "secondary"}>
                         {member.active ? "Actif" : "Masqué"}
                       </Badge>
-                      {member.imageUrl ? (
-                        <Badge variant="outline">Photo</Badge>
-                      ) : null}
+                      {member.imageUrl ? <Badge variant="outline">Photo</Badge> : null}
                       <Badge variant="secondary">#{member.sortOrder}</Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
@@ -146,6 +226,7 @@ export default async function AdminCadresTechniquesPage({
                     deleteAction={deletePeopleMember}
                     deleteFields={{ kind: "technical", id: member.id }}
                     deleteId={member.id}
+                    deleteLabel={member.name}
                     deleteMessage="Supprimer ce cadre technique ? Cette action est définitive."
                   />
                 </div>

@@ -7,6 +7,7 @@ import { cache } from "react";
 import { z } from "zod";
 
 import { requireAdminSession } from "@/lib/admin-auth";
+import { uploadFileToCloudinary } from "@/lib/cloudinary";
 import { prisma } from "@/lib/prisma";
 import {
   formatFrenchDate,
@@ -23,6 +24,17 @@ const articleFormSchema = z.object({
   excerpt: z.string().trim().min(20, "L'extrait doit contenir au moins 20 caracteres."),
   content: z.string().trim().min(40, "Le contenu doit contenir au moins 40 caracteres."),
   category: z.string().trim().min(2, "La categorie est requise."),
+  imageUrl: z
+    .string()
+    .trim()
+    .refine(
+      (value) =>
+        !value ||
+        value.startsWith("/") ||
+        z.url().safeParse(value).success,
+      "Indiquez une URL d'image valide ou un chemin interne commencant par /.",
+    )
+    .optional(),
   status: z.nativeEnum(NewsArticleStatus),
   featured: z.boolean(),
   publishedAt: z.string().trim().optional(),
@@ -141,6 +153,7 @@ function toArticleCard(article: NewsArticle): ArticleCardItem {
     title: article.title,
     excerpt: article.excerpt,
     category: article.category,
+    imageUrl: article.imageUrl,
     date: formatFrenchDate(article.publishedAt ?? article.createdAt),
     readTime: article.readTime,
     featured: article.featured,
@@ -250,6 +263,7 @@ export async function saveNewsArticle(formData: FormData) {
   const status = getBooleanValue(formData, "published")
     ? NewsArticleStatus.PUBLISHED
     : NewsArticleStatus.DRAFT;
+  let redirectPath = "/admin/actualites";
 
   try {
     const values = articleFormSchema.parse({
@@ -259,10 +273,16 @@ export async function saveNewsArticle(formData: FormData) {
       excerpt: getStringValue(formData, "excerpt"),
       content: getStringValue(formData, "content"),
       category: getStringValue(formData, "category"),
+      imageUrl: getStringValue(formData, "imageUrl") || undefined,
       status,
       featured: getBooleanValue(formData, "featured"),
       publishedAt: getStringValue(formData, "publishedAt") || undefined,
     });
+    const uploadedImageUrl = await uploadFileToCloudinary(
+      formData.get("imageUpload") as File | null,
+      "image",
+    );
+    const imageUrl = uploadedImageUrl ?? values.imageUrl;
 
     const normalizedSlug = values.slug
       ? slugifyArticleTitle(values.slug)
@@ -278,33 +298,33 @@ export async function saveNewsArticle(formData: FormData) {
       excerpt: values.excerpt,
       content: values.content,
       category: values.category,
+      imageUrl: imageUrl || null,
       readTime: estimateReadTime(values.content),
       status: values.status,
       featured: values.featured,
       publishedAt: toPublishedDate(values.publishedAt ?? "", values.status),
     };
 
-    if (values.id) {
-      await prisma.newsArticle.update({
+    const savedArticle = values.id
+      ? await prisma.newsArticle.update({
         where: { id: values.id },
         data: payload,
-      });
-    } else {
-      await prisma.newsArticle.create({
+      })
+      : await prisma.newsArticle.create({
         data: payload,
       });
-    }
 
     revalidatePath("/admin");
     revalidatePath("/admin/actualites");
     revalidatePath("/actualites");
     revalidatePath("/");
+    redirectPath = `/admin/actualites/${savedArticle.id}?saved=1`;
   } catch (error) {
     const message = encodeURIComponent(serializeErrorMessage(error));
     redirect(`${buildArticlePath(id)}?error=${message}`);
   }
 
-  redirect("/admin/actualites?saved=1");
+  redirect(redirectPath);
 }
 
 export async function deleteNewsArticle(formData: FormData) {
@@ -372,6 +392,7 @@ export async function seedMockNewsArticles() {
       excerpt: article.excerpt,
       content: `${article.excerpt}\n\nContenu de démonstration à enrichir dans l'administration.`,
       category: article.category,
+      imageUrl: article.imageUrl ?? null,
       readTime: article.readTime,
       featured: Boolean(article.featured),
       status: NewsArticleStatus.PUBLISHED,

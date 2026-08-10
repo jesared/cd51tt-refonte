@@ -3,26 +3,39 @@ import {
   ArrowRight,
   BarChart3,
   Building2,
+  CalendarDays,
   CheckCircle2,
   CircleDashed,
   FileText,
   Landmark,
   Newspaper,
   Settings2,
+  Trophy,
   UserRoundCheck,
 } from "lucide-react";
+import {
+  DocumentResourceStatus,
+  NewsArticleStatus,
+  type CalendarEvent,
+  type ClubResource,
+  type CommitteeMemberResource,
+  type DocumentResource,
+  type NewsArticle,
+  type TechnicalStaffMemberResource,
+} from "@prisma/client";
 
 import { Badge } from "@/components/ui/badge";
+import { getAdminCalendarEvents } from "@/lib/admin-calendar";
 import { getAdminClubs } from "@/lib/admin-clubs";
+import { getAdminDocuments } from "@/lib/admin-documents";
+import { getAdminNewsArticles } from "@/lib/admin-news";
+import {
+  getAdminCommitteeMembers,
+  getAdminTechnicalStaffMembers,
+} from "@/lib/admin-people";
 import { getAdminStats } from "@/lib/admin-stats";
 import { createPageMetadata } from "@/lib/metadata";
-import {
-  actualCommitteeMembers,
-  clubs,
-  documents,
-  newsArticles,
-  technicalStaffMembers,
-} from "@/lib/mock-data";
+import { competitions } from "@/lib/mock-data";
 
 export const metadata = createPageMetadata({
   title: "Administration",
@@ -31,72 +44,109 @@ export const metadata = createPageMetadata({
   path: "/admin",
 });
 
-function getModules(clubCount: number, licenseeCount: number | null) {
+type DashboardData = {
+  articles: NewsArticle[];
+  documents: DocumentResource[];
+  clubs: ClubResource[];
+  calendarEvents: CalendarEvent[];
+  committeeMembers: CommitteeMemberResource[];
+  technicalStaffMembers: TechnicalStaffMemberResource[];
+  licenseeCount: number | null;
+};
+
+function getModules(data: DashboardData) {
+  const activeClubs = data.clubs.filter((club) => club.active);
+  const publishedCalendarEvents = data.calendarEvents.filter(
+    (event) => event.published,
+  );
+
   return [
-  {
-    href: "/admin/actualites",
-    title: "Actualités",
-    description: "Publier et modifier les annonces du site.",
-    count: newsArticles.length,
-    unit: "articles",
-    state: "Pret",
-    icon: Newspaper,
-  },
-  {
-    href: "/admin/documents",
-    title: "Documents",
-    description: "Centraliser les formulaires et ressources.",
-    count: documents.length,
-    unit: "documents",
-    state: "Pret",
-    icon: FileText,
-  },
-  {
-    href: "/admin/clubs",
-    title: "Clubs",
-    description: "Maintenir l'annuaire departemental.",
-    count: clubCount,
-    unit: "clubs",
-    state: "Structure",
-    icon: Building2,
-  },
-  {
-    href: "/admin/stats",
-    title: "Stats",
-    description: "Synchroniser et suivre les chiffres FFTT.",
-    count: licenseeCount ?? 0,
-    unit: "licenciés",
-    state: "FFTT",
-    icon: BarChart3,
-  },
-  {
-    href: "/admin/comite",
-    title: "Comité",
-    description: "Mettre a jour les membres et fonctions.",
-    count: actualCommitteeMembers.length,
-    unit: "membres",
-    state: "Structure",
-    icon: Landmark,
-  },
-  {
-    href: "/admin/cadres-techniques",
-    title: "Cadres techniques",
-    description: "Compléter les fiches des encadrants.",
-    count: technicalStaffMembers.length,
-    unit: "cadres",
-    state: "Structure",
-    icon: UserRoundCheck,
-  },
-  {
-    href: "/admin/site",
-    title: "Paramètres",
-    description: "Regler les informations generales du site.",
-    count: 1,
-    unit: "configuration",
-    state: "Pret",
-    icon: Settings2,
-  },
-];
+    {
+      href: "/admin/actualites",
+      title: "Actualités",
+      description: "Publier et modifier les annonces du site.",
+      count: data.articles.length,
+      unit: "articles",
+      state: "Prêt",
+      icon: Newspaper,
+    },
+    {
+      href: "/admin/documents",
+      title: "Documents",
+      description: "Centraliser les formulaires et ressources.",
+      count: data.documents.length,
+      unit: "documents",
+      state: "Prêt",
+      icon: FileText,
+    },
+    {
+      href: "/admin/competitions",
+      title: "Compétitions",
+      description: "Vue de cadrage en lecture seule.",
+      count: competitions.length,
+      unit: "démo",
+      state: "Préparation",
+      demo: true,
+      icon: Trophy,
+    },
+    {
+      href: "/admin/calendrier",
+      title: "Calendrier",
+      description: "Piloter les échéances sportives.",
+      count: data.calendarEvents.length,
+      unit:
+        publishedCalendarEvents.length === 1
+          ? "échéance publiée"
+          : "échéances",
+      state: "Prêt",
+      icon: CalendarDays,
+    },
+    {
+      href: "/admin/clubs",
+      title: "Clubs",
+      description: "Maintenir l'annuaire départemental.",
+      count: activeClubs.length,
+      unit: activeClubs.length === 1 ? "club actif" : "clubs actifs",
+      state: "Structure",
+      icon: Building2,
+    },
+    {
+      href: "/admin/stats",
+      title: "Stats",
+      description: "Synchroniser et suivre les chiffres FFTT.",
+      count: data.licenseeCount ?? 0,
+      unit: "licenciés",
+      state: "FFTT",
+      icon: BarChart3,
+    },
+    {
+      href: "/admin/comite",
+      title: "Comité",
+      description: "Mettre à jour les membres et fonctions.",
+      count: data.committeeMembers.length,
+      unit: "membres",
+      state: "Structure",
+      icon: Landmark,
+    },
+    {
+      href: "/admin/cadres-techniques",
+      title: "Cadres techniques",
+      description: "Compléter les fiches des encadrants.",
+      count: data.technicalStaffMembers.length,
+      unit: "cadres",
+      state: "Structure",
+      icon: UserRoundCheck,
+    },
+    {
+      href: "/admin/site",
+      title: "Paramètres",
+      description: "Régler les informations générales du site.",
+      count: 1,
+      unit: "configuration",
+      state: "Prêt",
+      icon: Settings2,
+    },
+  ];
 }
 
 const checks = [
@@ -107,26 +157,63 @@ const checks = [
   },
   {
     label: "Actualités et documents",
-    detail: "Premier socle d'édition branché.",
+    detail: "Édition branchée sur la base.",
     done: true,
   },
   {
     label: "Clubs, comité, cadres",
-    detail: "Pages préparées avant édition complète.",
-    done: false,
+    detail: "Gestion structurée en base, avec fallback public séparé.",
+    done: true,
   },
   {
-    label: "Backoffice complet",
-    detail: "CRUD, validation, media et droits fins.",
+    label: "Compétitions",
+    detail: "Lecture seule tant que le modèle de données n'est pas branché.",
     done: false,
   },
 ];
 
 export default async function AdminDashboardPage() {
-  const adminClubs = await getAdminClubs();
-  const stats = await getAdminStats();
-  const clubCount = adminClubs.length || clubs.length;
-  const modules = getModules(clubCount, stats.licenseeTotal);
+  const [
+    articles,
+    documents,
+    adminClubs,
+    calendarEvents,
+    committeeMembers,
+    technicalStaffMembers,
+    stats,
+  ] = await Promise.all([
+    getAdminNewsArticles(),
+    getAdminDocuments(),
+    getAdminClubs(),
+    getAdminCalendarEvents(),
+    getAdminCommitteeMembers(),
+    getAdminTechnicalStaffMembers(),
+    getAdminStats(),
+  ]);
+
+  const data: DashboardData = {
+    articles,
+    documents,
+    clubs: adminClubs,
+    calendarEvents,
+    committeeMembers,
+    technicalStaffMembers,
+    licenseeCount: stats.licenseeTotal,
+  };
+  const modules = getModules(data);
+  const publishedArticleCount = articles.filter(
+    (article) => article.status === NewsArticleStatus.PUBLISHED,
+  ).length;
+  const publishedDocumentCount = documents.filter(
+    (document) => document.status === DocumentResourceStatus.PUBLISHED,
+  ).length;
+  const publishedCalendarCount = calendarEvents.filter(
+    (event) => event.published,
+  ).length;
+  const publicContentCount =
+    publishedArticleCount + publishedDocumentCount + publishedCalendarCount;
+  const structuredDataCount =
+    adminClubs.length + committeeMembers.length + technicalStaffMembers.length;
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
@@ -140,15 +227,16 @@ export default async function AdminDashboardPage() {
               Tableau de bord
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-              Une console simple pour piloter les contenus du site, suivre les
-              modules disponibles et preparer les prochaines fonctions admin.
+              Une console simple pour piloter les contenus réellement présents
+              en base, suivre les modules disponibles et identifier les zones de
+              démonstration.
             </p>
           </div>
           <Link
             href="/admin/actualites/nouveau"
             className="inline-flex h-9 items-center justify-center rounded-md bg-foreground px-3 text-sm font-medium text-background transition-colors hover:opacity-85"
           >
-            Nouvelle actualite
+            Nouvelle actualité
           </Link>
         </div>
       </section>
@@ -159,22 +247,25 @@ export default async function AdminDashboardPage() {
           <p className="mt-2 text-2xl font-semibold">{modules.length}</p>
         </div>
         <div className="rounded-lg border border-border bg-background p-4">
-          <p className="text-sm text-muted-foreground">Contenus publics</p>
-          <p className="mt-2 text-2xl font-semibold">
-            {newsArticles.length + documents.length}
+          <p className="text-sm text-muted-foreground">Contenus publiés</p>
+          <p className="mt-2 text-2xl font-semibold">{publicContentCount}</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Actus, documents et échéances visibles
           </p>
         </div>
         <div className="rounded-lg border border-border bg-background p-4">
-          <p className="text-sm text-muted-foreground">Donnees structurees</p>
-          <p className="mt-2 text-2xl font-semibold">
-            {clubCount +
-              actualCommitteeMembers.length +
-              technicalStaffMembers.length}
+          <p className="text-sm text-muted-foreground">Données structurées</p>
+          <p className="mt-2 text-2xl font-semibold">{structuredDataCount}</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Clubs, comité et cadres en base
           </p>
         </div>
         <div className="rounded-lg border border-border bg-background p-4">
-          <p className="text-sm text-muted-foreground">Statut</p>
-          <p className="mt-2 text-2xl font-semibold">Local</p>
+          <p className="text-sm text-muted-foreground">Données de démo</p>
+          <p className="mt-2 text-2xl font-semibold">{competitions.length}</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Compétitions en lecture seule
+          </p>
         </div>
       </section>
 
@@ -210,6 +301,11 @@ export default async function AdminDashboardPage() {
                         >
                           {item.state}
                         </Badge>
+                        {item.demo ? (
+                          <Badge variant="secondary" className="rounded-md">
+                            Données de démo
+                          </Badge>
+                        ) : null}
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">
                         {item.description}
@@ -257,16 +353,16 @@ export default async function AdminDashboardPage() {
           </div>
 
           <div className="rounded-lg border border-border bg-background p-5">
-            <h2 className="text-base font-semibold">Prochaine priorite</h2>
+            <h2 className="text-base font-semibold">Prochaine priorité</h2>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Stabiliser les formulaires de gestion pour que les contenus ne
-              dependent plus du code.
+              Brancher le modèle Compétitions pour remplacer les données de
+              démonstration par un vrai CRUD.
             </p>
             <Link
-              href="/admin/site"
+              href="/admin/competitions"
               className="mt-4 inline-flex h-9 items-center justify-center rounded-md border border-border px-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
             >
-              Paramètres du site
+              Voir le module compétitions
             </Link>
           </div>
         </aside>

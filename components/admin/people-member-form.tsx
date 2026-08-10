@@ -6,6 +6,7 @@ import type {
 import { ArrowLeft, Save } from "lucide-react";
 
 import { savePeopleMember } from "@/lib/admin-people";
+import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
 
 type PeopleKind = "committee" | "technical";
 
@@ -88,6 +89,7 @@ export function PeopleMemberForm({
         encType="multipart/form-data"
         className="grid gap-6"
       >
+        <UnsavedChangesGuard />
         <input type="hidden" name="kind" value={kind} />
         {member ? <input type="hidden" name="id" value={member.id} /> : null}
 

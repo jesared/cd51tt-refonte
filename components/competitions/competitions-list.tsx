@@ -3,9 +3,12 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
+  ArrowRight,
   CalendarDays,
+  ChevronDown,
   ClipboardCheck,
   ClipboardList,
+  FileText,
   LayoutGrid,
   List as ListIcon,
   ListChecks,
@@ -17,6 +20,11 @@ import type { LucideIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type {
   Competition,
   CompetitionAction,
@@ -90,32 +98,131 @@ function CompetitionActions({
   competition: Competition;
   compact?: boolean;
 }) {
+  const primaryAction =
+    competition.actions.find((action) => action.primary) ??
+    competition.actions[0];
+  const secondaryActions = competition.actions.filter(
+    (action) => action !== primaryAction,
+  );
+
+  if (!primaryAction) {
+    return null;
+  }
+
+  const PrimaryIcon = actionIcons[primaryAction.type];
+
   return (
     <div
       className={cn(
-        "flex flex-wrap gap-1.5 border-t border-border pt-3",
-        compact ? "justify-end" : "justify-start lg:justify-end",
+        "flex flex-col gap-2 border-t border-border pt-3 sm:flex-row sm:items-center",
+        compact ? "sm:justify-end" : "sm:justify-start lg:justify-end",
       )}
     >
-      {competition.actions.map((action) => {
-        const Icon = actionIcons[action.type];
+      <Link
+        href={primaryAction.href}
+        className={cn(
+          buttonVariants({ variant: "default", size: "lg" }),
+          "w-full sm:w-auto",
+        )}
+      >
+        <PrimaryIcon className="size-4" />
+        {primaryAction.label}
+        <ArrowRight className="size-4" />
+      </Link>
 
-        return (
-          <Link
-            key={`${competition.title}-${action.label}`}
-            href={action.href}
-            aria-label={action.label}
-            title={action.label}
-            className={buttonVariants({
-              variant: action.primary ? "default" : "outline",
-              size: "icon-sm",
-              className: "h-8 w-8",
-            })}
+      {secondaryActions.length > 0 ? (
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            className={cn(
+              buttonVariants({ variant: "outline", size: "lg" }),
+              "w-full sm:w-auto",
+            )}
           >
-            <Icon className="size-4" />
+            <FileText className="size-4" />
+            Documents
+            <ChevronDown className="size-4" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <div className="px-1.5 py-1 text-xs font-medium text-muted-foreground">
+              Documents utiles
+            </div>
+            <div className="grid gap-1">
+              {secondaryActions.map((action) => {
+                const Icon = actionIcons[action.type];
+
+                return (
+                  <Link
+                    key={`${competition.title}-${action.label}`}
+                    href={action.href}
+                    className="flex min-h-9 items-center gap-2 rounded-md px-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground focus-visible:outline-none"
+                  >
+                    <Icon className="size-4 shrink-0 text-muted-foreground" />
+                    <span className="min-w-0 flex-1 truncate">
+                      {action.label}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ) : null}
+    </div>
+  );
+}
+
+function CompetitionDocumentLinks({
+  competition,
+  compact = false,
+}: {
+  competition: Competition;
+  compact?: boolean;
+}) {
+  if (competition.documents.length === 0) {
+    return null;
+  }
+
+  const visibleDocuments = competition.documents.slice(0, compact ? 2 : 3);
+  const remainingCount = competition.documents.length - visibleDocuments.length;
+
+  return (
+    <div className="space-y-2 border-t border-border pt-4">
+      <div className="flex items-center gap-2 text-sm font-medium">
+        <FileText className="size-4 text-primary" />
+        Documents liés
+      </div>
+      <div
+        className={cn(
+          "grid gap-2",
+          compact ? "sm:grid-cols-2" : "sm:grid-cols-2 lg:grid-cols-1",
+        )}
+      >
+        {visibleDocuments.map((document) => (
+          <Link
+            key={`${competition.title}-${document.title}`}
+            href={document.href}
+            className="group flex min-w-0 items-center justify-between gap-3 rounded-md border border-border bg-background px-3 py-2 text-sm transition-colors hover:border-primary/35 hover:bg-accent"
+          >
+            <span className="min-w-0">
+              <span className="block truncate font-medium group-hover:text-primary">
+                {document.title}
+              </span>
+              <span className="mt-0.5 block text-xs text-muted-foreground">
+                {document.category} · {document.format}
+              </span>
+            </span>
+            <ArrowRight className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
           </Link>
-        );
-      })}
+        ))}
+        {remainingCount > 0 ? (
+          <Link
+            href="/documents"
+            className="inline-flex min-h-10 items-center rounded-md border border-dashed border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/35 hover:text-foreground"
+          >
+            + {remainingCount} document{remainingCount > 1 ? "s" : ""}
+          </Link>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -168,6 +275,7 @@ function CompetitionDetails({
           <dd className="mt-1 text-foreground">{competition.manager}</dd>
         </div>
       </dl>
+      <CompetitionDocumentLinks competition={competition} compact={compact} />
       <CompetitionActions competition={competition} compact={compact} />
     </div>
   );
@@ -234,6 +342,9 @@ function CompetitionListRow({ competition }: { competition: Competition }) {
           <span className="truncate">{competition.location}</span>
         </p>
         <CompetitionActions competition={competition} />
+      </div>
+      <div className="mt-4">
+        <CompetitionDocumentLinks competition={competition} compact />
       </div>
     </article>
   );

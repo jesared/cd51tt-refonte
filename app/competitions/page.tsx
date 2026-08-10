@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, CalendarDays, FileText, Trophy } from "lucide-react";
+import { ArrowRight, CalendarDays, Trophy } from "lucide-react";
 
 import { CompetitionsList } from "@/components/competitions/competitions-list";
 import { Badge } from "@/components/ui/badge";
@@ -109,7 +109,8 @@ export default async function CompetitionsPage() {
                 Prochaine échéance
               </p>
               <h2 className="text-balance text-2xl font-semibold tracking-tight sm:text-3xl">
-                {nextCalendarEvent.title} · {formatEventDate(nextCalendarEvent.date)}
+                {nextCalendarEvent.title} ·{" "}
+                {formatEventDate(nextCalendarEvent.date)}
               </h2>
               <p className="text-sm leading-6 text-muted-foreground">
                 {nextCalendarCompetitionTitle} · {nextCalendarEvent.location}
@@ -202,64 +203,6 @@ export default async function CompetitionsPage() {
       ) : null}
 
       <CompetitionsList competitions={displayCompetitions} />
-
-      <section className="space-y-4">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-sm font-medium text-primary">Documents</p>
-            <h2 className="text-2xl font-semibold tracking-tight">
-              Ressources par compétition
-            </h2>
-          </div>
-          <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-            Accédez directement aux calendriers, convocations et règlements liés
-            à chaque épreuve.
-          </p>
-        </div>
-
-        <div className="grid gap-4 lg:grid-cols-3">
-          {displayCompetitions.map((competition) => (
-            <article
-              key={`${competition.title}-documents`}
-              className="rounded-lg border border-border bg-card p-5"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h3 className="font-semibold tracking-tight">
-                    {competition.title}
-                  </h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {competition.documents.length} documents utiles
-                  </p>
-                </div>
-                <div className="rounded-md border border-border bg-background p-2 text-primary">
-                  <FileText className="size-4" />
-                </div>
-              </div>
-
-              <div className="mt-5 divide-y divide-border">
-                {competition.documents.map((document) => (
-                  <Link
-                    key={`${competition.title}-${document.title}`}
-                    href={document.href}
-                    className="group flex items-center justify-between gap-3 py-3 text-sm first:pt-0 last:pb-0"
-                  >
-                    <span className="min-w-0">
-                      <span className="block truncate font-medium group-hover:text-primary">
-                        {document.title}
-                      </span>
-                      <span className="mt-1 block text-xs text-muted-foreground">
-                        {document.category} · {document.format}
-                      </span>
-                    </span>
-                    <ArrowRight className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
-                  </Link>
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Eye, EyeOff, Plus, Sparkles } from "lucide-react";
+import { CalendarDays, Eye, EyeOff, MapPin, Plus, Sparkles } from "lucide-react";
 
+import { AdminListControls } from "@/components/admin/admin-list-controls";
 import { AdminRowActionsMenu } from "@/components/admin/admin-row-actions-menu";
 import { AdminSportsCalendar } from "@/components/admin/admin-sports-calendar";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +29,10 @@ type AdminCalendrierPageProps = {
     deleted?: string;
     seeded?: string;
     published?: string;
+    q?: string;
+    statut?: string;
+    type?: string;
+    tri?: string;
   };
 };
 
@@ -37,6 +42,13 @@ function formatEventDate(date: Date) {
     month: "long",
     year: "numeric",
   }).format(date);
+}
+
+function normalizeSearchValue(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
 }
 
 export default async function AdminCalendrierPage({
@@ -53,6 +65,48 @@ export default async function AdminCalendrierPage({
     location: event.location,
     status: event.published ? ("published" as const) : ("draft" as const),
   }));
+  const query = normalizeSearchValue(searchParams?.q ?? "");
+  const statusFilter = searchParams?.statut;
+  const typeFilter = searchParams?.type;
+  const sortMode = searchParams?.tri ?? "date-asc";
+  const typeOptions = Array.from(
+    new Map(
+      calendarEvents.map((event) => [
+        event.type,
+        getCalendarEventTypeLabel(event.type),
+      ]),
+    ),
+  ).sort(([, first], [, second]) => first.localeCompare(second, "fr"));
+  const filteredEvents = calendarEvents
+    .filter((event) => {
+      const typeLabel = getCalendarEventTypeLabel(event.type);
+      const competitionTitle = getCompetitionTitle(event.competitionId);
+      const matchesSearch =
+        !query ||
+        normalizeSearchValue(
+          `${competitionTitle} ${event.title} ${typeLabel} ${event.location}`,
+        ).includes(query);
+      const matchesStatus =
+        !statusFilter ||
+        (statusFilter === "published" && event.published) ||
+        (statusFilter === "draft" && !event.published);
+      const matchesType = !typeFilter || event.type === typeFilter;
+
+      return matchesSearch && matchesStatus && matchesType;
+    })
+    .sort((first, second) => {
+      if (sortMode === "title-asc") {
+        return first.title.localeCompare(second.title, "fr");
+      }
+
+      if (sortMode === "title-desc") {
+        return second.title.localeCompare(first.title, "fr");
+      }
+
+      return sortMode === "date-desc"
+        ? second.date.getTime() - first.date.getTime()
+        : first.date.getTime() - second.date.getTime();
+    });
 
   return (
     <div className="space-y-6">
@@ -122,14 +176,45 @@ export default async function AdminCalendrierPage({
       </section>
 
       <section className="rounded-[1.5rem] border border-border bg-background">
-        <div className="flex flex-col gap-2 border-b border-border px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h3 className="font-medium">Événements du calendrier</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Gestion complète des échéances sportives.
-            </p>
+        <div className="space-y-4 border-b border-border px-6 py-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="font-medium">Événements du calendrier</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {filteredEvents.length} sur {calendarEvents.length} échéance(s)
+              </p>
+            </div>
+            <Badge variant="outline">Prisma CalendarEvent</Badge>
           </div>
-          <Badge variant="outline">Prisma CalendarEvent</Badge>
+          <AdminListControls
+            searchPlaceholder="Compétition, libellé, type ou lieu"
+            filters={[
+              {
+                name: "statut",
+                label: "Publication",
+                defaultLabel: "Tous les statuts",
+                options: [
+                  { label: "Publiées", value: "published" },
+                  { label: "Brouillons", value: "draft" },
+                ],
+              },
+              {
+                name: "type",
+                label: "Type",
+                defaultLabel: "Tous les types",
+                options: typeOptions.map(([value, label]) => ({
+                  label,
+                  value,
+                })),
+              },
+            ]}
+            sortOptions={[
+              { label: "Date proche", value: "date-asc" },
+              { label: "Date lointaine", value: "date-desc" },
+              { label: "Libellé A-Z", value: "title-asc" },
+              { label: "Libellé Z-A", value: "title-desc" },
+            ]}
+          />
         </div>
 
         {calendarEvents.length === 0 ? (
@@ -137,64 +222,60 @@ export default async function AdminCalendrierPage({
             Aucune échéance n&apos;est enregistrée pour le moment.
           </div>
         ) : (
-          <>
-            <div className="hidden border-b border-border px-6 py-3 text-xs font-medium uppercase text-muted-foreground xl:grid xl:grid-cols-[minmax(180px,1.2fr)_150px_160px_140px_minmax(180px,1fr)_120px_44px] xl:gap-4">
-              <span>Compétition</span>
-              <span>Date</span>
-              <span>Libellé</span>
-              <span>Type</span>
-              <span>Lieu</span>
-              <span>Publication</span>
-              <span className="sr-only">Actions</span>
-            </div>
-
             <div className="divide-y divide-border">
-              {calendarEvents.map((event) => (
-                <article
-                  key={event.id}
-                  className="admin-list-row grid gap-4 px-6 py-4 xl:grid-cols-[minmax(180px,1.2fr)_150px_160px_140px_minmax(180px,1fr)_120px_44px] xl:items-center"
-                >
-                  <div className="min-w-0">
-                    <h4 className="font-medium">
-                      {getCompetitionTitle(event.competitionId)}
-                    </h4>
-                    <p className="mt-1 text-sm text-muted-foreground xl:hidden">
-                      {formatEventDate(event.date)} · {event.title}
-                    </p>
-                  </div>
+              {filteredEvents.length === 0 ? (
+                <div className="px-6 py-8 text-sm leading-6 text-muted-foreground">
+                  Aucune échéance ne correspond aux filtres.
+                </div>
+              ) : null}
+              {filteredEvents.map((event) => {
+                const typeLabel = getCalendarEventTypeLabel(event.type);
+                const competitionTitle = getCompetitionTitle(event.competitionId);
 
-                  <p className="text-sm text-foreground">
-                    {formatEventDate(event.date)}
-                  </p>
-                  <p className="text-sm text-foreground">{event.title}</p>
-                  <span className="w-fit rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
-                    {getCalendarEventTypeLabel(event.type)}
-                  </span>
-                  <p className="text-sm text-muted-foreground">
-                    {event.location}
-                  </p>
-                  <span
-                    className={
-                      event.published
-                        ? "inline-flex w-fit items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-700 dark:text-emerald-300"
-                        : "inline-flex w-fit items-center gap-1.5 rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground"
-                    }
+                return (
+                  <article
+                    key={event.id}
+                    className="admin-list-row grid gap-4 px-6 py-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center"
                   >
-                    {event.published ? (
-                      <Eye className="size-3.5" />
-                    ) : (
-                      <EyeOff className="size-3.5" />
-                    )}
-                    {event.published ? "Publié" : "Brouillon"}
-                  </span>
+                    <div className="min-w-0 space-y-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h4 className="text-base font-semibold">{event.title}</h4>
+                        <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
+                          {typeLabel}
+                        </span>
+                        <span
+                          className={
+                            event.published
+                              ? "inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-700 dark:text-emerald-300"
+                              : "inline-flex items-center gap-1.5 rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground"
+                          }
+                        >
+                          {event.published ? (
+                            <Eye className="size-3.5" />
+                          ) : (
+                            <EyeOff className="size-3.5" />
+                          )}
+                          {event.published ? "Publié" : "Brouillon"}
+                        </span>
+                      </div>
 
-                  <div className="flex justify-start xl:justify-end">
-                    <AdminRowActionsMenu
-                      editHref={`/admin/calendrier/${event.id}`}
-                      deleteAction={deleteCalendarEvent}
-                      deleteId={event.id}
-                      deleteMessage="Supprimer cette échéance du calendrier ?"
-                    >
+                      <p className="text-sm font-medium text-muted-foreground">
+                        {competitionTitle}
+                      </p>
+
+                      <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
+                        <span className="inline-flex items-center gap-2">
+                          <CalendarDays className="size-4 text-primary" />
+                          {formatEventDate(event.date)}
+                        </span>
+                        <span className="inline-flex items-center gap-2">
+                          <MapPin className="size-4 text-primary" />
+                          {event.location}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 lg:justify-end">
                       <form action={toggleCalendarEventPublication}>
                         <input type="hidden" name="id" value={event.id} />
                         <input
@@ -204,7 +285,11 @@ export default async function AdminCalendrierPage({
                         />
                         <button
                           type="submit"
-                          className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm transition-colors hover:bg-muted"
+                          className={
+                            event.published
+                              ? "inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-background px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                              : "inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
+                          }
                         >
                           {event.published ? (
                             <EyeOff className="size-4" />
@@ -214,12 +299,18 @@ export default async function AdminCalendrierPage({
                           {event.published ? "Dépublier" : "Publier"}
                         </button>
                       </form>
-                    </AdminRowActionsMenu>
-                  </div>
-                </article>
-              ))}
+                      <AdminRowActionsMenu
+                        editHref={`/admin/calendrier/${event.id}`}
+                        deleteAction={deleteCalendarEvent}
+                        deleteId={event.id}
+                        deleteLabel={`${event.title} - ${competitionTitle}`}
+                        deleteMessage="Supprimer cette échéance du calendrier ?"
+                      />
+                    </div>
+                  </article>
+                );
+              })}
             </div>
-          </>
         )}
       </section>
     </div>

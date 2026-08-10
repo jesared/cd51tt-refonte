@@ -1,7 +1,7 @@
-import { Download, FileText, FolderKanban } from "lucide-react";
+import { FolderKanban } from "lucide-react";
 
+import { DocumentsList } from "@/components/documents/documents-list";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
 import { getPublishedDocumentCards } from "@/lib/admin-documents";
 import type { DocumentCardItem } from "@/lib/documents";
 import { createPageMetadata } from "@/lib/metadata";
@@ -55,59 +55,7 @@ export default async function DocumentsPage() {
         </div>
       </section>
 
-      {library.length === 0 ? (
-        <section className="rounded-lg border border-border bg-card p-8 text-sm leading-6 text-muted-foreground">
-          Aucun document n&apos;est publié pour le moment.
-        </section>
-      ) : (
-        <section className="divide-y divide-border rounded-lg border border-border bg-card">
-          {library.map((document) => (
-          <article
-            key={document.title}
-            className="grid gap-5 p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center"
-          >
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="secondary">{document.category}</Badge>
-                <Badge variant="outline">{document.format}</Badge>
-                <span className="text-sm text-muted-foreground">
-                  Mis à jour : {document.updatedAt}
-                </span>
-              </div>
-              <div className="mt-4 flex items-start gap-3">
-                <div className="rounded-md border border-border bg-background p-2 text-primary">
-                  <FileText className="size-5" />
-                </div>
-                <div className="min-w-0">
-                  <h2 className="text-xl font-semibold tracking-tight">
-                    {document.title}
-                  </h2>
-                  <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-                    {document.description}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {document.href && document.href !== "#" ? (
-              <a
-                href={document.href}
-                target="_blank"
-                rel="noreferrer"
-                className={buttonVariants({ variant: "outline", size: "lg" })}
-              >
-                Télécharger
-                <Download className="size-4" />
-              </a>
-            ) : (
-              <span className="inline-flex h-10 items-center justify-center rounded-lg border border-border px-4 text-sm text-muted-foreground">
-                Fichier à ajouter
-              </span>
-            )}
-          </article>
-          ))}
-        </section>
-      )}
+      <DocumentsList documents={library} />
     </div>
   );
 }

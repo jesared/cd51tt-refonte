@@ -1,6 +1,7 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { Building2, Plus, RefreshCw } from "lucide-react";
 
+import { AdminListControls } from "@/components/admin/admin-list-controls";
 import { AdminRowActionsMenu } from "@/components/admin/admin-row-actions-menu";
 import { AdminSubmitButton } from "@/components/admin/admin-submit-button";
 import { Badge } from "@/components/ui/badge";
@@ -24,14 +25,69 @@ type AdminClubsPageProps = {
     deleted?: string;
     fftt?: string;
     error?: string;
+    q?: string;
+    statut?: string;
+    ville?: string;
+    tri?: string;
   };
 };
+
+function normalizeSearchValue(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
 
 export default async function AdminClubsPage({
   searchParams,
 }: AdminClubsPageProps) {
   const clubs = await getAdminClubs();
   const activeClubs = clubs.filter((club) => club.active);
+  const cities = Array.from(new Set(clubs.map((club) => club.city))).sort(
+    (a, b) => a.localeCompare(b, "fr"),
+  );
+  const query = normalizeSearchValue(searchParams?.q ?? "");
+  const statusFilter = searchParams?.statut;
+  const cityFilter = searchParams?.ville;
+  const sortMode = searchParams?.tri ?? "name-asc";
+  const filteredClubs = clubs
+    .filter((club) => {
+      const matchesSearch =
+        !query ||
+        normalizeSearchValue(
+          `${club.name} ${club.city} ${club.venue} ${club.contact}`,
+        ).includes(query);
+      const matchesStatus =
+        !statusFilter ||
+        (statusFilter === "active" && club.active) ||
+        (statusFilter === "hidden" && !club.active) ||
+        (statusFilter === "fftt" && Boolean(club.ffttId));
+      const matchesCity = !cityFilter || club.city === cityFilter;
+
+      return matchesSearch && matchesStatus && matchesCity;
+    })
+    .sort((first, second) => {
+      if (sortMode === "city-asc") {
+        return (
+          first.city.localeCompare(second.city, "fr") ||
+          first.name.localeCompare(second.name, "fr")
+        );
+      }
+
+      if (sortMode === "city-desc") {
+        return (
+          second.city.localeCompare(first.city, "fr") ||
+          first.name.localeCompare(second.name, "fr")
+        );
+      }
+
+      if (sortMode === "name-desc") {
+        return second.name.localeCompare(first.name, "fr");
+      }
+
+      return first.name.localeCompare(second.name, "fr");
+    });
   const message =
     searchParams?.saved === "1"
       ? "Le club a été enregistré."
@@ -90,15 +146,43 @@ export default async function AdminClubsPage({
         </div>
       </section>
 
-      {message ? (
-        <div className="admin-feedback">
-          {message}
-        </div>
-      ) : null}
+      {message ? <div className="admin-feedback">{message}</div> : null}
 
       <section className="rounded-[1.5rem] border border-border bg-background">
-        <div className="border-b border-border px-6 py-4">
-          <h3 className="font-medium">Liste des clubs</h3>
+        <div className="space-y-4 border-b border-border px-6 py-4">
+          <div>
+            <h3 className="font-medium">Liste des clubs</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {filteredClubs.length} sur {clubs.length} club(s)
+            </p>
+          </div>
+          <AdminListControls
+            searchPlaceholder="Club, ville, salle ou contact"
+            filters={[
+              {
+                name: "statut",
+                label: "Statut",
+                defaultLabel: "Tous les statuts",
+                options: [
+                  { label: "Actifs", value: "active" },
+                  { label: "Masqués", value: "hidden" },
+                  { label: "Avec identifiant FFTT", value: "fftt" },
+                ],
+              },
+              {
+                name: "ville",
+                label: "Ville",
+                defaultLabel: "Toutes les villes",
+                options: cities.map((city) => ({ label: city, value: city })),
+              },
+            ]}
+            sortOptions={[
+              { label: "Nom A-Z", value: "name-asc" },
+              { label: "Nom Z-A", value: "name-desc" },
+              { label: "Ville A-Z", value: "city-asc" },
+              { label: "Ville Z-A", value: "city-desc" },
+            ]}
+          />
         </div>
 
         {clubs.length === 0 ? (
@@ -108,7 +192,12 @@ export default async function AdminClubsPage({
           </div>
         ) : (
           <div className="divide-y divide-border">
-            {clubs.map((club) => (
+            {filteredClubs.length === 0 ? (
+              <div className="px-6 py-8 text-sm leading-6 text-muted-foreground">
+                Aucun club ne correspond aux filtres.
+              </div>
+            ) : null}
+            {filteredClubs.map((club) => (
               <article
                 key={club.id}
                 className="admin-list-row grid gap-3 px-6 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
@@ -130,6 +219,7 @@ export default async function AdminClubsPage({
                     editHref={`/admin/clubs/${club.id}`}
                     deleteAction={deleteClub}
                     deleteId={club.id}
+                    deleteLabel={club.name}
                     deleteMessage="Supprimer ce club ? Cette action est définitive."
                   />
                 </div>

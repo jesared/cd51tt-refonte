@@ -1,6 +1,8 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { Eye, EyeOff, Plus, Sparkles } from "lucide-react";
+import { NewsArticleStatus } from "@prisma/client";
 
+import { AdminListControls } from "@/components/admin/admin-list-controls";
 import { AdminRowActionsMenu } from "@/components/admin/admin-row-actions-menu";
 import { AdminSubmitButton } from "@/components/admin/admin-submit-button";
 import {
@@ -13,7 +15,7 @@ import { createPageMetadata } from "@/lib/metadata";
 import { formatFrenchDate } from "@/lib/news";
 
 export const metadata = createPageMetadata({
-  title: "Admin actualites",
+  title: "Admin actualités",
   description:
     "Administration des articles, annonces et publications du comité.",
   path: "/admin/actualites",
@@ -27,13 +29,66 @@ type AdminActualitesPageProps = {
     published?: string;
     unpublished?: string;
     error?: string;
+    q?: string;
+    statut?: string;
+    categorie?: string;
+    tri?: string;
   };
 };
+
+function normalizeSearchValue(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
 
 export default async function AdminActualitesPage({
   searchParams,
 }: AdminActualitesPageProps) {
   const articles = await getAdminNewsArticles();
+  const categories = Array.from(
+    new Set(articles.map((article) => article.category)),
+  ).sort((a, b) => a.localeCompare(b, "fr"));
+  const query = normalizeSearchValue(searchParams?.q ?? "");
+  const statusFilter = searchParams?.statut;
+  const categoryFilter = searchParams?.categorie;
+  const sortMode = searchParams?.tri ?? "date-desc";
+  const filteredArticles = articles
+    .filter((article) => {
+      const matchesSearch =
+        !query ||
+        normalizeSearchValue(
+          `${article.title} ${article.excerpt} ${article.category}`,
+        ).includes(query);
+      const matchesStatus =
+        !statusFilter ||
+        (statusFilter === "published" &&
+          article.status === NewsArticleStatus.PUBLISHED) ||
+        (statusFilter === "draft" &&
+          article.status === NewsArticleStatus.DRAFT) ||
+        (statusFilter === "featured" && article.featured);
+      const matchesCategory =
+        !categoryFilter || article.category === categoryFilter;
+
+      return matchesSearch && matchesStatus && matchesCategory;
+    })
+    .sort((first, second) => {
+      if (sortMode === "title-asc") {
+        return first.title.localeCompare(second.title, "fr");
+      }
+
+      if (sortMode === "title-desc") {
+        return second.title.localeCompare(first.title, "fr");
+      }
+
+      const firstDate = first.publishedAt ?? first.createdAt;
+      const secondDate = second.publishedAt ?? second.createdAt;
+
+      return sortMode === "date-asc"
+        ? firstDate.getTime() - secondDate.getTime()
+        : secondDate.getTime() - firstDate.getTime();
+    });
   const message =
     searchParams?.saved === "1"
       ? "L'article a été enregistré."
@@ -90,89 +145,127 @@ export default async function AdminActualitesPage({
         </div>
       </section>
 
-      {message ? (
-        <div className="admin-feedback">
-          {message}
-        </div>
-      ) : null}
+      {message ? <div className="admin-feedback">{message}</div> : null}
 
       <section className="rounded-[1.5rem] border border-border bg-background">
-        <div className="border-b border-border px-6 py-4">
-          <h3 className="font-medium">Liste des articles</h3>
+        <div className="space-y-4 border-b border-border px-6 py-4">
+          <div>
+            <h3 className="font-medium">Liste des articles</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {filteredArticles.length} sur {articles.length} article(s)
+            </p>
+          </div>
+          <AdminListControls
+            searchPlaceholder="Titre, extrait ou catégorie"
+            filters={[
+              {
+                name: "statut",
+                label: "Statut",
+                defaultLabel: "Tous les statuts",
+                options: [
+                  { label: "Publiées", value: "published" },
+                  { label: "Brouillons", value: "draft" },
+                  { label: "Mises en avant", value: "featured" },
+                ],
+              },
+              {
+                name: "categorie",
+                label: "Catégorie",
+                defaultLabel: "Toutes les catégories",
+                options: categories.map((category) => ({
+                  label: category,
+                  value: category,
+                })),
+              },
+            ]}
+            sortOptions={[
+              { label: "Date récente", value: "date-desc" },
+              { label: "Date ancienne", value: "date-asc" },
+              { label: "Titre A-Z", value: "title-asc" },
+              { label: "Titre Z-A", value: "title-desc" },
+            ]}
+          />
         </div>
 
         {articles.length === 0 ? (
           <div className="px-6 py-8 text-sm leading-6 text-muted-foreground">
             Aucun article n&apos;est encore en base. Vous pouvez importer les
-            mocks ou creer votre premier contenu manuellement.
+            mocks ou créer votre premier contenu manuellement.
           </div>
         ) : (
           <div className="divide-y divide-border">
-            {articles.map((article) => {
+            {filteredArticles.length === 0 ? (
+              <div className="px-6 py-8 text-sm leading-6 text-muted-foreground">
+                Aucun article ne correspond aux filtres.
+              </div>
+            ) : null}
+            {filteredArticles.map((article) => {
               const isPublished = article.status === "PUBLISHED";
 
               return (
-              <article
-                key={article.id}
-                className="admin-list-row grid gap-3 px-6 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
-              >
-                <div className="min-w-0 space-y-2">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h4 className="font-medium">{article.title}</h4>
-                    <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
-                      {article.category}
-                    </span>
-                    <span
-                      className={
-                        isPublished
-                          ? "rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-700 dark:text-emerald-300"
-                          : "rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground"
-                      }
-                    >
-                      {isPublished ? "Publiée" : "Brouillon"}
-                    </span>
-                    {article.featured ? (
-                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
-                        Mise en avant
+                <article
+                  key={article.id}
+                  className="admin-list-row grid gap-3 px-6 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+                >
+                  <div className="min-w-0 space-y-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h4 className="font-medium">{article.title}</h4>
+                      <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
+                        {article.category}
                       </span>
-                    ) : null}
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {formatFrenchDate(article.publishedAt ?? article.createdAt)}
-                  </p>
-                </div>
-
-                <div className="flex justify-start lg:justify-end">
-                  <AdminRowActionsMenu
-                    editHref={`/admin/actualites/${article.id}`}
-                    deleteAction={deleteNewsArticle}
-                    deleteId={article.id}
-                    deleteMessage="Supprimer cette actualité ? Cette action est définitive."
-                  >
-                    <div className="px-1">
-                      <form action={toggleNewsArticlePublication}>
-                        <input type="hidden" name="id" value={article.id} />
-                        <input
-                          type="hidden"
-                          name="status"
-                          value={isPublished ? "DRAFT" : "PUBLISHED"}
-                        />
-                        <button
-                          type="submit"
-                          className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm transition-colors hover:bg-accent"
-                        >
-                          {isPublished ? (
-                            <EyeOff className="size-4" />
-                          ) : (
-                            <Eye className="size-4" />
-                          )}
-                          {isPublished ? "Dépublier" : "Publier"}
-                        </button>
-                      </form>
+                      <span
+                        className={
+                          isPublished
+                            ? "rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-700 dark:text-emerald-300"
+                            : "rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground"
+                        }
+                      >
+                        {isPublished ? "Publiée" : "Brouillon"}
+                      </span>
+                      {article.featured ? (
+                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
+                          Mise en avant
+                        </span>
+                      ) : null}
                     </div>
-                  </AdminRowActionsMenu>
-                </div>
-              </article>
+                    <p className="text-sm text-muted-foreground">
+                      {formatFrenchDate(article.publishedAt ?? article.createdAt)}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+                    <form action={toggleNewsArticlePublication}>
+                      <input type="hidden" name="id" value={article.id} />
+                      <input
+                        type="hidden"
+                        name="status"
+                        value={isPublished ? "DRAFT" : "PUBLISHED"}
+                      />
+                      <button
+                        type="submit"
+                        className={
+                          isPublished
+                            ? "inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-background px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                            : "inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
+                        }
+                      >
+                        {isPublished ? (
+                          <EyeOff className="size-4" />
+                        ) : (
+                          <Eye className="size-4" />
+                        )}
+                        {isPublished ? "Dépublier" : "Publier"}
+                      </button>
+                    </form>
+                    <AdminRowActionsMenu
+                      editHref={`/admin/actualites/${article.id}`}
+                      deleteAction={deleteNewsArticle}
+                      deleteId={article.id}
+                      deleteLabel={article.title}
+                      deleteMessage="Supprimer cette actualité ? Cette action est définitive."
+                    />
+                  </div>
+                </article>
               );
             })}
           </div>
