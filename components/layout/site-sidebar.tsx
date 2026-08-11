@@ -64,8 +64,8 @@ export function SiteSidebar({
   }, []);
 
   return (
-    <aside className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
-      <div className="border-b border-sidebar-border px-5 py-5">
+    <aside className="flex h-full min-h-0 flex-col overflow-y-auto bg-sidebar text-sidebar-foreground">
+      <div className="shrink-0 border-b border-sidebar-border px-5 py-5">
         <Link href="/" onClick={onNavigate} className="flex items-center gap-3">
           <div className="relative size-12 overflow-hidden rounded-xl border border-sidebar-border bg-card">
             <Image
@@ -129,7 +129,7 @@ export function SiteSidebar({
       </nav>
 
       {mobile ? (
-        <div className="border-t border-sidebar-border px-3 py-4">
+        <div className="shrink-0 border-t border-sidebar-border px-3 py-4">
           <div className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-sidebar-foreground/45">
             Apparence
           </div>
@@ -181,7 +181,7 @@ export function SiteSidebar({
         </div>
       ) : null}
 
-      <div className="border-t border-sidebar-border px-5 py-4">
+      <div className="shrink-0 border-t border-sidebar-border px-5 py-4">
         <div className="flex items-start gap-2 text-xs leading-5 text-sidebar-foreground/62">
           <ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-sidebar-primary" />
           <p>
