@@ -5,6 +5,10 @@
 @tailwind utilities;
 
 @layer components {
+  .interactive-card {
+    @apply transition-[background-color,border-color,box-shadow,transform] duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/45 hover:shadow-sm active:translate-y-0;
+  }
+
   .admin-action {
     @apply inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border bg-background px-3 text-sm font-medium text-muted-foreground transition duration-200 ease-out hover:-translate-y-px hover:border-primary/35 hover:bg-muted hover:text-foreground active:translate-y-0 disabled:pointer-events-none disabled:opacity-60;
   }
@@ -235,6 +239,10 @@
     animation: admin-page-in 180ms cubic-bezier(0.25, 1, 0.5, 1) both;
   }
 
+  .public-page-transition {
+    animation: public-page-in 220ms cubic-bezier(0.25, 1, 0.5, 1) both;
+  }
+
   .public-scroll-reveal {
     opacity: 0;
     transform: translateY(14px);
@@ -433,6 +441,37 @@
   }
 }
 
+@keyframes public-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes site-loading-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes site-loading-bar {
+  from {
+    transform: translateX(-120%);
+  }
+  to {
+    transform: translateX(220%);
+  }
+}
+
 @keyframes metric-icon {
   from {
     opacity: 0;
@@ -465,9 +504,90 @@
   animation-delay: calc(var(--metric-delay, 0ms) + 320ms);
 }
 
+.site-loading {
+  animation: site-loading-in 280ms cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+
+.site-loading-bar {
+  animation: site-loading-bar 1100ms cubic-bezier(0.25, 1, 0.5, 1) infinite;
+}
+
+.site-header-floating {
+  --site-header-shadow: 0 8px 24px rgb(0 0 0 / 0.08);
+  background-color: color-mix(
+    in oklab,
+    oklch(var(--background)) 85%,
+    transparent
+  );
+  border-color: color-mix(
+    in oklab,
+    oklch(var(--border)) 60%,
+    transparent
+  );
+  box-shadow: none;
+  transition:
+    background-color 200ms cubic-bezier(0.25, 1, 0.5, 1),
+    border-color 200ms cubic-bezier(0.25, 1, 0.5, 1),
+    box-shadow 200ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.dark .site-header-floating {
+  --site-header-shadow: 0 8px 24px rgb(0 0 0 / 0.22);
+}
+
+@supports (animation-timeline: scroll()) {
+  .site-header-floating {
+    animation: site-header-float linear both;
+    animation-range: 0 36px;
+    animation-timeline: scroll(root block);
+  }
+}
+
+@keyframes site-header-float {
+  to {
+    background-color: color-mix(
+      in oklab,
+      oklch(var(--background)) 95%,
+      transparent
+    );
+    border-color: oklch(var(--border));
+    box-shadow: var(--site-header-shadow);
+  }
+}
+
+.skeleton-pulse {
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, oklch(var(--foreground)) 8%, transparent),
+    transparent
+  );
+  animation: skeleton-shimmer 1300ms cubic-bezier(0.25, 1, 0.5, 1) infinite;
+}
+
+@keyframes skeleton-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .metric-card {
     opacity: 1;
+  }
+
+  .interactive-card {
+    transform: none;
+    transition: none;
   }
 
   .admin-kpi-card {
@@ -475,7 +595,8 @@
     transform: none;
   }
 
-  .admin-page-transition {
+  .admin-page-transition,
+  .public-page-transition {
     animation: none;
   }
 
@@ -483,6 +604,22 @@
     opacity: 1;
     transform: none;
     transition: none;
+  }
+
+  .site-loading,
+  .site-loading-bar,
+  .site-header-floating,
+  .skeleton-pulse::after {
+    animation: none;
+  }
+
+  .site-header-floating {
+    transition: none;
+  }
+
+  .site-loading-bar {
+    transform: none;
+    width: 100%;
   }
 
   .metric-card > :first-child,

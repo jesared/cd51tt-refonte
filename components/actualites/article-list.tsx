@@ -234,7 +234,7 @@ export function ArticleList({ articles }: ArticleListProps) {
       {featuredArticle ? (
         <Link
           href={`/actualites/${featuredArticle.slug}`}
-          className="group block overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-primary/45 hover:bg-accent"
+          className="interactive-card group block overflow-hidden rounded-lg border border-border bg-card hover:bg-accent"
         >
           {featuredArticle.imageUrl ? (
             <div className="relative aspect-[16/9] bg-muted">

@@ -130,7 +130,7 @@ export function AnimatedMetrics({ metrics }: AnimatedMetricsProps) {
         return (
           <div
             key={metric.label}
-            className="metric-card group relative overflow-hidden rounded-lg border border-border bg-card p-5 opacity-0 shadow-sm transition-colors hover:border-primary/35 group-data-[visible=true]/metrics:animate-[metric-card_820ms_cubic-bezier(0.22,1,0.36,1)_forwards]"
+            className="interactive-card metric-card group relative overflow-hidden rounded-lg border border-border bg-card p-5 opacity-0 shadow-sm group-data-[visible=true]/metrics:animate-[metric-card_820ms_cubic-bezier(0.22,1,0.36,1)_forwards]"
             style={cardStyle}
           >
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 bg-primary/80 group-data-[visible=true]/metrics:animate-[metric-progress_1400ms_cubic-bezier(0.25,1,0.5,1)_forwards]" />

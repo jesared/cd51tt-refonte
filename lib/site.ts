@@ -92,6 +92,11 @@ export const mainNavigation: NavigationItem[] = [
     description: "Guides, formulaires et règlements",
   },
   {
+    href: "/cadres-techniques",
+    label: "Cadres techniques",
+    description: "Encadrement technique du comité",
+  },
+  {
     href: "/comite",
     label: "Comité",
     description: "Gouvernance et commissions",
@@ -138,6 +143,7 @@ export const footerNavigation = {
     { href: "/calendrier", label: "Calendrier" },
     { href: "/clubs", label: "Clubs" },
     { href: "/documents", label: "Documents" },
+    { href: "/cadres-techniques", label: "Cadres techniques" },
   ],
   institutionnel: [
     { href: "/mentions-legales", label: "Mentions légales" },
@@ -195,6 +201,12 @@ export const routeCopy = {
     eyebrow: "Ressources",
     description:
       "Accédez aux formulaires, règlements et supports utiles à la vie sportive et administrative des clubs.",
+  },
+  "/cadres-techniques": {
+    title: "Cadres techniques",
+    eyebrow: "Encadrement",
+    description:
+      "Retrouvez les cadres techniques référencés par le comité départemental.",
   },
   "/comite": {
     title: "Comité",

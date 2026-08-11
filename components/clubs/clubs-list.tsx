@@ -159,7 +159,7 @@ export function ClubsList({ clubs }: ClubsListProps) {
             return (
               <article
                 key={club.name}
-                className="flex min-h-56 flex-col justify-between rounded-lg border border-border bg-card p-5 transition-colors hover:border-primary/45 hover:bg-accent"
+                className="interactive-card flex min-h-56 flex-col justify-between rounded-lg border border-border bg-card p-5 hover:bg-accent"
               >
                 <div>
                   <div className="flex items-start justify-between gap-4">

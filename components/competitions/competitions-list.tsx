@@ -283,7 +283,7 @@ function CompetitionDetails({
 
 function CompetitionCard({ competition }: { competition: Competition }) {
   return (
-    <article className="flex min-h-full flex-col rounded-lg border border-border bg-card p-5">
+    <article className="interactive-card flex min-h-full flex-col rounded-lg border border-border bg-card p-5">
       <div className="min-w-0">
         <CompetitionBadges competition={competition} />
         <h2 className="mt-4 text-2xl font-semibold tracking-tight">
@@ -302,7 +302,7 @@ function CompetitionCard({ competition }: { competition: Competition }) {
 
 function CompetitionListRow({ competition }: { competition: Competition }) {
   return (
-    <article className="rounded-lg border border-border bg-card p-4 transition-colors hover:border-primary/45 hover:bg-accent sm:p-5">
+    <article className="interactive-card rounded-lg border border-border bg-card p-4 hover:bg-accent sm:p-5">
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
         <div className="min-w-0">
           <CompetitionBadges competition={competition} />

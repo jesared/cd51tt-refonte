@@ -60,7 +60,7 @@ export default async function ComitePage() {
         </div>
       </section>
 
-      <section className="flex flex-col gap-4 rounded-lg border border-border bg-card p-6 sm:flex-row sm:items-center sm:justify-between">
+      <section className="interactive-card flex flex-col gap-4 rounded-lg border border-border bg-card p-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="mb-2 flex items-center gap-2 text-sm font-medium text-primary">
             <UserRoundCheck className="size-4" />
@@ -86,7 +86,7 @@ export default async function ComitePage() {
         {committeeMembers.map((member) => (
           <article
             key={member.name}
-            className="flex min-h-72 flex-col justify-between rounded-lg border border-border bg-card p-5 transition-colors hover:border-primary/45 hover:bg-accent"
+            className="interactive-card flex min-h-72 flex-col justify-between rounded-lg border border-border bg-card p-5 hover:bg-accent"
           >
             <div>
               <div className="flex items-start justify-between gap-5">

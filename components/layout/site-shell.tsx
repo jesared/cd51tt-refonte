@@ -66,7 +66,9 @@ export function SiteShell({
           siteConfig={settings.siteConfig}
         />
         <main className="relative z-10 flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-          <div className="mx-auto max-w-7xl">{children}</div>
+          <div key={pathname} className="public-page-transition mx-auto max-w-7xl">
+            {children}
+          </div>
         </main>
         <SiteFooter settings={settings} />
       </div>

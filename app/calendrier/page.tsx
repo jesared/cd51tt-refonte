@@ -99,7 +99,7 @@ export default async function CalendrierPage() {
               {nextEvents.map((event) => (
                 <article
                   key={event.id}
-                  className="rounded-lg border border-border bg-card p-5"
+                  className="interactive-card rounded-lg border border-border bg-card p-5"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <Badge variant="secondary">

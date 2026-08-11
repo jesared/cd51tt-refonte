@@ -1,0 +1,5 @@
+import { DataPageSkeleton } from "@/components/layout/page-skeleton";
+
+export default function Loading() {
+  return <DataPageSkeleton type="calendar" />;
+}

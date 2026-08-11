@@ -187,7 +187,7 @@ export default async function HomePage() {
             <Link
               key={item.href}
               href={item.href}
-              className="group flex min-h-32 flex-col justify-between rounded-lg border border-border bg-card p-5 transition-colors hover:border-primary/45 hover:bg-accent"
+              className="interactive-card group flex min-h-32 flex-col justify-between rounded-lg border border-border bg-card p-5 hover:bg-accent"
             >
               <Icon className="size-5 text-primary" />
               <div>
@@ -204,7 +204,7 @@ export default async function HomePage() {
       {featuredArticle ? (
         <ScrollReveal>
           <section className="grid gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
-          <div className="overflow-hidden rounded-lg border border-border bg-card">
+          <div className="interactive-card overflow-hidden rounded-lg border border-border bg-card">
             {featuredArticle.imageUrl ? (
               <div className="relative aspect-[16/9] bg-muted">
                 <Image
@@ -253,7 +253,7 @@ export default async function HomePage() {
               <Link
                 key={article.slug}
                 href={`/actualites/${article.slug}`}
-                className="block rounded-lg border border-border bg-card p-5 transition-colors hover:border-primary/45 hover:bg-accent"
+                className="interactive-card block rounded-lg border border-border bg-card p-5 hover:bg-accent"
               >
                 <p className="text-sm font-medium text-primary">
                   {article.category}
@@ -292,7 +292,7 @@ export default async function HomePage() {
             {competitions.slice(0, 3).map((competition) => (
               <div
                 key={competition.title}
-                className="rounded-lg border border-border bg-card p-5"
+                className="interactive-card rounded-lg border border-border bg-card p-5"
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="font-semibold">{competition.title}</h3>
@@ -326,7 +326,7 @@ export default async function HomePage() {
             {directory.slice(0, 4).map((club) => (
               <div
                 key={club.name}
-                className="rounded-lg border border-border bg-card p-5"
+                className="interactive-card rounded-lg border border-border bg-card p-5"
               >
                 <h3 className="font-semibold">{club.name}</h3>
                 <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
@@ -342,7 +342,7 @@ export default async function HomePage() {
       <AnimatedMetrics metrics={homeMetrics} />
 
       <ScrollReveal>
-        <section className="flex flex-col gap-4 rounded-lg border border-border bg-card p-6 sm:flex-row sm:items-center sm:justify-between">
+        <section className="interactive-card flex flex-col gap-4 rounded-lg border border-border bg-card p-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-xl font-semibold tracking-tight">
             Besoin d&apos;un document ?
