@@ -33,6 +33,8 @@ const CONTROL_PARAMS = new Set([
   "ville",
   "type",
   "competition",
+  "sport",
+  "tag",
 ]);
 
 export function AdminListControls({

@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { ExternalLink, List, Plus } from "lucide-react";
+import { Edit3, ExternalLink, List, Plus } from "lucide-react";
 
 type SaveResultActionsProps = {
   message: string;
   publicHref?: string | null;
+  editHref?: string | null;
   createHref?: string | null;
   listHref?: string;
 };
@@ -11,6 +12,7 @@ type SaveResultActionsProps = {
 export function SaveResultActions({
   message,
   publicHref,
+  editHref,
   createHref,
   listHref,
 }: SaveResultActionsProps) {
@@ -28,6 +30,15 @@ export function SaveResultActions({
             Voir la page publique
           </Link>
         ) : null}
+        {editHref ? (
+          <Link
+            href={editHref}
+            className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-emerald-500/25 px-3 font-medium text-emerald-800 transition hover:bg-emerald-500/10 dark:text-emerald-200"
+          >
+            <Edit3 className="size-4" />
+            Modifier encore
+          </Link>
+        ) : null}
         {createHref ? (
           <Link
             href={createHref}
@@ -43,7 +54,7 @@ export function SaveResultActions({
             className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-emerald-500/25 px-3 font-medium text-emerald-800 transition hover:bg-emerald-500/10 dark:text-emerald-200"
           >
             <List className="size-4" />
-            Retour liste
+            Retour à la liste
           </Link>
         ) : null}
       </div>

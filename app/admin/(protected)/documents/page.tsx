@@ -32,6 +32,7 @@ type AdminDocumentsPageProps = {
     q?: string;
     statut?: string;
     categorie?: string;
+    competition?: string;
     tri?: string;
   };
 };
@@ -49,6 +50,10 @@ function publishButtonClass(isPublished: boolean) {
     : "inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90";
 }
 
+function isString(value: string | null): value is string {
+  return Boolean(value);
+}
+
 export default async function AdminDocumentsPage({
   searchParams,
 }: AdminDocumentsPageProps) {
@@ -59,7 +64,22 @@ export default async function AdminDocumentsPage({
   const query = normalizeSearchValue(searchParams?.q ?? "");
   const statusFilter = searchParams?.statut;
   const categoryFilter = searchParams?.categorie;
+  const competitionFilter = searchParams?.competition;
   const sortMode = searchParams?.tri ?? "date-desc";
+  const competitionOptions = Array.from(
+    new Set(entries.map((entry) => entry.competitionId).filter(isString)),
+  )
+    .map((competitionId) => {
+      const title =
+        competitions.find((competition) => competition.id === competitionId)
+          ?.title ?? competitionId;
+
+      return {
+        label: title,
+        value: competitionId,
+      };
+    })
+    .sort((first, second) => first.label.localeCompare(second.label, "fr"));
   const filteredEntries = entries
     .filter((entry) => {
       const matchesSearch =
@@ -76,8 +96,15 @@ export default async function AdminDocumentsPage({
         (statusFilter === "linked" && Boolean(entry.competitionId));
       const matchesCategory =
         !categoryFilter || entry.category === categoryFilter;
+      const matchesCompetition =
+        !competitionFilter || entry.competitionId === competitionFilter;
 
-      return matchesSearch && matchesStatus && matchesCategory;
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesCategory &&
+        matchesCompetition
+      );
     })
     .sort((first, second) => {
       if (sortMode === "title-asc") {
@@ -211,6 +238,12 @@ export default async function AdminDocumentsPage({
                   label: category,
                   value: category,
                 })),
+              },
+              {
+                name: "competition",
+                label: "Compétition",
+                defaultLabel: "Toutes les compétitions",
+                options: competitionOptions,
               },
             ]}
             sortOptions={[

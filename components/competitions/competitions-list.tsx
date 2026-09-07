@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -37,8 +38,10 @@ type CompetitionView = "cards" | "list";
 
 const filters: CompetitionFilter[] = [
   "Toutes",
+  "Ouvert",
   "En cours",
   "À venir",
+  "Terminé",
   "Équipes",
   "Individuel",
   "Jeunes",
@@ -85,7 +88,9 @@ function CompetitionBadges({ competition }: { competition: Competition }) {
       >
         {competition.status}
       </Badge>
-      <Badge variant="outline">{competition.statusDetail}</Badge>
+      {competition.statusDetail ? (
+        <Badge variant="outline">{competition.statusDetail}</Badge>
+      ) : null}
       <Badge variant="outline">{competition.format}</Badge>
     </div>
   );
@@ -283,18 +288,41 @@ function CompetitionDetails({
 
 function CompetitionCard({ competition }: { competition: Competition }) {
   return (
-    <article className="interactive-card flex min-h-full flex-col rounded-lg border border-border bg-card p-5">
-      <div className="min-w-0">
-        <CompetitionBadges competition={competition} />
-        <h2 className="mt-4 text-2xl font-semibold tracking-tight">
-          {competition.title}
-        </h2>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          {competition.summary}
-        </p>
-      </div>
-      <div className="mt-5">
-        <CompetitionDetails competition={competition} compact />
+    <article className="interactive-card flex min-h-full flex-col overflow-hidden rounded-lg border border-border bg-card">
+      {competition.imageUrl ? (
+        <div className="relative aspect-[16/9] bg-muted">
+          <Image
+            src={competition.imageUrl}
+            alt=""
+            fill
+            sizes="(min-width: 1536px) 33vw, (min-width: 1024px) 50vw, 100vw"
+            className="object-cover"
+          />
+        </div>
+      ) : null}
+      <div className="flex flex-1 flex-col p-5">
+        <div className="min-w-0">
+          <CompetitionBadges competition={competition} />
+          <h2 className="mt-4 text-2xl font-semibold tracking-tight">
+            {competition.title}
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            {competition.summary}
+          </p>
+        </div>
+        <div className="mt-5">
+          <CompetitionDetails competition={competition} compact />
+        </div>
+        <Link
+          href={`/competitions/${competition.id}`}
+          className={cn(
+            buttonVariants({ variant: "outline", size: "lg" }),
+            "mt-4 w-full",
+          )}
+        >
+          Voir le détail
+          <ArrowRight className="size-4" />
+        </Link>
       </div>
     </article>
   );
@@ -304,6 +332,17 @@ function CompetitionListRow({ competition }: { competition: Competition }) {
   return (
     <article className="interactive-card rounded-lg border border-border bg-card p-4 hover:bg-accent sm:p-5">
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+        {competition.imageUrl ? (
+          <div className="relative aspect-[16/9] overflow-hidden rounded-md bg-muted lg:hidden">
+            <Image
+              src={competition.imageUrl}
+              alt=""
+              fill
+              sizes="100vw"
+              className="object-cover"
+            />
+          </div>
+        ) : null}
         <div className="min-w-0">
           <CompetitionBadges competition={competition} />
           <h2 className="mt-3 text-xl font-semibold tracking-tight">
@@ -342,6 +381,13 @@ function CompetitionListRow({ competition }: { competition: Competition }) {
           <span className="truncate">{competition.location}</span>
         </p>
         <CompetitionActions competition={competition} />
+        <Link
+          href={`/competitions/${competition.id}`}
+          className={buttonVariants({ variant: "outline", size: "lg" })}
+        >
+          Voir le détail
+          <ArrowRight className="size-4" />
+        </Link>
       </div>
       <div className="mt-4">
         <CompetitionDocumentLinks competition={competition} compact />

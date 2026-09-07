@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { CalendarEventForm } from "@/components/admin/calendar-event-form";
 import { getAdminCalendarEventById } from "@/lib/admin-calendar";
+import { getAdminCompetitions } from "@/lib/admin-competitions";
 import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata = createPageMetadata({
@@ -24,7 +25,10 @@ export default async function EditCalendarEventPage({
   params,
   searchParams,
 }: EditCalendarEventPageProps) {
-  const event = await getAdminCalendarEventById(params.id);
+  const [event, competitionOptions] = await Promise.all([
+    getAdminCalendarEventById(params.id),
+    getAdminCompetitions(),
+  ]);
 
   if (!event) {
     notFound();
@@ -34,6 +38,7 @@ export default async function EditCalendarEventPage({
     <CalendarEventForm
       mode="edit"
       event={event}
+      competitionOptions={competitionOptions}
       errorMessage={
         searchParams?.error ? decodeURIComponent(searchParams.error) : null
       }

@@ -16,6 +16,11 @@ enum DocumentResourceStatus {
   PUBLISHED
 }
 
+enum CompetitionResourceStatus {
+  DRAFT
+  PUBLISHED
+}
+
 enum CalendarEventType {
   JOURNEE
   CONVOCATION
@@ -79,6 +84,30 @@ model DocumentResource {
 
   @@index([competitionId])
   @@index([status, updatedAt(sort: Desc)])
+}
+
+model CompetitionResource {
+  id                   String                    @id @default(cuid())
+  title                String
+  summary              String
+  imageUrl             String?
+  period               String
+  sportStatus          String
+  statusDetail         String
+  format               String
+  nextDate             String
+  registrationDeadline String
+  location             String
+  manager              String
+  tags                 Json
+  actions              Json
+  status               CompetitionResourceStatus @default(DRAFT)
+  sortOrder            Int                       @default(0)
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+
+  @@index([status, sortOrder])
+  @@index([sportStatus])
 }
 
 model CalendarEvent {

@@ -5,10 +5,10 @@ import { CompetitionsList } from "@/components/competitions/competitions-list";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { getPublishedCalendarEvents } from "@/lib/admin-calendar";
+import { getPublishedCompetitionItems } from "@/lib/admin-competitions";
 import { getPublishedDocumentCards } from "@/lib/admin-documents";
 import { getCalendarEventTypeLabel, getCompetitionTitle } from "@/lib/calendar";
 import { createPageMetadata } from "@/lib/metadata";
-import { competitions } from "@/lib/mock-data";
 
 export const metadata = createPageMetadata({
   title: "Compétitions",
@@ -28,14 +28,15 @@ function formatEventDate(date: Date) {
 }
 
 export default async function CompetitionsPage() {
-  const [databaseDocuments, publishedEvents] = await Promise.all([
+  const [databaseCompetitions, databaseDocuments, publishedEvents] = await Promise.all([
+    getPublishedCompetitionItems(),
     getPublishedDocumentCards(),
     getPublishedCalendarEvents(),
   ]);
   const calendarEvents = publishedEvents ?? [];
   const competitionDocuments =
     databaseDocuments?.filter((document) => document.competitionId) ?? [];
-  const displayCompetitions = competitions.map((competition) => {
+  const displayCompetitions = (databaseCompetitions ?? []).map((competition) => {
     const linkedDocuments = competitionDocuments.filter(
       (document) => document.competitionId === competition.id,
     );
@@ -66,8 +67,11 @@ export default async function CompetitionsPage() {
     (action) => action.primary,
   );
   const nextCalendarEvent = calendarEvents[0];
+  const competitionTitles = new Map(
+    displayCompetitions.map((competition) => [competition.id, competition.title]),
+  );
   const nextCalendarCompetitionTitle = nextCalendarEvent
-    ? getCompetitionTitle(nextCalendarEvent.competitionId)
+    ? getCompetitionTitle(nextCalendarEvent.competitionId, competitionTitles)
     : null;
 
   return (
@@ -190,7 +194,7 @@ export default async function CompetitionsPage() {
                   {event.title}
                 </h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {getCompetitionTitle(event.competitionId)}
+                  {getCompetitionTitle(event.competitionId, competitionTitles)}
                 </p>
                 <p className="mt-4 flex items-center gap-2 text-sm text-foreground">
                   <CalendarDays className="size-4 text-primary" />

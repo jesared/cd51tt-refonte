@@ -1,4 +1,5 @@
 import { CalendarEventForm } from "@/components/admin/calendar-event-form";
+import { getAdminCompetitions } from "@/lib/admin-competitions";
 import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata = createPageMetadata({
@@ -9,16 +10,21 @@ export const metadata = createPageMetadata({
 
 type NewCalendarEventPageProps = {
   searchParams?: {
+    competition?: string;
     error?: string;
   };
 };
 
-export default function NewCalendarEventPage({
+export default async function NewCalendarEventPage({
   searchParams,
 }: NewCalendarEventPageProps) {
+  const competitionOptions = await getAdminCompetitions();
+
   return (
     <CalendarEventForm
       mode="create"
+      competitionOptions={competitionOptions}
+      defaultCompetitionId={searchParams?.competition}
       errorMessage={
         searchParams?.error ? decodeURIComponent(searchParams.error) : null
       }

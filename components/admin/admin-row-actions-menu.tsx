@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRef } from "react";
 import type { ReactNode } from "react";
 import { MoreVertical, Pencil, Trash2 } from "lucide-react";
 
@@ -34,53 +35,65 @@ export function AdminRowActionsMenu({
   deleteMessage,
 }: AdminRowActionsMenuProps) {
   const hiddenFields = deleteFields ?? { id: deleteId };
+  const deleteTriggerRef = useRef<HTMLButtonElement>(null);
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        aria-label="Ouvrir les actions"
-        className="inline-flex size-9 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition duration-200 ease-out hover:border-primary/35 hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <MoreVertical className="size-4" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44">
-        <DropdownMenuGroup>
-          {children ? (
-            <>
-              {children}
-              <DropdownMenuSeparator />
-            </>
-          ) : null}
-          <DropdownMenuItem className="p-0">
-            <Link
-              href={editHref}
-              className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm"
-            >
-              <Pencil className="size-4" />
-              Modifier
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <div className="px-1">
-            <DeleteConfirmationForm
-              action={deleteAction}
-              itemName={deleteLabel}
-              message={deleteMessage}
-            >
-              {Object.entries(hiddenFields).map(([name, value]) => (
-                <input key={name} type="hidden" name={name} value={value} />
-              ))}
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          aria-label="Ouvrir les actions"
+          className="inline-flex size-9 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition duration-200 ease-out hover:border-primary/35 hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <MoreVertical className="size-4" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-44">
+          <DropdownMenuGroup>
+            {children ? (
+              <>
+                {children}
+                <DropdownMenuSeparator />
+              </>
+            ) : null}
+            <DropdownMenuItem className="p-0">
+              <Link
+                href={editHref}
+                className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm"
+              >
+                <Pencil className="size-4" />
+                Modifier
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <div className="px-1">
               <button
-                type="submit"
+                type="button"
                 className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm text-destructive transition-colors hover:bg-destructive/10"
+                onClick={() => deleteTriggerRef.current?.click()}
               >
                 <Trash2 className="size-4" />
                 Supprimer
               </button>
-            </DeleteConfirmationForm>
-          </div>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+            </div>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <DeleteConfirmationForm
+        action={deleteAction}
+        itemName={deleteLabel}
+        message={deleteMessage}
+      >
+        {Object.entries(hiddenFields).map(([name, value]) => (
+          <input key={name} type="hidden" name={name} value={value} />
+        ))}
+        <button
+          ref={deleteTriggerRef}
+          type="submit"
+          hidden
+        >
+          Supprimer
+        </button>
+      </DeleteConfirmationForm>
+    </>
   );
 }

@@ -36,8 +36,9 @@ export type Competition = {
   id: string;
   title: string;
   summary: string;
+  imageUrl?: string | null;
   period: string;
-  status: "Ouvert" | "À venir" | "En cours";
+  status: "Ouvert" | "À venir" | "En cours" | "Terminé";
   statusDetail: string;
   format: string;
   nextDate: string;

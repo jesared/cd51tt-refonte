@@ -11,7 +11,7 @@ import { prisma } from "@/lib/prisma";
 
 const calendarEventFormSchema = z.object({
   id: z.string().optional(),
-  competitionId: z.string().trim().optional(),
+  competitionId: z.string().trim().min(1, "Choisissez une compétition."),
   title: z.string().trim().min(3, "Le libellé doit contenir au moins 3 caractères."),
   type: z.nativeEnum(CalendarEventType),
   date: z.string().trim().min(1, "La date est requise."),
@@ -153,8 +153,17 @@ export async function saveCalendarEvent(formData: FormData) {
       sortOrder: getStringValue(formData, "sortOrder") || "0",
     });
 
+    const competition = await prisma.competitionResource.findUnique({
+      where: { id: values.competitionId },
+      select: { id: true },
+    });
+
+    if (!competition) {
+      throw new Error("Choisissez une compétition existante.");
+    }
+
     const payload = {
-      competitionId: values.competitionId || null,
+      competitionId: values.competitionId,
       title: values.title,
       type: values.type,
       date: toEventDate(values.date),
@@ -222,64 +231,6 @@ export async function toggleCalendarEventPublication(formData: FormData) {
 
   revalidateCalendarPaths();
   redirect("/admin/calendrier?published=1");
-}
-
-export async function seedMockCalendarEvents() {
-  await requireAdminSession();
-
-  if (!(await hasCalendarEventTable())) {
-    redirect(
-      "/admin/calendrier?error=La table du calendrier n'existe pas encore. Lancez d'abord prisma db push.",
-    );
-  }
-
-  if ((await prisma.calendarEvent.count()) > 0) {
-    redirect("/admin/calendrier?seeded=0");
-  }
-
-  await prisma.calendarEvent.createMany({
-    data: [
-      {
-        competitionId: "championnat-equipes",
-        title: "Journée 4",
-        type: CalendarEventType.JOURNEE,
-        date: new Date("2026-09-14T12:00:00"),
-        location: "Salles des clubs recevants",
-        published: true,
-        sortOrder: 10,
-      },
-      {
-        competitionId: "criterium-federal",
-        title: "Limite d'inscription tour 1",
-        type: CalendarEventType.INSCRIPTION,
-        date: new Date("2026-09-28T12:00:00"),
-        location: "Extranet clubs",
-        published: true,
-        sortOrder: 20,
-      },
-      {
-        competitionId: "criterium-federal",
-        title: "Tour 1",
-        type: CalendarEventType.JOURNEE,
-        date: new Date("2026-10-11T12:00:00"),
-        location: "Complexe René Tys, Reims",
-        published: false,
-        sortOrder: 30,
-      },
-      {
-        competitionId: "coupes-finales",
-        title: "Finales départementales",
-        type: CalendarEventType.JOURNEE,
-        date: new Date("2027-05-30T12:00:00"),
-        location: "Lieu à confirmer",
-        published: false,
-        sortOrder: 40,
-      },
-    ],
-  });
-
-  revalidateCalendarPaths();
-  redirect("/admin/calendrier?seeded=1");
 }
 
 function revalidateCalendarPaths() {

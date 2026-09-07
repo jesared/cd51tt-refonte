@@ -5,10 +5,16 @@ import { ArrowLeft, Save } from "lucide-react";
 import { saveCalendarEvent } from "@/lib/admin-calendar";
 import { SaveResultActions } from "@/components/admin/save-result-actions";
 import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
-import { competitions } from "@/lib/mock-data";
+
+type CalendarCompetitionOption = {
+  id: string;
+  title: string;
+};
 
 type CalendarEventFormProps = {
   event?: CalendarEvent;
+  competitionOptions: CalendarCompetitionOption[];
+  defaultCompetitionId?: string;
   mode: "create" | "edit";
   errorMessage?: string | null;
   saved?: boolean;
@@ -30,12 +36,15 @@ const eventTypes = [
 ];
 
 export function CalendarEventForm({
+  competitionOptions,
+  defaultCompetitionId,
   event,
   errorMessage,
   mode,
   saved = false,
 }: CalendarEventFormProps) {
   const isEdit = mode === "edit";
+  const hasCompetitions = competitionOptions.length > 0;
 
   return (
     <div className="space-y-6">
@@ -93,16 +102,29 @@ export function CalendarEventForm({
               <select
                 id="competitionId"
                 name="competitionId"
-                defaultValue={event?.competitionId ?? ""}
+                defaultValue={event?.competitionId ?? defaultCompetitionId ?? ""}
+                required
                 className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
               >
-                <option value="">Événement général</option>
-                {competitions.map((competition) => (
+                <option value="" disabled>
+                  Choisir une compétition
+                </option>
+                {competitionOptions.map((competition) => (
                   <option key={competition.id} value={competition.id}>
                     {competition.title}
                   </option>
                 ))}
               </select>
+              <p className="text-xs leading-5 text-muted-foreground">
+                L’échéance sera affichée dans le calendrier et sur la page
+                détail de cette compétition.
+              </p>
+              {!hasCompetitions ? (
+                <p className="text-sm text-muted-foreground">
+                  Créez d&apos;abord une compétition pour pouvoir ajouter une
+                  échéance.
+                </p>
+              ) : null}
             </div>
 
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_180px_220px]">
@@ -118,6 +140,10 @@ export function CalendarEventForm({
                   placeholder="Journée 1, tour 2, limite inscription..."
                   className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
                 />
+                <p className="text-xs leading-5 text-muted-foreground">
+                  Exemple : Journée 1, Tour 2, limite d’inscription, convocation
+                  phase 1.
+                </p>
               </div>
 
               <div className="grid gap-2">
@@ -132,6 +158,9 @@ export function CalendarEventForm({
                   defaultValue={toDateInputValue(event?.date)}
                   className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
                 />
+                <p className="text-xs leading-5 text-muted-foreground">
+                  Date affichée sur le calendrier public.
+                </p>
               </div>
 
               <div className="grid gap-2">
@@ -150,6 +179,10 @@ export function CalendarEventForm({
                     </option>
                   ))}
                 </select>
+                <p className="text-xs leading-5 text-muted-foreground">
+                  Choisissez la nature de l’échéance pour aider les visiteurs à
+                  comprendre l’action attendue.
+                </p>
               </div>
             </div>
 
@@ -166,6 +199,10 @@ export function CalendarEventForm({
                   placeholder="Salle, club recevant, extranet..."
                   className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
                 />
+                <p className="text-xs leading-5 text-muted-foreground">
+                  Exemple : Complexe René Tys, club recevant, extranet, lieu à
+                  confirmer.
+                </p>
               </div>
 
               <div className="grid gap-2">
@@ -179,6 +216,10 @@ export function CalendarEventForm({
                   defaultValue={event?.sortOrder ?? 0}
                   className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
                 />
+                <p className="text-xs leading-5 text-muted-foreground">
+                  Sert à départager plusieurs échéances le même jour. 0 suffit
+                  dans la plupart des cas.
+                </p>
               </div>
             </div>
 
@@ -197,6 +238,7 @@ export function CalendarEventForm({
         <div className="flex justify-end">
           <button
             type="submit"
+            disabled={!hasCompetitions}
             className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:opacity-90"
           >
             <Save className="size-4" />

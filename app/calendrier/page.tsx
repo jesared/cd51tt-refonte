@@ -8,6 +8,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { getPublishedCalendarEvents } from "@/lib/admin-calendar";
+import { getPublishedCompetitionItems } from "@/lib/admin-competitions";
 import { getCalendarEventTypeLabel, getCompetitionTitle } from "@/lib/calendar";
 import { createPageMetadata } from "@/lib/metadata";
 
@@ -29,10 +30,20 @@ function formatEventDate(date: Date) {
 }
 
 export default async function CalendrierPage() {
-  const publishedEvents = (await getPublishedCalendarEvents()) ?? [];
+  const [publishedEventsResult, publishedCompetitionsResult] = await Promise.all([
+    getPublishedCalendarEvents(),
+    getPublishedCompetitionItems(),
+  ]);
+  const publishedEvents = publishedEventsResult ?? [];
+  const competitionTitles = new Map(
+    (publishedCompetitionsResult ?? []).map((competition) => [
+      competition.id,
+      competition.title,
+    ]),
+  );
   const calendarItems: SportsCalendarEvent[] = publishedEvents.map((event) => ({
     id: event.id,
-    competitionTitle: getCompetitionTitle(event.competitionId),
+    competitionTitle: getCompetitionTitle(event.competitionId, competitionTitles),
     date: event.date.toISOString().slice(0, 10),
     title: event.title,
     type: getCalendarEventTypeLabel(event.type),
@@ -111,7 +122,7 @@ export default async function CalendrierPage() {
                     {event.title}
                   </h3>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    {getCompetitionTitle(event.competitionId)}
+                    {getCompetitionTitle(event.competitionId, competitionTitles)}
                   </p>
                   <div className="mt-4 space-y-2 text-sm">
                     <p className="flex items-center gap-2 text-foreground">

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarDays, Eye, EyeOff, MapPin, Plus, Sparkles } from "lucide-react";
+import { CalendarDays, Eye, EyeOff, MapPin, Plus } from "lucide-react";
 
 import { AdminListControls } from "@/components/admin/admin-list-controls";
 import { AdminRowActionsMenu } from "@/components/admin/admin-row-actions-menu";
@@ -8,9 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import {
   deleteCalendarEvent,
   getAdminCalendarEvents,
-  seedMockCalendarEvents,
   toggleCalendarEventPublication,
 } from "@/lib/admin-calendar";
+import { getAdminCompetitions } from "@/lib/admin-competitions";
 import { getCalendarEventTypeLabel, getCompetitionTitle } from "@/lib/calendar";
 import { createPageMetadata } from "@/lib/metadata";
 
@@ -27,7 +27,6 @@ type AdminCalendrierPageProps = {
     error?: string;
     saved?: string;
     deleted?: string;
-    seeded?: string;
     published?: string;
     q?: string;
     competition?: string;
@@ -55,11 +54,17 @@ function normalizeSearchValue(value: string) {
 export default async function AdminCalendrierPage({
   searchParams,
 }: AdminCalendrierPageProps) {
-  const calendarEvents = await getAdminCalendarEvents();
+  const [calendarEvents, competitions] = await Promise.all([
+    getAdminCalendarEvents(),
+    getAdminCompetitions(),
+  ]);
+  const competitionTitles = new Map(
+    competitions.map((competition) => [competition.id, competition.title]),
+  );
   const publishedCount = calendarEvents.filter((event) => event.published).length;
   const calendarItems = calendarEvents.map((event) => ({
     id: event.id,
-    competitionTitle: getCompetitionTitle(event.competitionId),
+    competitionTitle: getCompetitionTitle(event.competitionId, competitionTitles),
     date: event.date.toISOString().slice(0, 10),
     title: event.title,
     type: getCalendarEventTypeLabel(event.type),
@@ -75,7 +80,7 @@ export default async function AdminCalendrierPage({
     new Map(
       calendarEvents.map((event) => [
         event.competitionId ?? "general",
-        getCompetitionTitle(event.competitionId),
+        getCompetitionTitle(event.competitionId, competitionTitles),
       ]),
     ),
   ).sort(([, first], [, second]) => first.localeCompare(second, "fr"));
@@ -90,7 +95,10 @@ export default async function AdminCalendrierPage({
   const filteredEvents = calendarEvents
     .filter((event) => {
       const typeLabel = getCalendarEventTypeLabel(event.type);
-      const competitionTitle = getCompetitionTitle(event.competitionId);
+      const competitionTitle = getCompetitionTitle(
+        event.competitionId,
+        competitionTitles,
+      );
       const matchesSearch =
         !query ||
         normalizeSearchValue(
@@ -141,14 +149,6 @@ export default async function AdminCalendrierPage({
         </div>
 
         <div className="flex flex-col justify-center gap-3 border-t border-border pt-5 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
-          {calendarEvents.length === 0 ? (
-            <form action={seedMockCalendarEvents} className="contents">
-              <button type="submit" className="admin-action h-11 w-full">
-                <Sparkles className="size-4" />
-                Charger un exemple
-              </button>
-            </form>
-          ) : null}
           <Link
             href="/admin/calendrier/nouveau"
             className="admin-action admin-action-primary h-11 w-full"
@@ -167,7 +167,6 @@ export default async function AdminCalendrierPage({
 
       {searchParams?.saved ||
       searchParams?.deleted ||
-      searchParams?.seeded ||
       searchParams?.published ? (
         <div className="admin-feedback">Calendrier mis à jour.</div>
       ) : null}
@@ -255,7 +254,10 @@ export default async function AdminCalendrierPage({
               ) : null}
               {filteredEvents.map((event) => {
                 const typeLabel = getCalendarEventTypeLabel(event.type);
-                const competitionTitle = getCompetitionTitle(event.competitionId);
+                const competitionTitle = getCompetitionTitle(
+                  event.competitionId,
+                  competitionTitles,
+                );
 
                 return (
                   <article
