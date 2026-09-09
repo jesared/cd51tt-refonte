@@ -329,13 +329,15 @@ export async function saveCompetition(formData: FormData) {
   const status = getBooleanValue(formData, "published")
     ? CompetitionResourceStatus.PUBLISHED
     : CompetitionResourceStatus.DRAFT;
+  const removeImage = getBooleanValue(formData, "removeImage");
   let redirectPath = "/admin/competitions";
 
   try {
     const uploadedImageUrl = await getUploadedCompetitionImageUrl(
       formData.get("imageUpload") as File | null,
     );
-    const imageUrl = uploadedImageUrl ?? getStringValue(formData, "imageUrl");
+    const imageUrl =
+      uploadedImageUrl ?? (removeImage ? "" : getStringValue(formData, "imageUrl"));
 
     const values = competitionFormSchema.parse({
       id,

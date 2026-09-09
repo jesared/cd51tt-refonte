@@ -3,6 +3,7 @@ import { CalendarEventType, type CalendarEvent } from "@prisma/client";
 import { ArrowLeft, Save } from "lucide-react";
 
 import { saveCalendarEvent } from "@/lib/admin-calendar";
+import { ConfirmableAdminForm } from "@/components/admin/confirmable-admin-form";
 import { SaveResultActions } from "@/components/admin/save-result-actions";
 import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
 
@@ -88,7 +89,12 @@ export function CalendarEventForm({
         </div>
       ) : null}
 
-      <form action={saveCalendarEvent} className="grid gap-6">
+      <ConfirmableAdminForm
+        action={saveCalendarEvent}
+        className="grid gap-6"
+        contentLabel="cette échéance"
+        contentType="calendar"
+      >
         <UnsavedChangesGuard />
         {event ? <input type="hidden" name="id" value={event.id} /> : null}
 
@@ -245,7 +251,7 @@ export function CalendarEventForm({
             {isEdit ? "Enregistrer les modifications" : "Créer l'échéance"}
           </button>
         </div>
-      </form>
+      </ConfirmableAdminForm>
     </div>
   );
 }

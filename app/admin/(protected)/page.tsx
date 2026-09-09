@@ -14,11 +14,13 @@ import {
   UserRoundCheck,
 } from "lucide-react";
 import {
+  CompetitionResourceStatus,
   DocumentResourceStatus,
   NewsArticleStatus,
   type CalendarEvent,
   type ClubResource,
   type CommitteeMemberResource,
+  type CompetitionResource,
   type DocumentResource,
   type NewsArticle,
   type TechnicalStaffMemberResource,
@@ -27,6 +29,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { getAdminCalendarEvents } from "@/lib/admin-calendar";
 import { getAdminClubs } from "@/lib/admin-clubs";
+import { getAdminCompetitions } from "@/lib/admin-competitions";
 import { getAdminDocuments } from "@/lib/admin-documents";
 import { getAdminNewsArticles } from "@/lib/admin-news";
 import {
@@ -35,7 +38,6 @@ import {
 } from "@/lib/admin-people";
 import { getAdminStats } from "@/lib/admin-stats";
 import { createPageMetadata } from "@/lib/metadata";
-import { competitions } from "@/lib/mock-data";
 
 export const metadata = createPageMetadata({
   title: "Administration",
@@ -47,6 +49,7 @@ export const metadata = createPageMetadata({
 type DashboardData = {
   articles: NewsArticle[];
   documents: DocumentResource[];
+  competitions: CompetitionResource[];
   clubs: ClubResource[];
   calendarEvents: CalendarEvent[];
   committeeMembers: CommitteeMemberResource[];
@@ -82,11 +85,11 @@ function getModules(data: DashboardData) {
     {
       href: "/admin/competitions",
       title: "Compétitions",
-      description: "Vue de cadrage en lecture seule.",
-      count: competitions.length,
-      unit: "démo",
-      state: "Préparation",
-      demo: true,
+      description: "Créer, modifier et publier les épreuves.",
+      count: data.competitions.length,
+      unit:
+        data.competitions.length === 1 ? "compétition" : "compétitions",
+      state: "Prêt",
       icon: Trophy,
     },
     {
@@ -167,8 +170,8 @@ const checks = [
   },
   {
     label: "Compétitions",
-    detail: "Lecture seule tant que le modèle de données n'est pas branché.",
-    done: false,
+    detail: "CRUD branché sur la base avec échéances et documents liés.",
+    done: true,
   },
 ];
 
@@ -176,6 +179,7 @@ export default async function AdminDashboardPage() {
   const [
     articles,
     documents,
+    competitions,
     adminClubs,
     calendarEvents,
     committeeMembers,
@@ -184,6 +188,7 @@ export default async function AdminDashboardPage() {
   ] = await Promise.all([
     getAdminNewsArticles(),
     getAdminDocuments(),
+    getAdminCompetitions(),
     getAdminClubs(),
     getAdminCalendarEvents(),
     getAdminCommitteeMembers(),
@@ -194,6 +199,7 @@ export default async function AdminDashboardPage() {
   const data: DashboardData = {
     articles,
     documents,
+    competitions,
     clubs: adminClubs,
     calendarEvents,
     committeeMembers,
@@ -210,8 +216,14 @@ export default async function AdminDashboardPage() {
   const publishedCalendarCount = calendarEvents.filter(
     (event) => event.published,
   ).length;
+  const publishedCompetitionCount = competitions.filter(
+    (competition) => competition.status === CompetitionResourceStatus.PUBLISHED,
+  ).length;
   const publicContentCount =
-    publishedArticleCount + publishedDocumentCount + publishedCalendarCount;
+    publishedArticleCount +
+    publishedDocumentCount +
+    publishedCalendarCount +
+    publishedCompetitionCount;
   const structuredDataCount =
     adminClubs.length + committeeMembers.length + technicalStaffMembers.length;
 
@@ -228,8 +240,8 @@ export default async function AdminDashboardPage() {
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
               Une console simple pour piloter les contenus réellement présents
-              en base, suivre les modules disponibles et identifier les zones de
-              démonstration.
+              en base, suivre les modules disponibles et repérer les points à
+              vérifier.
             </p>
           </div>
           <Link
@@ -261,10 +273,10 @@ export default async function AdminDashboardPage() {
           </p>
         </div>
         <div className="rounded-lg border border-border bg-background p-4">
-          <p className="text-sm text-muted-foreground">Données de démo</p>
+          <p className="text-sm text-muted-foreground">Compétitions</p>
           <p className="mt-2 text-2xl font-semibold">{competitions.length}</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Compétitions en lecture seule
+            Épreuves gérées en base
           </p>
         </div>
       </section>
@@ -301,11 +313,6 @@ export default async function AdminDashboardPage() {
                         >
                           {item.state}
                         </Badge>
-                        {item.demo ? (
-                          <Badge variant="secondary" className="rounded-md">
-                            Données de démo
-                          </Badge>
-                        ) : null}
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">
                         {item.description}
@@ -355,14 +362,14 @@ export default async function AdminDashboardPage() {
           <div className="rounded-lg border border-border bg-background p-5">
             <h2 className="text-base font-semibold">Prochaine priorité</h2>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Brancher le modèle Compétitions pour remplacer les données de
-              démonstration par un vrai CRUD.
+              Utiliser la page “À vérifier” pour repérer les contenus
+              incomplets avant publication.
             </p>
             <Link
-              href="/admin/competitions"
+              href="/admin/a-verifier"
               className="mt-4 inline-flex h-9 items-center justify-center rounded-md border border-border px-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
             >
-              Voir le module compétitions
+              Ouvrir les vérifications
             </Link>
           </div>
         </aside>

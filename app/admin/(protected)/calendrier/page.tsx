@@ -4,12 +4,14 @@ import { CalendarDays, Eye, EyeOff, MapPin, Plus } from "lucide-react";
 import { AdminListControls } from "@/components/admin/admin-list-controls";
 import { AdminRowActionsMenu } from "@/components/admin/admin-row-actions-menu";
 import { AdminSportsCalendar } from "@/components/admin/admin-sports-calendar";
+import { PublicationConfirmationForm } from "@/components/admin/publication-confirmation-form";
 import { Badge } from "@/components/ui/badge";
 import {
   deleteCalendarEvent,
   getAdminCalendarEvents,
   toggleCalendarEventPublication,
 } from "@/lib/admin-calendar";
+import { matchesRecentUpdateFilter } from "@/lib/admin-list-filters";
 import { getAdminCompetitions } from "@/lib/admin-competitions";
 import { getCalendarEventTypeLabel, getCompetitionTitle } from "@/lib/calendar";
 import { createPageMetadata } from "@/lib/metadata";
@@ -32,6 +34,7 @@ type AdminCalendrierPageProps = {
     competition?: string;
     statut?: string;
     type?: string;
+    maj?: string;
     tri?: string;
   };
 };
@@ -49,6 +52,20 @@ function normalizeSearchValue(value: string) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
+}
+
+function getCalendarEventIncompleteReasons(
+  event: Awaited<ReturnType<typeof getAdminCalendarEvents>>[number],
+  competitionTitles: ReadonlyMap<string, string>,
+) {
+  return [
+    !event.title ? "Libellé manquant" : null,
+    !event.location ? "Lieu manquant" : null,
+    !event.competitionId ? "Compétition non liée" : null,
+    event.competitionId && !competitionTitles.has(event.competitionId)
+      ? "Compétition liée introuvable"
+      : null,
+  ].filter((reason): reason is string => Boolean(reason));
 }
 
 export default async function AdminCalendrierPage({
@@ -75,6 +92,7 @@ export default async function AdminCalendrierPage({
   const competitionFilter = searchParams?.competition;
   const statusFilter = searchParams?.statut;
   const typeFilter = searchParams?.type;
+  const updateFilter = searchParams?.maj;
   const sortMode = searchParams?.tri ?? "date-asc";
   const competitionOptions = Array.from(
     new Map(
@@ -113,9 +131,17 @@ export default async function AdminCalendrierPage({
         (statusFilter === "published" && event.published) ||
         (statusFilter === "draft" && !event.published);
       const matchesType = !typeFilter || event.type === typeFilter;
+      const matchesUpdated = matchesRecentUpdateFilter(
+        event.updatedAt,
+        updateFilter,
+      );
 
       return (
-        matchesSearch && matchesCompetition && matchesStatus && matchesType
+        matchesSearch &&
+        matchesCompetition &&
+        matchesStatus &&
+        matchesType &&
+        matchesUpdated
       );
     })
     .sort((first, second) => {
@@ -125,6 +151,10 @@ export default async function AdminCalendrierPage({
 
       if (sortMode === "title-desc") {
         return second.title.localeCompare(first.title, "fr");
+      }
+
+      if (sortMode === "updated-desc") {
+        return second.updatedAt.getTime() - first.updatedAt.getTime();
       }
 
       return sortMode === "date-desc"
@@ -231,10 +261,20 @@ export default async function AdminCalendrierPage({
                   value,
                 })),
               },
+              {
+                name: "maj",
+                label: "Mise à jour",
+                defaultLabel: "Toutes les dates",
+                options: [
+                  { label: "Mis à jour récemment", value: "recent" },
+                  { label: "Plus ancien", value: "older" },
+                ],
+              },
             ]}
             sortOptions={[
               { label: "Date proche", value: "date-asc" },
               { label: "Date lointaine", value: "date-desc" },
+              { label: "Mise à jour récente", value: "updated-desc" },
               { label: "Libellé A-Z", value: "title-asc" },
               { label: "Libellé Z-A", value: "title-desc" },
             ]}
@@ -303,7 +343,15 @@ export default async function AdminCalendrierPage({
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-                      <form action={toggleCalendarEventPublication}>
+                      <PublicationConfirmationForm
+                        action={toggleCalendarEventPublication}
+                        itemName={`${event.title} - ${competitionTitle}`}
+                        isPublished={event.published}
+                        incompleteReasons={getCalendarEventIncompleteReasons(
+                          event,
+                          competitionTitles,
+                        )}
+                      >
                         <input type="hidden" name="id" value={event.id} />
                         <input
                           type="hidden"
@@ -325,7 +373,7 @@ export default async function AdminCalendrierPage({
                           )}
                           {event.published ? "Dépublier" : "Publier"}
                         </button>
-                      </form>
+                      </PublicationConfirmationForm>
                       <AdminRowActionsMenu
                         editHref={`/admin/calendrier/${event.id}`}
                         deleteAction={deleteCalendarEvent}

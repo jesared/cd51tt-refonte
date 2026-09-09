@@ -1,12 +1,10 @@
 import Link from "next/link";
-import Image from "next/image";
 import type { CalendarEvent, CompetitionResource } from "@prisma/client";
 import {
   ArrowLeft,
   CalendarDays,
   CalendarPlus,
   ExternalLink,
-  ImageIcon,
   Save,
 } from "lucide-react";
 
@@ -17,6 +15,8 @@ import {
   saveCompetition,
 } from "@/lib/admin-competitions";
 import { SaveResultActions } from "@/components/admin/save-result-actions";
+import { ConfirmableAdminForm } from "@/components/admin/confirmable-admin-form";
+import { ImageUploadField } from "@/components/admin/image-upload-field";
 import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
 import {
   formatCalendarEventDate,
@@ -186,10 +186,13 @@ export function CompetitionForm({
         </div>
       ) : null}
 
-      <form
+      <ConfirmableAdminForm
         action={saveCompetition}
         encType="multipart/form-data"
         className="grid gap-6"
+        contentLabel="cette compétition"
+        contentType="competition"
+        currentHasImage={Boolean(competition?.imageUrl)}
       >
         <UnsavedChangesGuard />
         {competition ? (
@@ -230,55 +233,7 @@ export function CompetitionForm({
               </p>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_220px] lg:items-start">
-              <div className="grid gap-2">
-                <label htmlFor="imageUrl" className="text-sm font-medium">
-                  Image existante
-                </label>
-                <input
-                  id="imageUrl"
-                  name="imageUrl"
-                  placeholder="https://... ou /images/competition.jpg"
-                  defaultValue={competition?.imageUrl ?? ""}
-                  className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
-                />
-                <p className="text-xs leading-5 text-muted-foreground">
-                  Collez une URL d’image déjà en ligne si vous n’envoyez pas de
-                  fichier.
-                </p>
-              </div>
-
-              <div className="grid gap-2">
-                <label htmlFor="imageUpload" className="text-sm font-medium">
-                  Image Cloudinary
-                </label>
-                <input
-                  id="imageUpload"
-                  name="imageUpload"
-                  type="file"
-                  accept="image/*"
-                  className="h-11 rounded-xl border border-input bg-background px-3 py-2 text-sm outline-none transition file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1 file:text-sm file:text-foreground focus:border-ring focus:ring-2 focus:ring-ring/20"
-                />
-                <p className="text-xs leading-5 text-muted-foreground">
-                  Envoyez une image depuis l’ordinateur. Format conseillé :
-                  paysage, net, moins de 15 Mo.
-                </p>
-              </div>
-
-              <div className="relative grid aspect-[4/3] place-items-center overflow-hidden rounded-xl border border-border bg-muted text-muted-foreground">
-                {competition?.imageUrl ? (
-                  <Image
-                    src={competition.imageUrl}
-                    alt=""
-                    fill
-                    sizes="220px"
-                    className="object-cover"
-                  />
-                ) : (
-                  <ImageIcon className="size-8" />
-                )}
-              </div>
-            </div>
+            <ImageUploadField initialImageUrl={competition?.imageUrl} />
 
             <div className="grid gap-4 md:grid-cols-3">
               <div className="grid gap-2">
@@ -660,7 +615,7 @@ export function CompetitionForm({
             {isEdit ? "Enregistrer les modifications" : "Créer la compétition"}
           </button>
         </div>
-      </form>
+      </ConfirmableAdminForm>
     </div>
   );
 }

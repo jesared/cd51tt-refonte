@@ -5,12 +5,14 @@ import { NewsArticleStatus } from "@prisma/client";
 import { AdminListControls } from "@/components/admin/admin-list-controls";
 import { AdminRowActionsMenu } from "@/components/admin/admin-row-actions-menu";
 import { AdminSubmitButton } from "@/components/admin/admin-submit-button";
+import { PublicationConfirmationForm } from "@/components/admin/publication-confirmation-form";
 import {
   deleteNewsArticle,
   getAdminNewsArticles,
   seedMockNewsArticles,
   toggleNewsArticlePublication,
 } from "@/lib/admin-news";
+import { matchesRecentUpdateFilter } from "@/lib/admin-list-filters";
 import { createPageMetadata } from "@/lib/metadata";
 import { formatFrenchDate } from "@/lib/news";
 
@@ -32,6 +34,8 @@ type AdminActualitesPageProps = {
     q?: string;
     statut?: string;
     categorie?: string;
+    image?: string;
+    maj?: string;
     tri?: string;
   };
 };
@@ -41,6 +45,17 @@ function normalizeSearchValue(value: string) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
+}
+
+function getArticleIncompleteReasons(
+  article: Awaited<ReturnType<typeof getAdminNewsArticles>>[number],
+) {
+  return [
+    !article.title ? "Titre manquant" : null,
+    !article.excerpt ? "Extrait manquant" : null,
+    !article.content ? "Contenu manquant" : null,
+    !article.imageUrl ? "Image manquante" : null,
+  ].filter((reason): reason is string => Boolean(reason));
 }
 
 export default async function AdminActualitesPage({
@@ -53,6 +68,8 @@ export default async function AdminActualitesPage({
   const query = normalizeSearchValue(searchParams?.q ?? "");
   const statusFilter = searchParams?.statut;
   const categoryFilter = searchParams?.categorie;
+  const imageFilter = searchParams?.image;
+  const updateFilter = searchParams?.maj;
   const sortMode = searchParams?.tri ?? "date-desc";
   const filteredArticles = articles
     .filter((article) => {
@@ -70,8 +87,23 @@ export default async function AdminActualitesPage({
         (statusFilter === "featured" && article.featured);
       const matchesCategory =
         !categoryFilter || article.category === categoryFilter;
+      const hasImage = Boolean(article.imageUrl);
+      const matchesImage =
+        !imageFilter ||
+        (imageFilter === "with" && hasImage) ||
+        (imageFilter === "without" && !hasImage);
+      const matchesUpdated = matchesRecentUpdateFilter(
+        article.updatedAt,
+        updateFilter,
+      );
 
-      return matchesSearch && matchesStatus && matchesCategory;
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesCategory &&
+        matchesImage &&
+        matchesUpdated
+      );
     })
     .sort((first, second) => {
       if (sortMode === "title-asc") {
@@ -80,6 +112,10 @@ export default async function AdminActualitesPage({
 
       if (sortMode === "title-desc") {
         return second.title.localeCompare(first.title, "fr");
+      }
+
+      if (sortMode === "updated-desc") {
+        return second.updatedAt.getTime() - first.updatedAt.getTime();
       }
 
       const firstDate = first.publishedAt ?? first.createdAt;
@@ -209,9 +245,28 @@ export default async function AdminActualitesPage({
                   value: category,
                 })),
               },
+              {
+                name: "image",
+                label: "Image",
+                defaultLabel: "Toutes les images",
+                options: [
+                  { label: "Avec image", value: "with" },
+                  { label: "Sans image", value: "without" },
+                ],
+              },
+              {
+                name: "maj",
+                label: "Mise à jour",
+                defaultLabel: "Toutes les dates",
+                options: [
+                  { label: "Mis à jour récemment", value: "recent" },
+                  { label: "Plus ancien", value: "older" },
+                ],
+              },
             ]}
             sortOptions={[
               { label: "Date récente", value: "date-desc" },
+              { label: "Mise à jour récente", value: "updated-desc" },
               { label: "Date ancienne", value: "date-asc" },
               { label: "Titre A-Z", value: "title-asc" },
               { label: "Titre Z-A", value: "title-desc" },
@@ -266,7 +321,12 @@ export default async function AdminActualitesPage({
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-                    <form action={toggleNewsArticlePublication}>
+                    <PublicationConfirmationForm
+                      action={toggleNewsArticlePublication}
+                      itemName={article.title}
+                      isPublished={isPublished}
+                      incompleteReasons={getArticleIncompleteReasons(article)}
+                    >
                       <input type="hidden" name="id" value={article.id} />
                       <input
                         type="hidden"
@@ -288,7 +348,7 @@ export default async function AdminActualitesPage({
                         )}
                         {isPublished ? "Dépublier" : "Publier"}
                       </button>
-                    </form>
+                    </PublicationConfirmationForm>
                     <AdminRowActionsMenu
                       editHref={`/admin/actualites/${article.id}`}
                       deleteAction={deleteNewsArticle}

@@ -11,6 +11,7 @@ import {
   FileText,
   Landmark,
   LayoutDashboard,
+  ListChecks,
   LogOut,
   Menu,
   Newspaper,
@@ -36,6 +37,12 @@ const adminNavigation = [
     href: "/admin",
     label: "Dashboard",
     icon: LayoutDashboard,
+    section: "Pilotage",
+  },
+  {
+    href: "/admin/a-verifier",
+    label: "À vérifier",
+    icon: ListChecks,
     section: "Pilotage",
   },
   {

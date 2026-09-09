@@ -5,15 +5,17 @@ import { DocumentResourceStatus } from "@prisma/client";
 import { AdminListControls } from "@/components/admin/admin-list-controls";
 import { AdminRowActionsMenu } from "@/components/admin/admin-row-actions-menu";
 import { AdminSubmitButton } from "@/components/admin/admin-submit-button";
+import { PublicationConfirmationForm } from "@/components/admin/publication-confirmation-form";
 import {
   deleteDocument,
   getAdminDocuments,
   seedMockDocuments,
   toggleDocumentPublication,
 } from "@/lib/admin-documents";
+import { getAdminCompetitions } from "@/lib/admin-competitions";
+import { matchesRecentUpdateFilter } from "@/lib/admin-list-filters";
 import { formatFrenchMonthYear } from "@/lib/documents";
 import { createPageMetadata } from "@/lib/metadata";
-import { competitions } from "@/lib/mock-data";
 
 export const metadata = createPageMetadata({
   title: "Admin documents",
@@ -33,6 +35,7 @@ type AdminDocumentsPageProps = {
     statut?: string;
     categorie?: string;
     competition?: string;
+    maj?: string;
     tri?: string;
   };
 };
@@ -54,10 +57,26 @@ function isString(value: string | null): value is string {
   return Boolean(value);
 }
 
+function getDocumentIncompleteReasons(
+  document: Awaited<ReturnType<typeof getAdminDocuments>>[number],
+) {
+  return [
+    !document.title ? "Titre manquant" : null,
+    !document.description ? "Description manquante" : null,
+    !document.fileUrl ? "Fichier ou lien manquant" : null,
+  ].filter((reason): reason is string => Boolean(reason));
+}
+
 export default async function AdminDocumentsPage({
   searchParams,
 }: AdminDocumentsPageProps) {
-  const entries = await getAdminDocuments();
+  const [entries, competitions] = await Promise.all([
+    getAdminDocuments(),
+    getAdminCompetitions(),
+  ]);
+  const competitionTitleById = new Map(
+    competitions.map((competition) => [competition.id, competition.title]),
+  );
   const categories = Array.from(
     new Set(entries.map((entry) => entry.category)),
   ).sort((a, b) => a.localeCompare(b, "fr"));
@@ -65,17 +84,14 @@ export default async function AdminDocumentsPage({
   const statusFilter = searchParams?.statut;
   const categoryFilter = searchParams?.categorie;
   const competitionFilter = searchParams?.competition;
+  const updateFilter = searchParams?.maj;
   const sortMode = searchParams?.tri ?? "date-desc";
   const competitionOptions = Array.from(
     new Set(entries.map((entry) => entry.competitionId).filter(isString)),
   )
     .map((competitionId) => {
-      const title =
-        competitions.find((competition) => competition.id === competitionId)
-          ?.title ?? competitionId;
-
       return {
-        label: title,
+        label: competitionTitleById.get(competitionId) ?? competitionId,
         value: competitionId,
       };
     })
@@ -93,17 +109,23 @@ export default async function AdminDocumentsPage({
           entry.status === DocumentResourceStatus.PUBLISHED) ||
         (statusFilter === "draft" &&
           entry.status === DocumentResourceStatus.DRAFT) ||
-        (statusFilter === "linked" && Boolean(entry.competitionId));
+        (statusFilter === "linked" && Boolean(entry.competitionId)) ||
+        (statusFilter === "unlinked" && !entry.competitionId);
       const matchesCategory =
         !categoryFilter || entry.category === categoryFilter;
       const matchesCompetition =
         !competitionFilter || entry.competitionId === competitionFilter;
+      const matchesUpdated = matchesRecentUpdateFilter(
+        entry.updatedAt,
+        updateFilter,
+      );
 
       return (
         matchesSearch &&
         matchesStatus &&
         matchesCategory &&
-        matchesCompetition
+        matchesCompetition &&
+        matchesUpdated
       );
     })
     .sort((first, second) => {
@@ -228,6 +250,7 @@ export default async function AdminDocumentsPage({
                   { label: "Publiés", value: "published" },
                   { label: "Brouillons", value: "draft" },
                   { label: "Liés à une compétition", value: "linked" },
+                  { label: "Sans compétition", value: "unlinked" },
                 ],
               },
               {
@@ -244,6 +267,15 @@ export default async function AdminDocumentsPage({
                 label: "Compétition",
                 defaultLabel: "Toutes les compétitions",
                 options: competitionOptions,
+              },
+              {
+                name: "maj",
+                label: "Mise à jour",
+                defaultLabel: "Toutes les dates",
+                options: [
+                  { label: "Mis à jour récemment", value: "recent" },
+                  { label: "Plus ancien", value: "older" },
+                ],
               },
             ]}
             sortOptions={[
@@ -295,10 +327,8 @@ export default async function AdminDocumentsPage({
                       </span>
                       {entry.competitionId ? (
                         <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
-                          {competitions.find(
-                            (competition) =>
-                              competition.id === entry.competitionId,
-                          )?.title ?? "Compétition liée"}
+                          {competitionTitleById.get(entry.competitionId) ??
+                            "Compétition liée"}
                         </span>
                       ) : null}
                     </div>
@@ -308,7 +338,12 @@ export default async function AdminDocumentsPage({
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-                    <form action={toggleDocumentPublication}>
+                    <PublicationConfirmationForm
+                      action={toggleDocumentPublication}
+                      itemName={entry.title}
+                      isPublished={isPublished}
+                      incompleteReasons={getDocumentIncompleteReasons(entry)}
+                    >
                       <input type="hidden" name="id" value={entry.id} />
                       <input
                         type="hidden"
@@ -326,7 +361,7 @@ export default async function AdminDocumentsPage({
                         )}
                         {isPublished ? "Dépublier" : "Publier"}
                       </button>
-                    </form>
+                    </PublicationConfirmationForm>
                     <AdminRowActionsMenu
                       editHref={`/admin/documents/${entry.id}`}
                       deleteAction={deleteDocument}

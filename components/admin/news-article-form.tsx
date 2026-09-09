@@ -3,6 +3,7 @@ import type { NewsArticle } from "@prisma/client";
 import { ArrowLeft, Eye, ExternalLink, Save } from "lucide-react";
 
 import { saveNewsArticle } from "@/lib/admin-news";
+import { ConfirmableAdminForm } from "@/components/admin/confirmable-admin-form";
 import { SaveResultActions } from "@/components/admin/save-result-actions";
 import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
 import {
@@ -106,10 +107,13 @@ export function NewsArticleForm({
         </div>
       ) : null}
 
-      <form
+      <ConfirmableAdminForm
         action={saveNewsArticle}
         encType="multipart/form-data"
         className="grid gap-6"
+        contentLabel="cette actualité"
+        contentType="news"
+        currentHasImage={Boolean(article?.imageUrl)}
       >
         <UnsavedChangesGuard />
         {article ? <input type="hidden" name="id" value={article.id} /> : null}
@@ -265,7 +269,7 @@ export function NewsArticleForm({
             {isEdit ? "Enregistrer les modifications" : "Créer l'article"}
           </button>
         </div>
-      </form>
+      </ConfirmableAdminForm>
     </div>
   );
 }

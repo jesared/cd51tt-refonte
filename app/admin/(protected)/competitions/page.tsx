@@ -11,6 +11,7 @@ import { CompetitionResourceStatus } from "@prisma/client";
 
 import { AdminListControls } from "@/components/admin/admin-list-controls";
 import { AdminRowActionsMenu } from "@/components/admin/admin-row-actions-menu";
+import { PublicationConfirmationForm } from "@/components/admin/publication-confirmation-form";
 import { Badge } from "@/components/ui/badge";
 import {
   deleteCompetition,
@@ -18,6 +19,7 @@ import {
   toggleCompetitionPublication,
 } from "@/lib/admin-competitions";
 import { getAdminCalendarEvents } from "@/lib/admin-calendar";
+import { matchesRecentUpdateFilter } from "@/lib/admin-list-filters";
 import { getAdminDocuments } from "@/lib/admin-documents";
 import { getCompetitionNextDateLabel } from "@/lib/calendar";
 import { createPageMetadata } from "@/lib/metadata";
@@ -42,6 +44,9 @@ type AdminCompetitionsPageProps = {
     statut?: string;
     sport?: string;
     tag?: string;
+    image?: string;
+    echeance?: string;
+    maj?: string;
     tri?: string;
   };
 };
@@ -69,6 +74,19 @@ function normalizeSearchValue(value: string) {
     .toLowerCase();
 }
 
+function getCompetitionIncompleteReasons(
+  competition: Awaited<ReturnType<typeof getAdminCompetitions>>[number],
+  hasPublishedEvent: boolean,
+) {
+  return [
+    !competition.imageUrl ? "Image manquante" : null,
+    !competition.summary ? "Résumé manquant" : null,
+    !competition.registrationDeadline ? "Date limite d’inscription manquante" : null,
+    !competition.location ? "Lieu manquant" : null,
+    !hasPublishedEvent ? "Aucune échéance publiée liée" : null,
+  ].filter((reason): reason is string => Boolean(reason));
+}
+
 export default async function AdminCompetitionsPage({
   searchParams,
 }: AdminCompetitionsPageProps) {
@@ -81,6 +99,9 @@ export default async function AdminCompetitionsPage({
   const publicationFilter = searchParams?.statut;
   const sportFilter = searchParams?.sport;
   const tagFilter = searchParams?.tag;
+  const imageFilter = searchParams?.image;
+  const deadlineFilter = searchParams?.echeance;
+  const updateFilter = searchParams?.maj;
   const sortMode = searchParams?.tri ?? "order-asc";
   const publishedCount = competitionEntries.filter(
     (competition) => competition.status === CompetitionResourceStatus.PUBLISHED,
@@ -111,8 +132,32 @@ export default async function AdminCompetitionsPage({
           competition.status === CompetitionResourceStatus.DRAFT);
       const matchesSport = !sportFilter || competition.sportStatus === sportFilter;
       const matchesTag = !tagFilter || tags.includes(tagFilter as CompetitionTag);
+      const hasImage = Boolean(competition.imageUrl);
+      const hasLinkedDeadline = calendarEvents.some(
+        (event) => event.competitionId === competition.id,
+      );
+      const matchesImage =
+        !imageFilter ||
+        (imageFilter === "with" && hasImage) ||
+        (imageFilter === "without" && !hasImage);
+      const matchesDeadline =
+        !deadlineFilter ||
+        (deadlineFilter === "with" && hasLinkedDeadline) ||
+        (deadlineFilter === "without" && !hasLinkedDeadline);
+      const matchesUpdated = matchesRecentUpdateFilter(
+        competition.updatedAt,
+        updateFilter,
+      );
 
-      return matchesSearch && matchesPublication && matchesSport && matchesTag;
+      return (
+        matchesSearch &&
+        matchesPublication &&
+        matchesSport &&
+        matchesTag &&
+        matchesImage &&
+        matchesDeadline &&
+        matchesUpdated
+      );
     })
     .sort((first, second) => {
       if (sortMode === "title-asc") {
@@ -232,6 +277,33 @@ export default async function AdminCompetitionsPage({
                   value: tag,
                 })),
               },
+              {
+                name: "image",
+                label: "Image",
+                defaultLabel: "Toutes les images",
+                options: [
+                  { label: "Avec image", value: "with" },
+                  { label: "Sans image", value: "without" },
+                ],
+              },
+              {
+                name: "echeance",
+                label: "Échéance",
+                defaultLabel: "Toutes les échéances",
+                options: [
+                  { label: "Avec échéance", value: "with" },
+                  { label: "Sans échéance", value: "without" },
+                ],
+              },
+              {
+                name: "maj",
+                label: "Mise à jour",
+                defaultLabel: "Toutes les dates",
+                options: [
+                  { label: "Mis à jour récemment", value: "recent" },
+                  { label: "Plus ancien", value: "older" },
+                ],
+              },
             ]}
             sortOptions={[
               { label: "Ordre d'affichage", value: "order-asc" },
@@ -263,6 +335,14 @@ export default async function AdminCompetitionsPage({
               const documentCount = documents.filter(
                 (document) => document.competitionId === competition.id,
               ).length;
+              const hasPublishedEvent = calendarEvents.some(
+                (event) =>
+                  event.competitionId === competition.id && event.published,
+              );
+              const incompleteReasons = getCompetitionIncompleteReasons(
+                competition,
+                hasPublishedEvent,
+              );
 
               return (
                 <article
@@ -344,7 +424,12 @@ export default async function AdminCompetitionsPage({
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-                    <form action={toggleCompetitionPublication}>
+                    <PublicationConfirmationForm
+                      action={toggleCompetitionPublication}
+                      itemName={competition.title}
+                      isPublished={isPublished}
+                      incompleteReasons={incompleteReasons}
+                    >
                       <input type="hidden" name="id" value={competition.id} />
                       <input
                         type="hidden"
@@ -366,7 +451,7 @@ export default async function AdminCompetitionsPage({
                         )}
                         {isPublished ? "Dépublier" : "Publier"}
                       </button>
-                    </form>
+                    </PublicationConfirmationForm>
                     <AdminRowActionsMenu
                       editHref={`/admin/competitions/${competition.id}`}
                       deleteAction={deleteCompetition}

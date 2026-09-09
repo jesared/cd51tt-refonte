@@ -3,6 +3,7 @@ import type { DocumentResource } from "@prisma/client";
 import { ArrowLeft, Download, Eye, ExternalLink, Save } from "lucide-react";
 
 import { saveDocument } from "@/lib/admin-documents";
+import { ConfirmableAdminForm } from "@/components/admin/confirmable-admin-form";
 import { SaveResultActions } from "@/components/admin/save-result-actions";
 import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
 import {
@@ -114,10 +115,12 @@ export function DocumentResourceForm({
         </div>
       ) : null}
 
-      <form
+      <ConfirmableAdminForm
         action={saveDocument}
         encType="multipart/form-data"
         className="grid gap-6"
+        contentLabel="ce document"
+        contentType="document"
       >
         <UnsavedChangesGuard />
         {document ? <input type="hidden" name="id" value={document.id} /> : null}
@@ -280,7 +283,7 @@ export function DocumentResourceForm({
             {isEdit ? "Enregistrer les modifications" : "Créer le document"}
           </button>
         </div>
-      </form>
+      </ConfirmableAdminForm>
     </div>
   );
 }
