@@ -9,6 +9,7 @@ import {
   Building2,
   CalendarDays,
   CircleHelp,
+  ExternalLink,
   FileText,
   Landmark,
   LayoutDashboard,
@@ -22,7 +23,6 @@ import {
 } from "lucide-react";
 
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Badge } from "@/components/ui/badge";
 import {
   Sheet,
   SheetContent,
@@ -348,24 +348,26 @@ export function AdminShell({ children, logoutAction }: AdminShellProps) {
               </p>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Badge
-                variant="outline"
-                className="rounded-md bg-background text-foreground"
-              >
+            <div className="flex items-center overflow-hidden rounded-full border border-border bg-muted/40 p-1 shadow-sm">
+              <span className="inline-flex h-8 items-center gap-2 rounded-full bg-background px-3 text-xs font-medium text-foreground shadow-sm">
+                <span className="size-1.5 rounded-full bg-emerald-500" />
                 Local
-              </Badge>
-              <ThemeToggle />
+              </span>
+              <div className="mx-1 h-5 w-px bg-border" />
+              <ThemeToggle className="h-8 w-8 rounded-full border-0 bg-transparent shadow-none hover:bg-background hover:shadow-sm" />
+              <div className="mx-1 h-5 w-px bg-border" />
               <Link
                 href="/"
-                className="inline-flex h-8 items-center justify-center rounded-md border border-border bg-background px-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+                className="inline-flex h-8 items-center justify-center gap-2 rounded-full px-3 text-sm font-medium text-foreground transition-colors hover:bg-background hover:shadow-sm"
               >
+                <ExternalLink className="size-3.5" />
                 Site public
               </Link>
+              <div className="mx-1 h-5 w-px bg-border" />
               <form action={logoutAction}>
                 <button
                   type="submit"
-                  className="inline-flex h-8 items-center justify-center rounded-md border border-border bg-background px-2.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-background hover:text-foreground hover:shadow-sm"
                   aria-label="Se déconnecter"
                 >
                   <LogOut className="size-4" />

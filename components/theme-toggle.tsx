@@ -22,7 +22,11 @@ const themeOptions = [
   { value: "system", label: "Système", icon: Monitor },
 ] as const;
 
-export function ThemeToggle() {
+type ThemeToggleProps = {
+  className?: string;
+};
+
+export function ThemeToggle({ className }: ThemeToggleProps) {
   const { resolvedTheme, setTheme, theme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -38,7 +42,10 @@ export function ThemeToggle() {
     <DropdownMenu>
       <DropdownMenuTrigger
         aria-label="Changer de thème"
-        className={cn(buttonVariants({ variant: "outline", size: "icon-sm" }))}
+        className={cn(
+          buttonVariants({ variant: "outline", size: "icon-sm" }),
+          className,
+        )}
       >
         <ActiveIcon className="size-4" />
       </DropdownMenuTrigger>
