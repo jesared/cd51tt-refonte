@@ -8,6 +8,7 @@ import {
   BarChart3,
   Building2,
   CalendarDays,
+  CircleHelp,
   FileText,
   Landmark,
   LayoutDashboard,
@@ -46,6 +47,12 @@ const adminNavigation = [
     section: "Pilotage",
   },
   {
+    href: "/admin/aide",
+    label: "Aide",
+    icon: CircleHelp,
+    section: "Pilotage",
+  },
+  {
     href: "/admin/actualites",
     label: "Actualités",
     icon: Newspaper,
@@ -65,7 +72,7 @@ const adminNavigation = [
   },
   {
     href: "/admin/calendrier",
-    label: "Calendrier",
+    label: "Échéances",
     icon: CalendarDays,
     section: "Sportif",
   },

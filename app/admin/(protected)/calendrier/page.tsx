@@ -17,7 +17,7 @@ import { getCalendarEventTypeLabel, getCompetitionTitle } from "@/lib/calendar";
 import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata = createPageMetadata({
-  title: "Admin calendrier",
+  title: "Admin échéances",
   description: "Pilotage des échéances sportives du comité.",
   path: "/admin/calendrier",
 });
@@ -170,7 +170,7 @@ export default async function AdminCalendrierPage({
             Sportif
           </p>
           <h2 className="text-2xl font-semibold tracking-tight">
-            Gérer le calendrier
+            Gérer les échéances
           </h2>
           <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
             Centralisez les journées, tours, finales, convocations, résultats et
@@ -198,15 +198,15 @@ export default async function AdminCalendrierPage({
       {searchParams?.saved ||
       searchParams?.deleted ||
       searchParams?.published ? (
-        <div className="admin-feedback">Calendrier mis à jour.</div>
+        <div className="admin-feedback">Échéance mise à jour.</div>
       ) : null}
 
       <section className="rounded-[1.5rem] border border-border bg-background">
         <div className="flex flex-col gap-2 border-b border-border px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="font-medium">Vue agenda</h3>
+            <h3 className="font-medium">Vue des échéances</h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              Mois, semaine ou liste selon le besoin de pilotage.
+              Mois, semaine ou liste selon le besoin de pilotage des échéances.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -224,12 +224,12 @@ export default async function AdminCalendrierPage({
         <div className="space-y-4 border-b border-border px-6 py-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h3 className="font-medium">Événements du calendrier</h3>
+              <h3 className="font-medium">Échéances</h3>
               <p className="mt-1 text-sm text-muted-foreground">
                 {filteredEvents.length} sur {calendarEvents.length} échéance(s)
               </p>
             </div>
-            <Badge variant="outline">Prisma CalendarEvent</Badge>
+            <Badge variant="outline">Base échéances</Badge>
           </div>
           <AdminListControls
             searchPlaceholder="Compétition, libellé, type ou lieu"
@@ -248,8 +248,8 @@ export default async function AdminCalendrierPage({
                 label: "Publication",
                 defaultLabel: "Tous les statuts",
                 options: [
-                  { label: "Publiées", value: "published" },
-                  { label: "Brouillons", value: "draft" },
+                  { label: "Publié", value: "published" },
+                  { label: "Brouillon", value: "draft" },
                 ],
               },
               {
@@ -379,7 +379,7 @@ export default async function AdminCalendrierPage({
                         deleteAction={deleteCalendarEvent}
                         deleteId={event.id}
                         deleteLabel={`${event.title} - ${competitionTitle}`}
-                        deleteMessage="Supprimer cette échéance du calendrier ?"
+                        deleteMessage="Supprimer cette échéance ?"
                       />
                     </div>
                   </article>

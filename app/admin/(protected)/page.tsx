@@ -85,7 +85,7 @@ function getModules(data: DashboardData) {
     {
       href: "/admin/competitions",
       title: "Compétitions",
-      description: "Créer, modifier et publier les épreuves.",
+      description: "Créer, modifier et publier les compétitions.",
       count: data.competitions.length,
       unit:
         data.competitions.length === 1 ? "compétition" : "compétitions",
@@ -94,7 +94,7 @@ function getModules(data: DashboardData) {
     },
     {
       href: "/admin/calendrier",
-      title: "Calendrier",
+      title: "Échéances",
       description: "Piloter les échéances sportives.",
       count: data.calendarEvents.length,
       unit:
@@ -276,7 +276,7 @@ export default async function AdminDashboardPage() {
           <p className="text-sm text-muted-foreground">Compétitions</p>
           <p className="mt-2 text-2xl font-semibold">{competitions.length}</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Épreuves gérées en base
+            Compétitions gérées en base
           </p>
         </div>
       </section>

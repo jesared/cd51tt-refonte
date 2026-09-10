@@ -247,8 +247,8 @@ export default async function AdminDocumentsPage({
                 label: "Statut",
                 defaultLabel: "Tous les statuts",
                 options: [
-                  { label: "Publiés", value: "published" },
-                  { label: "Brouillons", value: "draft" },
+                  { label: "Publié", value: "published" },
+                  { label: "Brouillon", value: "draft" },
                   { label: "Liés à une compétition", value: "linked" },
                   { label: "Sans compétition", value: "unlinked" },
                 ],

@@ -231,8 +231,8 @@ export default async function AdminActualitesPage({
                 label: "Statut",
                 defaultLabel: "Tous les statuts",
                 options: [
-                  { label: "Publiées", value: "published" },
-                  { label: "Brouillons", value: "draft" },
+                  { label: "Publié", value: "published" },
+                  { label: "Brouillon", value: "draft" },
                   { label: "Mises en avant", value: "featured" },
                 ],
               },
@@ -307,7 +307,7 @@ export default async function AdminActualitesPage({
                             : "rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground"
                         }
                       >
-                        {isPublished ? "Publiée" : "Brouillon"}
+                        {isPublished ? "Publié" : "Brouillon"}
                       </span>
                       {article.featured ? (
                         <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">

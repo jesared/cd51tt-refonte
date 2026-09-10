@@ -199,8 +199,8 @@ export default async function AdminCompetitionsPage({
             Gérer les compétitions
           </h2>
           <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-            Créez, modifiez, publiez ou dépubliez les épreuves visibles sur la
-            page publique, avec leurs échéances, responsables, tags et liens
+            Créez, modifiez, publiez ou dépubliez les compétitions visibles sur
+            la page publique, avec leurs échéances, responsables, tags et liens
             utiles.
           </p>
           <div className="flex flex-wrap gap-2">
@@ -255,8 +255,8 @@ export default async function AdminCompetitionsPage({
                 label: "Publication",
                 defaultLabel: "Tous les statuts",
                 options: [
-                  { label: "Publiées", value: "published" },
-                  { label: "Brouillons", value: "draft" },
+                  { label: "Publié", value: "published" },
+                  { label: "Brouillon", value: "draft" },
                 ],
               },
               {

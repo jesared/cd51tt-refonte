@@ -33,7 +33,7 @@ type CompetitionFormProps = {
 };
 
 const actionFields = [
-  { type: "calendar", label: "Calendrier" },
+  { type: "calendar", label: "Échéances" },
   { type: "results", label: "Résultats" },
   { type: "convocation", label: "Convocation" },
   { type: "rules", label: "Règlement" },
@@ -45,7 +45,7 @@ const actionFields = [
 
 const defaultActions: CompetitionAction[] = [
   {
-    label: "Voir le calendrier",
+    label: "Voir les échéances",
     href: "/calendrier",
     type: "calendar",
     primary: true,
@@ -145,7 +145,7 @@ export function CompetitionForm({
             </h2>
             <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
               Préparez tous les champs nécessaires pour alimenter la page
-              publique, le calendrier et les documents liés.
+              publique, les échéances et les documents liés.
             </p>
           </div>
 
@@ -367,8 +367,8 @@ export function CompetitionForm({
             <div className="grid gap-2 rounded-xl border border-border bg-muted/30 p-4">
               <p className="text-sm font-medium">Prochaine échéance</p>
               <p className="text-sm text-muted-foreground">
-                Elle est calculée automatiquement à partir des échéances du
-                calendrier liées à cette compétition.
+                Elle est calculée automatiquement à partir des échéances liées
+                à cette compétition.
               </p>
               {competition ? (
                 <Link
@@ -380,8 +380,8 @@ export function CompetitionForm({
                 </Link>
               ) : (
                 <p className="text-xs leading-5 text-muted-foreground">
-                  Créez d’abord la compétition, puis ajoutez ses dates depuis le
-                  calendrier.
+                  Créez d’abord la compétition, puis ajoutez ses échéances
+                  depuis cette fiche.
                 </p>
               )}
               <input
@@ -453,8 +453,8 @@ export function CompetitionForm({
             <div>
               <h3 className="text-lg font-semibold">Échéances liées</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                Ces dates alimentent le calendrier public et la prochaine
-                échéance affichée sur la compétition.
+                Ces dates alimentent la page publique des échéances et la
+                prochaine échéance affichée sur la compétition.
               </p>
             </div>
 

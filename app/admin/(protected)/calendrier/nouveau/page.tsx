@@ -4,7 +4,7 @@ import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata = createPageMetadata({
   title: "Nouvelle échéance",
-  description: "Création d'une échéance du calendrier sportif.",
+  description: "Création d'une échéance sportive.",
   path: "/admin/calendrier/nouveau",
 });
 

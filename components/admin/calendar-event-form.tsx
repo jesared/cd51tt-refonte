@@ -59,8 +59,8 @@ export function CalendarEventForm({
               {isEdit ? "Modifier l'échéance" : "Nouvelle échéance"}
             </h2>
             <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-              Rattachez un événement à une compétition pour alimenter le
-              calendrier public, la page compétitions et l&apos;agenda admin.
+              Rattachez une échéance à une compétition pour alimenter la page
+              publique des échéances et la page compétition.
             </p>
           </div>
 
@@ -69,7 +69,7 @@ export function CalendarEventForm({
             className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border px-4 text-sm text-muted-foreground transition hover:text-foreground"
           >
             <ArrowLeft className="size-4" />
-            Retour au calendrier
+            Retour aux échéances
           </Link>
         </div>
       </section>
@@ -122,8 +122,8 @@ export function CalendarEventForm({
                 ))}
               </select>
               <p className="text-xs leading-5 text-muted-foreground">
-                L’échéance sera affichée dans le calendrier et sur la page
-                détail de cette compétition.
+                L’échéance sera affichée sur la page publique des échéances et
+                sur la page détail de cette compétition.
               </p>
               {!hasCompetitions ? (
                 <p className="text-sm text-muted-foreground">
@@ -165,7 +165,7 @@ export function CalendarEventForm({
                   className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
                 />
                 <p className="text-xs leading-5 text-muted-foreground">
-                  Date affichée sur le calendrier public.
+                  Date affichée sur la page publique des échéances.
                 </p>
               </div>
 
