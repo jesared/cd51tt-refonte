@@ -17,15 +17,11 @@ import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { getPublicClubs } from "@/lib/admin-clubs";
+import { getPublishedCompetitionItems } from "@/lib/admin-competitions";
 import { getPublishedNewsArticleCards } from "@/lib/admin-news";
 import { getPublicLicenseeTotal } from "@/lib/admin-stats";
 import { createPageMetadata } from "@/lib/metadata";
 import type { ArticleCardItem } from "@/lib/news";
-import {
-  clubs,
-  competitions,
-  newsArticles,
-} from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
 export const metadata = createPageMetadata({
@@ -66,10 +62,11 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const databaseArticles = await getPublishedNewsArticleCards(3);
-  const publishedArticles: ArticleCardItem[] = databaseArticles ?? newsArticles;
+  const publishedArticles: ArticleCardItem[] = databaseArticles ?? [];
+  const publishedCompetitions = (await getPublishedCompetitionItems()) ?? [];
   const databaseClubs = await getPublicClubs();
   const licenseeTotal = await getPublicLicenseeTotal();
-  const directory = databaseClubs ?? clubs;
+  const directory = databaseClubs ?? [];
   const highlightedArticles = publishedArticles.slice(0, 3);
   const featuredArticle = highlightedArticles.find((article) => article.featured);
   const secondaryArticles = featuredArticle
@@ -289,7 +286,7 @@ export default async function HomePage() {
             </Link>
           </div>
           <div className="space-y-3">
-            {competitions.slice(0, 3).map((competition) => (
+            {publishedCompetitions.slice(0, 3).map((competition) => (
               <div
                 key={competition.title}
                 className="interactive-card rounded-lg border border-border bg-card p-5"
@@ -303,6 +300,11 @@ export default async function HomePage() {
                 </p>
               </div>
             ))}
+            {publishedCompetitions.length === 0 ? (
+              <div className="rounded-lg border border-border bg-card p-5 text-sm leading-6 text-muted-foreground">
+                Aucun temps fort publié pour le moment.
+              </div>
+            ) : null}
           </div>
         </ScrollReveal>
 
@@ -335,6 +337,11 @@ export default async function HomePage() {
                 </p>
               </div>
             ))}
+            {directory.length === 0 ? (
+              <div className="rounded-lg border border-border bg-card p-5 text-sm leading-6 text-muted-foreground sm:col-span-2">
+                Aucun club publié pour le moment.
+              </div>
+            ) : null}
           </div>
         </ScrollReveal>
       </section>

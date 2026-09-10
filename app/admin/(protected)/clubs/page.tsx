@@ -100,7 +100,7 @@ export default async function AdminClubsPage({
         ? "Le club a été supprimé."
         : searchParams?.fftt
           ? syncSource === "mock"
-            ? `${searchParams.fftt} clubs importés depuis le mock local. Synchro FFTT non utilisée.`
+            ? `${searchParams.fftt} clubs importés depuis la source locale. Synchro FFTT non utilisée.`
             : `${searchParams.fftt} clubs synchronisés depuis la FFTT.`
           : searchParams?.error
             ? decodeURIComponent(searchParams.error)
@@ -137,8 +137,8 @@ export default async function AdminClubsPage({
             </Badge>
             <Badge variant={ffttApiReadiness.hasAppCredentials ? "secondary" : "outline"}>
               {ffttApiReadiness.hasAppCredentials
-                ? "Données réelles possibles"
-                : "Mock local si synchro"}
+                ? "Données FFTT disponibles"
+                : "Source locale disponible"}
             </Badge>
             <Badge variant="secondary">{activeClubs.length} clubs actifs</Badge>
           </div>
@@ -153,7 +153,7 @@ export default async function AdminClubsPage({
             >
               {ffttApiReadiness.hasAppCredentials
                 ? "Synchroniser FFTT"
-                : "Importer mock local"}
+                : "Importer les clubs"}
             </AdminSubmitButton>
           </form>
 
@@ -183,10 +183,10 @@ export default async function AdminClubsPage({
             {feedbackTone === "error"
               ? "Synchro impossible"
               : feedbackTone === "mock"
-                ? "Mock local"
+                ? "Source locale"
                 : feedbackTone === "success"
                   ? "Synchro réussie"
-                  : "Données réelles"}
+                  : "Données clubs"}
           </span>
           {message}
         </div>

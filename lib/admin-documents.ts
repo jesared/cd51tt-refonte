@@ -15,6 +15,8 @@ import {
   requireAdministratorSession,
   requireEditorSession,
 } from "@/lib/admin-auth";
+import { recordAdminActivity } from "@/lib/admin-activity";
+import { assertDocumentCanBePublished } from "@/lib/admin-publication-guards";
 import { uploadFileToCloudinary } from "@/lib/cloudinary";
 import { normalizeDocumentCategory } from "@/lib/content-categories";
 import { formatFrenchMonthYear, type DocumentCardItem } from "@/lib/documents";
@@ -202,7 +204,7 @@ export async function saveDocument(formData: FormData) {
         })
       : null;
     const status =
-      session.role === AdminUserRole.ADMIN
+      session.role !== AdminUserRole.USER
         ? requestedStatus
         : existingDocument?.status ?? DocumentResourceStatus.DRAFT;
 
@@ -239,6 +241,10 @@ export async function saveDocument(formData: FormData) {
       updatedAt: toUpdatedDate(values.updatedAt ?? ""),
     };
 
+    if (payload.status === DocumentResourceStatus.PUBLISHED) {
+      assertDocumentCanBePublished(payload);
+    }
+
     const savedDocument = values.id
       ? await prisma.documentResource.update({
         where: { id: values.id },
@@ -247,6 +253,17 @@ export async function saveDocument(formData: FormData) {
       : await prisma.documentResource.create({
         data: payload,
       });
+
+    await recordAdminActivity({
+      session,
+      action: values.id ? "update" : "create",
+      entityType: "document",
+      entityId: savedDocument.id,
+      entityLabel: savedDocument.title,
+      message: `${session.name} a ${
+        values.id ? "modifié" : "créé"
+      } le document ${savedDocument.title}.`,
+    });
 
     revalidatePath("/admin");
     revalidatePath("/admin/documents");
@@ -262,7 +279,7 @@ export async function saveDocument(formData: FormData) {
 }
 
 export async function deleteDocument(formData: FormData) {
-  await requireAdministratorSession("/admin/documents");
+  const session = await requireEditorSession("/admin/documents");
 
   const id = getStringValue(formData, "id");
 
@@ -271,8 +288,17 @@ export async function deleteDocument(formData: FormData) {
   }
 
   try {
-    await prisma.documentResource.delete({
+    const deletedDocument = await prisma.documentResource.delete({
       where: { id },
+    });
+
+    await recordAdminActivity({
+      session,
+      action: "delete",
+      entityType: "document",
+      entityId: deletedDocument.id,
+      entityLabel: deletedDocument.title,
+      message: `${session.name} a supprimé le document ${deletedDocument.title}.`,
     });
   } catch (error) {
     const message = encodeURIComponent(serializeErrorMessage(error));
@@ -287,7 +313,7 @@ export async function deleteDocument(formData: FormData) {
 }
 
 export async function toggleDocumentPublication(formData: FormData) {
-  await requireAdministratorSession("/admin/documents");
+  const session = await requireAdministratorSession("/admin/documents");
 
   const id = getStringValue(formData, "id");
   const status = getBooleanValue(formData, "published")
@@ -299,9 +325,33 @@ export async function toggleDocumentPublication(formData: FormData) {
   }
 
   try {
-    await prisma.documentResource.update({
+    if (status === DocumentResourceStatus.PUBLISHED) {
+      const document = await prisma.documentResource.findUnique({
+        where: { id },
+      });
+
+      if (!document) {
+        throw new Error("Document introuvable.");
+      }
+
+      assertDocumentCanBePublished(document);
+    }
+
+    const updatedDocument = await prisma.documentResource.update({
       where: { id },
       data: { status },
+    });
+
+    await recordAdminActivity({
+      session,
+      action:
+        status === DocumentResourceStatus.PUBLISHED ? "publish" : "unpublish",
+      entityType: "document",
+      entityId: updatedDocument.id,
+      entityLabel: updatedDocument.title,
+      message: `${session.name} a ${
+        status === DocumentResourceStatus.PUBLISHED ? "publié" : "dépublié"
+      } le document ${updatedDocument.title}.`,
     });
   } catch (error) {
     const message = encodeURIComponent(serializeErrorMessage(error));

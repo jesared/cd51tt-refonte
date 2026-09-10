@@ -4,7 +4,6 @@ import { ArticleList } from "@/components/actualites/article-list";
 import { Badge } from "@/components/ui/badge";
 import { getPublishedNewsArticleCards } from "@/lib/admin-news";
 import { createPageMetadata } from "@/lib/metadata";
-import { newsArticles } from "@/lib/mock-data";
 import type { ArticleCardItem } from "@/lib/news";
 
 export const metadata = createPageMetadata({
@@ -18,7 +17,7 @@ export const dynamic = "force-dynamic";
 
 export default async function ActualitesPage() {
   const databaseArticles = await getPublishedNewsArticleCards();
-  const articles: ArticleCardItem[] = databaseArticles ?? newsArticles;
+  const articles: ArticleCardItem[] = databaseArticles ?? [];
   const categories = Array.from(
     new Set(articles.map((article) => article.category)),
   );

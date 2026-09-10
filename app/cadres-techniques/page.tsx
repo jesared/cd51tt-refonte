@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { getPublicTechnicalStaffMembers } from "@/lib/admin-people";
 import { getCloudinaryCircleAvatarUrl } from "@/lib/cloudinary-url";
 import { createPageMetadata } from "@/lib/metadata";
-import { technicalStaffMembers } from "@/lib/mock-data";
 
 export const metadata = createPageMetadata({
   title: "Cadres techniques",
@@ -16,8 +15,7 @@ export const metadata = createPageMetadata({
 export const dynamic = "force-dynamic";
 
 export default async function CadresTechniquesPage() {
-  const staffMembers =
-    (await getPublicTechnicalStaffMembers()) ?? technicalStaffMembers;
+  const staffMembers = (await getPublicTechnicalStaffMembers()) ?? [];
 
   return (
     <div className="space-y-8">
@@ -44,7 +42,8 @@ export default async function CadresTechniquesPage() {
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {staffMembers.map((member) => (
+        {staffMembers.length > 0 ? (
+          staffMembers.map((member) => (
           <article
             key={member.name}
             className="interactive-card flex min-h-72 flex-col justify-between rounded-lg border border-border bg-card p-5 hover:bg-accent"
@@ -87,7 +86,12 @@ export default async function CadresTechniquesPage() {
               </p>
             </div>
           </article>
-        ))}
+          ))
+        ) : (
+          <div className="rounded-lg border border-border bg-card p-8 text-sm leading-6 text-muted-foreground md:col-span-2 xl:col-span-3">
+            Aucun cadre technique publié pour le moment.
+          </div>
+        )}
       </section>
     </div>
   );

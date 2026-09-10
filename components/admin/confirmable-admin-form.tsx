@@ -9,7 +9,6 @@ type ConfirmableAdminFormProps = {
   action: (formData: FormData) => void | Promise<void>;
   children: ReactNode;
   className?: string;
-  encType?: "multipart/form-data";
   currentHasImage?: boolean;
   contentLabel?: string;
   contentType?: "competition" | "news" | "document" | "calendar";
@@ -152,7 +151,6 @@ export function ConfirmableAdminForm({
   action,
   children,
   className,
-  encType,
   currentHasImage = false,
   contentLabel = "ce contenu",
   contentType = "competition",
@@ -270,7 +268,6 @@ export function ConfirmableAdminForm({
         action={action}
         aria-busy={pending}
         className={className}
-        encType={encType}
         onSubmit={handleSubmit}
       >
         {children}

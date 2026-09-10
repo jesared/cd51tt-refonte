@@ -7,7 +7,7 @@ import {
   Plus,
   UserRound,
 } from "lucide-react";
-import { CompetitionResourceStatus } from "@prisma/client";
+import { AdminUserRole, CompetitionResourceStatus } from "@prisma/client";
 
 import { AdminListControls } from "@/components/admin/admin-list-controls";
 import { AdminRowActionsMenu } from "@/components/admin/admin-row-actions-menu";
@@ -18,7 +18,7 @@ import {
   getAdminCompetitions,
   toggleCompetitionPublication,
 } from "@/lib/admin-competitions";
-import { requireEditorSession } from "@/lib/admin-auth";
+import { requireAdminSession } from "@/lib/admin-auth";
 import { getAdminCalendarEvents } from "@/lib/admin-calendar";
 import { matchesRecentUpdateFilter } from "@/lib/admin-list-filters";
 import { getAdminDocuments } from "@/lib/admin-documents";
@@ -95,9 +95,10 @@ export default async function AdminCompetitionsPage({
     getAdminCompetitions(),
     getAdminCalendarEvents(),
     getAdminDocuments(),
-    requireEditorSession("/admin/competitions"),
+    requireAdminSession(),
   ]);
-  const canManagePublication = session.role === "ADMIN";
+  const canEditContent = session.role !== AdminUserRole.USER;
+  const canManagePublication = canEditContent;
   const query = normalizeSearchValue(searchParams?.q ?? "");
   const publicationFilter = searchParams?.statut;
   const sportFilter = searchParams?.sport;
@@ -202,9 +203,9 @@ export default async function AdminCompetitionsPage({
             Gérer les compétitions
           </h2>
           <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-            Créez, modifiez, publiez ou dépubliez les compétitions visibles sur
-            la page publique, avec leurs échéances, responsables, tags et liens
-            utiles.
+            Consultez les compétitions visibles sur la page publique, avec leurs
+            échéances, responsables, tags et liens utiles. Les rôles ADMIN et
+            EDITOR peuvent aussi les mettre à jour.
           </p>
           <div className="flex flex-wrap gap-2">
             <Badge variant="outline">Base admin réelle</Badge>
@@ -212,13 +213,15 @@ export default async function AdminCompetitionsPage({
         </div>
 
         <div className="flex flex-col justify-center gap-3 border-t border-border pt-5 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
-          <Link
-            href="/admin/competitions/nouveau"
-            className="admin-action admin-action-primary h-11 w-full"
-          >
-            <Plus className="size-4" />
-            Nouvelle compétition
-          </Link>
+          {canEditContent ? (
+            <Link
+              href="/admin/competitions/nouveau"
+              className="admin-action admin-action-primary h-11 w-full"
+            >
+              <Plus className="size-4" />
+              Nouvelle compétition
+            </Link>
+          ) : null}
         </div>
       </section>
 
@@ -319,8 +322,7 @@ export default async function AdminCompetitionsPage({
 
         {competitionEntries.length === 0 ? (
           <div className="px-6 py-8 text-sm leading-6 text-muted-foreground">
-            Aucune compétition n&apos;est encore en base. Créez la première
-            compétition manuellement.
+            Aucune compétition n&apos;est encore en base.
           </div>
         ) : (
           <div className="divide-y divide-border">
@@ -465,12 +467,19 @@ export default async function AdminCompetitionsPage({
                           deleteMessage="Supprimer cette compétition ? Les documents et échéances liés garderont leur identifiant de compétition."
                         />
                       </>
-                    ) : (
+                    ) : canEditContent ? (
                       <Link
                         href={`/admin/competitions/${competition.id}`}
                         className="inline-flex h-9 items-center justify-center rounded-lg border border-border bg-background px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                       >
                         Modifier
+                      </Link>
+                    ) : (
+                      <Link
+                        href={`/competitions/${competition.id}`}
+                        className="inline-flex h-9 items-center justify-center rounded-lg border border-border bg-background px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                      >
+                        Voir public
                       </Link>
                     )}
                   </div>

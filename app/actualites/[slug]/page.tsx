@@ -7,8 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { getPublishedNewsArticleBySlug } from "@/lib/admin-news";
 import { createPageMetadata } from "@/lib/metadata";
-import { newsArticles } from "@/lib/mock-data";
-import type { ArticleDetailItem } from "@/lib/news";
 import { cn } from "@/lib/utils";
 
 type ArticlePageProps = {
@@ -17,23 +15,8 @@ type ArticlePageProps = {
   };
 };
 
-function getMockArticleBySlug(slug: string): ArticleDetailItem | null {
-  const article = newsArticles.find((item) => item.slug === slug);
-
-  if (!article) {
-    return null;
-  }
-
-  return {
-    ...article,
-    content: article.excerpt,
-  };
-}
-
 async function getArticle(slug: string) {
-  const databaseArticle = await getPublishedNewsArticleBySlug(slug);
-
-  return databaseArticle ?? getMockArticleBySlug(slug);
+  return getPublishedNewsArticleBySlug(slug);
 }
 
 export async function generateMetadata({ params }: ArticlePageProps) {

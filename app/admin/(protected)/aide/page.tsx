@@ -4,13 +4,17 @@ import {
   Eye,
   EyeOff,
   FilePlus2,
+  HelpCircle,
   ImagePlus,
+  ListChecks,
   Plus,
+  ShieldCheck,
   Trophy,
 } from "lucide-react";
+import { AdminUserRole } from "@prisma/client";
 
 import { Badge } from "@/components/ui/badge";
-import { requireEditorSession } from "@/lib/admin-auth";
+import { requireAdminSession } from "@/lib/admin-auth";
 import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata = createPageMetadata({
@@ -82,8 +86,42 @@ const guideSections = [
   },
 ];
 
+const handoverSections = [
+  {
+    title: "Quoi faire en premier",
+    icon: ListChecks,
+    items: [
+      "Ouvrir À vérifier pour repérer les contenus incomplets.",
+      "Commencer par créer ou compléter la compétition concernée.",
+      "Ajouter les échéances liées depuis la fiche compétition ou depuis Échéances.",
+      "Ajouter les documents et images seulement quand les informations principales sont prêtes.",
+    ],
+  },
+  {
+    title: "Avant de publier",
+    icon: ShieldCheck,
+    items: [
+      "Vérifier que le contenu a une image quand elle est attendue.",
+      "Vérifier qu’une compétition possède au moins une échéance liée.",
+      "Tester les liens de document, d’inscription, de convocation ou de résultat.",
+      "Lire la prévisualisation pour éviter les titres trop courts ou les contenus trop vides.",
+    ],
+  },
+  {
+    title: "En cas de doute",
+    icon: HelpCircle,
+    items: [
+      "Laisser le contenu en Brouillon plutôt que de publier une information incertaine.",
+      "Dépublier temporairement si une date, un lieu ou un document devient faux.",
+      "Contacter l’administrateur du site pour les droits, les comptes ou les paramètres.",
+      "Contacter le responsable sportif pour valider une compétition ou une échéance.",
+    ],
+  },
+];
+
 export default async function AdminHelpPage() {
-  await requireEditorSession("/admin");
+  const session = await requireAdminSession();
+  const canEditContent = session.role !== AdminUserRole.USER;
 
   return (
     <div className="space-y-6">
@@ -103,22 +141,24 @@ export default async function AdminHelpPage() {
           </div>
         </div>
 
-        <div className="grid gap-3 border-t border-border pt-5 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
-          <Link
-            href="/admin/competitions/nouveau"
-            className="admin-action admin-action-primary h-11 w-full"
-          >
-            <Plus className="size-4" />
-            Créer une compétition
-          </Link>
-          <Link
-            href="/admin/calendrier/nouveau"
-            className="admin-action h-11 w-full"
-          >
-            <CalendarPlus className="size-4" />
-            Ajouter une échéance
-          </Link>
-        </div>
+        {canEditContent ? (
+          <div className="grid gap-3 border-t border-border pt-5 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
+            <Link
+              href="/admin/competitions/nouveau"
+              className="admin-action admin-action-primary h-11 w-full"
+            >
+              <Plus className="size-4" />
+              Créer une compétition
+            </Link>
+            <Link
+              href="/admin/calendrier/nouveau"
+              className="admin-action h-11 w-full"
+            >
+              <CalendarPlus className="size-4" />
+              Ajouter une échéance
+            </Link>
+          </div>
+        ) : null}
       </section>
 
       <section className="grid gap-4 xl:grid-cols-2">
@@ -154,21 +194,59 @@ export default async function AdminHelpPage() {
                   ))}
                 </ol>
 
-                <Link
-                  href={section.href}
-                  className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-border px-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
-                >
-                  {section.title === "Publier / dépublier" ? (
-                    <EyeOff className="size-4" />
-                  ) : (
-                    <Icon className="size-4" />
-                  )}
-                  {section.actionLabel}
-                </Link>
+                {canEditContent ? (
+                  <Link
+                    href={section.href}
+                    className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-border px-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+                  >
+                    {section.title === "Publier / dépublier" ? (
+                      <EyeOff className="size-4" />
+                    ) : (
+                      <Icon className="size-4" />
+                    )}
+                    {section.actionLabel}
+                  </Link>
+                ) : (
+                  <Badge variant="outline" className="w-fit">
+                    Lecture seule
+                  </Badge>
+                )}
               </div>
             </article>
           );
         })}
+      </section>
+
+      <section className="rounded-[1.5rem] border border-border bg-background">
+        <div className="border-b border-border px-5 py-4">
+          <h3 className="font-semibold">Mise en main</h3>
+          <p className="mt-1 text-sm leading-5 text-muted-foreground">
+            Les réflexes à garder pour mettre à jour le site sans publier trop
+            vite une information incomplète.
+          </p>
+        </div>
+
+        <div className="grid gap-4 p-5 lg:grid-cols-3">
+          {handoverSections.map((section) => {
+            const Icon = section.icon;
+
+            return (
+              <article key={section.title} className="rounded-xl border border-border p-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-9 items-center justify-center rounded-lg border border-border bg-muted text-muted-foreground">
+                    <Icon className="size-4" />
+                  </div>
+                  <h4 className="font-medium">{section.title}</h4>
+                </div>
+                <ul className="mt-4 grid gap-2 text-sm leading-6 text-muted-foreground">
+                  {section.items.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </article>
+            );
+          })}
+        </div>
       </section>
     </div>
   );

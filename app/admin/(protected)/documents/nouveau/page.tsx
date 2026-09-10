@@ -1,5 +1,6 @@
 import { DocumentResourceForm } from "@/components/admin/document-resource-form";
 import { requireEditorSession } from "@/lib/admin-auth";
+import { getAdminCompetitions } from "@/lib/admin-competitions";
 import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata = createPageMetadata({
@@ -17,12 +18,16 @@ type AdminNewDocumentPageProps = {
 export default async function AdminNewDocumentPage({
   searchParams,
 }: AdminNewDocumentPageProps) {
-  const session = await requireEditorSession("/admin/documents");
+  const [session, competitions] = await Promise.all([
+    requireEditorSession("/admin/documents"),
+    getAdminCompetitions(),
+  ]);
 
   return (
     <DocumentResourceForm
       mode="create"
-      canPublish={session.role === "ADMIN"}
+      competitions={competitions}
+      canPublish={session.role === "ADMIN" || session.role === "EDITOR"}
       errorMessage={
         searchParams?.error ? decodeURIComponent(searchParams.error) : null
       }

@@ -12,6 +12,7 @@ import {
   ExternalLink,
   FileText,
   Landmark,
+  KeyRound,
   LayoutDashboard,
   ListChecks,
   LogOut,
@@ -50,14 +51,14 @@ const adminNavigation = [
     label: "À vérifier",
     icon: ListChecks,
     section: "Pilotage",
-    roles: ["ADMIN", "EDITOR"],
+    roles: ["ADMIN", "EDITOR", "USER"],
   },
   {
     href: "/admin/aide",
     label: "Aide",
     icon: CircleHelp,
     section: "Pilotage",
-    roles: ["ADMIN", "EDITOR"],
+    roles: ["ADMIN", "EDITOR", "USER"],
   },
   {
     href: "/admin/activite",
@@ -71,28 +72,28 @@ const adminNavigation = [
     label: "Actualités",
     icon: Newspaper,
     section: "Contenu",
-    roles: ["ADMIN", "EDITOR"],
+    roles: ["ADMIN", "EDITOR", "USER"],
   },
   {
     href: "/admin/documents",
     label: "Documents",
     icon: FileText,
     section: "Contenu",
-    roles: ["ADMIN", "EDITOR"],
+    roles: ["ADMIN", "EDITOR", "USER"],
   },
   {
     href: "/admin/competitions",
     label: "Compétitions",
     icon: Trophy,
     section: "Sportif",
-    roles: ["ADMIN", "EDITOR"],
+    roles: ["ADMIN", "EDITOR", "USER"],
   },
   {
     href: "/admin/calendrier",
     label: "Échéances",
     icon: CalendarDays,
     section: "Sportif",
-    roles: ["ADMIN", "EDITOR"],
+    roles: ["ADMIN", "EDITOR", "USER"],
   },
   {
     href: "/admin/clubs",
@@ -199,6 +200,13 @@ function AdminAccountBlock({
             <p className="truncate text-xs leading-5 text-muted-foreground">
               {email}
             </p>
+            <Link
+              href="/admin/mot-de-passe"
+              className="mt-2 inline-flex items-center gap-1.5 rounded-md text-xs font-medium text-primary transition-colors hover:text-primary/80"
+            >
+              <KeyRound className="size-3.5" />
+              Mot de passe
+            </Link>
           </div>
         </div>
       </div>

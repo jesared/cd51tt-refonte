@@ -11,6 +11,7 @@ import { cache } from "react";
 import { z } from "zod";
 
 import { requireAdministratorSession } from "@/lib/admin-auth";
+import { recordAdminActivity } from "@/lib/admin-activity";
 import { uploadFileToCloudinary } from "@/lib/cloudinary";
 import {
   actualCommitteeMembers,
@@ -208,7 +209,7 @@ export async function getPublicCommitteeMembers(): Promise<
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
     });
 
-    return members.length ? members.map(toCommitteeMember) : null;
+    return members.map(toCommitteeMember);
   } catch {
     return null;
   }
@@ -227,7 +228,7 @@ export async function getPublicTechnicalStaffMembers(): Promise<
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
     });
 
-    return members.length ? members.map(toTechnicalStaffMember) : null;
+    return members.map(toTechnicalStaffMember);
   } catch {
     return null;
   }
@@ -237,16 +238,35 @@ export async function savePeopleMember(formData: FormData) {
   const rawKind = getStringValue(formData, "kind") as PeopleKind;
   const id = getStringValue(formData, "id") || undefined;
   const kind: PeopleKind = rawKind === "technical" ? "technical" : "committee";
-  await requireAdministratorSession(getListPath(kind));
+  const session = await requireAdministratorSession(getListPath(kind));
 
   let redirectPath = getListPath(kind);
+  let savedEntity:
+    | CommitteeMemberResource
+    | TechnicalStaffMemberResource
+    | null = null;
+  let imageWasReplaced = false;
 
   try {
+    const existingMember = id
+      ? kind === "committee"
+        ? await prisma.committeeMemberResource.findUnique({
+            where: { id },
+            select: { imageUrl: true },
+          })
+        : await prisma.technicalStaffMemberResource.findUnique({
+            where: { id },
+            select: { imageUrl: true },
+          })
+      : null;
     const uploadedImageUrl = await uploadFileToCloudinary(
       formData.get("imageUpload") as File | null,
       "image",
     );
     const imageUrl = uploadedImageUrl ?? getStringValue(formData, "imageUrl");
+    imageWasReplaced = Boolean(
+      id && uploadedImageUrl && existingMember?.imageUrl !== uploadedImageUrl,
+    );
 
     const values = peopleFormSchema.parse({
       id,
@@ -279,6 +299,7 @@ export async function savePeopleMember(formData: FormData) {
           data: payload,
         })
         : await prisma.committeeMemberResource.create({ data: payload });
+      savedEntity = savedMember;
       redirectPath = `${buildPeoplePath(values.kind, savedMember.id)}?saved=1`;
     } else {
       const payload = {
@@ -298,7 +319,36 @@ export async function savePeopleMember(formData: FormData) {
           data: payload,
         })
         : await prisma.technicalStaffMemberResource.create({ data: payload });
+      savedEntity = savedMember;
       redirectPath = `${buildPeoplePath(values.kind, savedMember.id)}?saved=1`;
+    }
+
+    if (savedEntity) {
+      const entityType = values.kind === "committee" ? "comite" : "cadre";
+      const entityLabel =
+        values.kind === "committee" ? "le membre" : "le cadre technique";
+
+      await recordAdminActivity({
+        session,
+        action: values.id ? "update" : "create",
+        entityType,
+        entityId: savedEntity.id,
+        entityLabel: savedEntity.name,
+        message: `${session.name} a ${
+          values.id ? "modifié" : "créé"
+        } ${entityLabel} ${savedEntity.name}.`,
+      });
+
+      if (imageWasReplaced) {
+        await recordAdminActivity({
+          session,
+          action: "replace_image",
+          entityType,
+          entityId: savedEntity.id,
+          entityLabel: savedEntity.name,
+          message: `${session.name} a remplacé l'image de ${savedEntity.name}.`,
+        });
+      }
     }
 
     revalidatePath("/admin");
@@ -321,7 +371,7 @@ export async function deletePeopleMember(formData: FormData) {
   const kind = getStringValue(formData, "kind") as PeopleKind;
   const id = getStringValue(formData, "id");
   const safeKind: PeopleKind = kind === "technical" ? "technical" : "committee";
-  await requireAdministratorSession(getListPath(safeKind));
+  const session = await requireAdministratorSession(getListPath(safeKind));
 
   if (!id) {
     redirect(`${getListPath(safeKind)}?error=Identifiant%20manquant.`);
@@ -329,9 +379,31 @@ export async function deletePeopleMember(formData: FormData) {
 
   try {
     if (safeKind === "committee") {
-      await prisma.committeeMemberResource.delete({ where: { id } });
+      const deletedMember = await prisma.committeeMemberResource.delete({
+        where: { id },
+      });
+
+      await recordAdminActivity({
+        session,
+        action: "delete",
+        entityType: "comite",
+        entityId: deletedMember.id,
+        entityLabel: deletedMember.name,
+        message: `${session.name} a supprimé le membre ${deletedMember.name}.`,
+      });
     } else {
-      await prisma.technicalStaffMemberResource.delete({ where: { id } });
+      const deletedMember = await prisma.technicalStaffMemberResource.delete({
+        where: { id },
+      });
+
+      await recordAdminActivity({
+        session,
+        action: "delete",
+        entityType: "cadre",
+        entityId: deletedMember.id,
+        entityLabel: deletedMember.name,
+        message: `${session.name} a supprimé le cadre technique ${deletedMember.name}.`,
+      });
     }
   } catch (error) {
     const label =

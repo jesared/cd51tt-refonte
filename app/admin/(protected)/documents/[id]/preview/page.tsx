@@ -12,10 +12,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { requireEditorSession } from "@/lib/admin-auth";
+import { getAdminCompetitions } from "@/lib/admin-competitions";
 import { getAdminDocumentById } from "@/lib/admin-documents";
 import { formatFrenchMonthYear } from "@/lib/documents";
 import { createPageMetadata } from "@/lib/metadata";
-import { competitions } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
 export const metadata = createPageMetadata({
@@ -33,9 +33,10 @@ type AdminDocumentPreviewPageProps = {
 export default async function AdminDocumentPreviewPage({
   params,
 }: AdminDocumentPreviewPageProps) {
-  const [document] = await Promise.all([
+  const [document, , competitions] = await Promise.all([
     getAdminDocumentById(params.id),
     requireEditorSession("/admin/documents"),
+    getAdminCompetitions(),
   ]);
 
   if (!document) {

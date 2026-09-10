@@ -38,7 +38,7 @@ export default async function AdminEditArticlePage({
     <NewsArticleForm
       mode="edit"
       article={article}
-      canPublish={session.role === "ADMIN"}
+      canPublish={session.role === "ADMIN" || session.role === "EDITOR"}
       errorMessage={searchParams?.error ? decodeURIComponent(searchParams.error) : null}
       saved={searchParams?.saved === "1"}
     />

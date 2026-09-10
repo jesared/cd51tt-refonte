@@ -35,6 +35,9 @@ const CONTROL_PARAMS = new Set([
   "competition",
   "sport",
   "tag",
+  "role",
+  "actif",
+  "mdp",
 ]);
 
 export function AdminListControls({
@@ -76,6 +79,10 @@ export function AdminListControls({
     params.delete("unpublished");
     params.delete("fftt");
     params.delete("error");
+    params.delete("invited");
+    params.delete("roleUpdated");
+    params.delete("active");
+    params.delete("password");
 
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }

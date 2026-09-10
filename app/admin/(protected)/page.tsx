@@ -15,6 +15,7 @@ import {
   Users,
 } from "lucide-react";
 import {
+  AdminUserRole,
   CompetitionResourceStatus,
   DocumentResourceStatus,
   NewsArticleStatus,
@@ -63,7 +64,7 @@ type DashboardData = {
 
 function getModules(
   data: DashboardData,
-  canManageContent: boolean,
+  canViewContent: boolean,
   canManageStructure: boolean,
 ) {
   const activeClubs = data.clubs.filter((club) => club.active);
@@ -75,7 +76,7 @@ function getModules(
     {
       href: "/admin/actualites",
       title: "Actualités",
-      description: "Publier et modifier les annonces du site.",
+      description: "Consulter ou mettre à jour les annonces du site.",
       count: data.articles.length,
       unit: "articles",
       state: "Prêt",
@@ -93,7 +94,7 @@ function getModules(
     {
       href: "/admin/competitions",
       title: "Compétitions",
-      description: "Créer, modifier et publier les compétitions.",
+      description: "Consulter ou mettre à jour les compétitions.",
       count: data.competitions.length,
       unit:
         data.competitions.length === 1 ? "compétition" : "compétitions",
@@ -172,7 +173,7 @@ function getModules(
     return modules;
   }
 
-  if (canManageContent) {
+  if (canViewContent) {
     return modules.filter((module) =>
         [
           "/admin/actualites",
@@ -199,7 +200,7 @@ const checks = [
   },
   {
     label: "Clubs, comité, cadres",
-    detail: "Gestion structurée en base, avec fallback public séparé.",
+    detail: "Gestion structurée en base pour les données institutionnelles.",
     done: true,
   },
   {
@@ -212,7 +213,8 @@ const checks = [
 export default async function AdminDashboardPage() {
   const session = await requireAdminSession();
   const canManageStructure = session.role === "ADMIN";
-  const canManageContent = session.role === "ADMIN" || session.role === "EDITOR";
+  const canManageContent = session.role !== AdminUserRole.USER;
+  const canViewContent = true;
   const [
     articles,
     documents,
@@ -224,11 +226,11 @@ export default async function AdminDashboardPage() {
     stats,
     adminUsers,
   ] = await Promise.all([
-    canManageContent ? getAdminNewsArticles() : Promise.resolve([]),
-    canManageContent ? getAdminDocuments() : Promise.resolve([]),
-    canManageContent ? getAdminCompetitions() : Promise.resolve([]),
+    canViewContent ? getAdminNewsArticles() : Promise.resolve([]),
+    canViewContent ? getAdminDocuments() : Promise.resolve([]),
+    canViewContent ? getAdminCompetitions() : Promise.resolve([]),
     canManageStructure ? getAdminClubs() : Promise.resolve([]),
-    canManageContent ? getAdminCalendarEvents() : Promise.resolve([]),
+    canViewContent ? getAdminCalendarEvents() : Promise.resolve([]),
     canManageStructure ? getAdminCommitteeMembers() : Promise.resolve([]),
     canManageStructure ? getAdminTechnicalStaffMembers() : Promise.resolve([]),
     canManageStructure ? getAdminStats() : Promise.resolve({ licenseeTotal: null }),
@@ -246,7 +248,7 @@ export default async function AdminDashboardPage() {
     licenseeCount: stats.licenseeTotal,
     adminUsersCount: adminUsers.length,
   };
-  const modules = getModules(data, canManageContent, canManageStructure);
+  const modules = getModules(data, canViewContent, canManageStructure);
   const publishedArticleCount = articles.filter(
     (article) => article.status === NewsArticleStatus.PUBLISHED,
   ).length;
@@ -284,12 +286,14 @@ export default async function AdminDashboardPage() {
               vérifier.
             </p>
           </div>
-          <Link
-            href="/admin/actualites/nouveau"
-            className="inline-flex h-9 items-center justify-center rounded-md bg-foreground px-3 text-sm font-medium text-background transition-colors hover:opacity-85"
-          >
-            Nouvelle actualité
-          </Link>
+          {canManageContent ? (
+            <Link
+              href="/admin/actualites/nouveau"
+              className="inline-flex h-9 items-center justify-center rounded-md bg-foreground px-3 text-sm font-medium text-background transition-colors hover:opacity-85"
+            >
+              Nouvelle actualité
+            </Link>
+          ) : null}
         </div>
       </section>
 
@@ -333,9 +337,9 @@ export default async function AdminDashboardPage() {
           <div className="divide-y divide-border">
             {modules.length === 0 ? (
               <div className="px-5 py-8 text-sm leading-6 text-muted-foreground">
-                Votre compte est actif, mais aucun module de mise à jour ne lui
-                est encore ouvert. Demandez à un administrateur de passer le
-                rôle en EDITOR ou ADMIN si nécessaire.
+                Votre compte est actif, mais aucun module ne lui est encore
+                ouvert. Demandez à un administrateur de vérifier votre rôle si
+                nécessaire.
               </div>
             ) : null}
             {modules.map((item) => {

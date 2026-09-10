@@ -41,7 +41,7 @@ export default async function EditCalendarEventPage({
       mode="edit"
       event={event}
       competitionOptions={competitionOptions}
-      canPublish={session.role === "ADMIN"}
+      canPublish={session.role === "ADMIN" || session.role === "EDITOR"}
       errorMessage={
         searchParams?.error ? decodeURIComponent(searchParams.error) : null
       }

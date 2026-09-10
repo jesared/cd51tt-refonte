@@ -102,7 +102,6 @@ export function PeopleMemberForm({
 
       <form
         action={savePeopleMember}
-        encType="multipart/form-data"
         className="grid gap-6"
       >
         <UnsavedChangesGuard />

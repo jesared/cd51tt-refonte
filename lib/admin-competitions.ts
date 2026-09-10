@@ -13,6 +13,8 @@ import {
   requireAdministratorSession,
   requireEditorSession,
 } from "@/lib/admin-auth";
+import { recordAdminActivity } from "@/lib/admin-activity";
+import { assertCompetitionCanBePublished } from "@/lib/admin-publication-guards";
 import type {
   Competition,
   CompetitionAction,
@@ -339,11 +341,11 @@ export async function saveCompetition(formData: FormData) {
     const existingCompetition = id
       ? await prisma.competitionResource.findUnique({
           where: { id },
-          select: { status: true },
+          select: { imageUrl: true, status: true },
         })
       : null;
     const status =
-      session.role === AdminUserRole.ADMIN
+      session.role !== AdminUserRole.USER
         ? requestedStatus
         : existingCompetition?.status ?? CompetitionResourceStatus.DRAFT;
 
@@ -420,12 +422,50 @@ export async function saveCompetition(formData: FormData) {
       sortOrder: values.sortOrder,
     };
 
+    if (payload.status === CompetitionResourceStatus.PUBLISHED) {
+      const linkedEventsCount = values.id
+        ? await prisma.calendarEvent.count({
+            where: { competitionId: values.id },
+          })
+        : 0;
+
+      assertCompetitionCanBePublished(payload, linkedEventsCount);
+    }
+
     const savedCompetition = values.id
       ? await prisma.competitionResource.update({
           where: { id: values.id },
           data: payload,
         })
       : await prisma.competitionResource.create({ data: payload });
+
+    await recordAdminActivity({
+      session,
+      action: values.id ? "update" : "create",
+      entityType: "competition",
+      entityId: savedCompetition.id,
+      entityLabel: savedCompetition.title,
+      message: `${session.name} a ${
+        values.id ? "modifié" : "créé"
+      } la compétition ${savedCompetition.title}.`,
+    });
+
+    if (
+      values.id &&
+      (uploadedImageUrl ||
+        (removeImage && existingCompetition?.imageUrl))
+    ) {
+      await recordAdminActivity({
+        session,
+        action: "replace_image",
+        entityType: "competition",
+        entityId: savedCompetition.id,
+        entityLabel: savedCompetition.title,
+        message: `${session.name} a ${
+          removeImage ? "retiré" : "remplacé"
+        } l'image de la compétition ${savedCompetition.title}.`,
+      });
+    }
 
     revalidateCompetitionPaths();
     redirectPath = `/admin/competitions/${savedCompetition.id}?saved=1`;
@@ -440,7 +480,7 @@ export async function saveCompetition(formData: FormData) {
 export async function deleteCompetition(formData: FormData) {
   "use server";
 
-  await requireAdministratorSession("/admin/competitions");
+  const session = await requireEditorSession("/admin/competitions");
 
   const id = getStringValue(formData, "id");
 
@@ -449,7 +489,18 @@ export async function deleteCompetition(formData: FormData) {
   }
 
   try {
-    await prisma.competitionResource.delete({ where: { id } });
+    const deletedCompetition = await prisma.competitionResource.delete({
+      where: { id },
+    });
+
+    await recordAdminActivity({
+      session,
+      action: "delete",
+      entityType: "competition",
+      entityId: deletedCompetition.id,
+      entityLabel: deletedCompetition.title,
+      message: `${session.name} a supprimé la compétition ${deletedCompetition.title}.`,
+    });
   } catch (error) {
     const message = encodeURIComponent(serializeErrorMessage(error));
     redirect(`/admin/competitions?error=${message}`);
@@ -462,7 +513,7 @@ export async function deleteCompetition(formData: FormData) {
 export async function toggleCompetitionPublication(formData: FormData) {
   "use server";
 
-  await requireAdministratorSession("/admin/competitions");
+  const session = await requireAdministratorSession("/admin/competitions");
 
   const id = getStringValue(formData, "id");
   const status = getBooleanValue(formData, "published")
@@ -474,9 +525,39 @@ export async function toggleCompetitionPublication(formData: FormData) {
   }
 
   try {
-    await prisma.competitionResource.update({
+    if (status === CompetitionResourceStatus.PUBLISHED) {
+      const competition = await prisma.competitionResource.findUnique({
+        where: { id },
+      });
+
+      if (!competition) {
+        throw new Error("Compétition introuvable.");
+      }
+
+      const linkedEventsCount = await prisma.calendarEvent.count({
+        where: { competitionId: id },
+      });
+
+      assertCompetitionCanBePublished(competition, linkedEventsCount);
+    }
+
+    const updatedCompetition = await prisma.competitionResource.update({
       where: { id },
       data: { status },
+    });
+
+    await recordAdminActivity({
+      session,
+      action:
+        status === CompetitionResourceStatus.PUBLISHED
+          ? "publish"
+          : "unpublish",
+      entityType: "competition",
+      entityId: updatedCompetition.id,
+      entityLabel: updatedCompetition.title,
+      message: `${session.name} a ${
+        status === CompetitionResourceStatus.PUBLISHED ? "publié" : "dépublié"
+      } la compétition ${updatedCompetition.title}.`,
     });
   } catch (error) {
     const message = encodeURIComponent(serializeErrorMessage(error));

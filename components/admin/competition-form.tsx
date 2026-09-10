@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   CalendarDays,
   CalendarPlus,
+  Eye,
   ExternalLink,
   Save,
 } from "lucide-react";
@@ -133,6 +134,9 @@ export function CompetitionForm({
     competition?.status === "PUBLISHED"
       ? `/competitions/${competition.id}`
       : null;
+  const previewHref = competition
+    ? `/admin/competitions/${competition.id}/preview`
+    : null;
 
   return (
     <div className="space-y-6">
@@ -152,6 +156,15 @@ export function CompetitionForm({
           </div>
 
           <div className="flex flex-wrap gap-2 lg:justify-end">
+            {previewHref ? (
+              <Link
+                href={previewHref}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border px-4 text-sm text-muted-foreground transition hover:text-foreground"
+              >
+                <Eye className="size-4" />
+                Prévisualiser
+              </Link>
+            ) : null}
             {publicHref ? (
               <Link
                 href={publicHref}
@@ -190,7 +203,6 @@ export function CompetitionForm({
 
       <ConfirmableAdminForm
         action={saveCompetition}
-        encType="multipart/form-data"
         className="grid gap-6"
         contentLabel="cette compétition"
         contentType="competition"

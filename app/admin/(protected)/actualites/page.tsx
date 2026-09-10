@@ -1,18 +1,16 @@
 import Link from "next/link";
-import { Eye, EyeOff, Plus, Sparkles } from "lucide-react";
-import { NewsArticleStatus } from "@prisma/client";
+import { Eye, EyeOff, Plus } from "lucide-react";
+import { AdminUserRole, NewsArticleStatus } from "@prisma/client";
 
 import { AdminListControls } from "@/components/admin/admin-list-controls";
 import { AdminRowActionsMenu } from "@/components/admin/admin-row-actions-menu";
-import { AdminSubmitButton } from "@/components/admin/admin-submit-button";
 import { PublicationConfirmationForm } from "@/components/admin/publication-confirmation-form";
 import {
   deleteNewsArticle,
   getAdminNewsArticles,
-  seedMockNewsArticles,
   toggleNewsArticlePublication,
 } from "@/lib/admin-news";
-import { requireEditorSession } from "@/lib/admin-auth";
+import { requireAdminSession } from "@/lib/admin-auth";
 import { matchesRecentUpdateFilter } from "@/lib/admin-list-filters";
 import { createPageMetadata } from "@/lib/metadata";
 import { formatFrenchDate } from "@/lib/news";
@@ -64,9 +62,10 @@ export default async function AdminActualitesPage({
 }: AdminActualitesPageProps) {
   const [articles, session] = await Promise.all([
     getAdminNewsArticles(),
-    requireEditorSession("/admin/actualites"),
+    requireAdminSession(),
   ]);
-  const canManagePublication = session.role === "ADMIN";
+  const canEditContent = session.role !== AdminUserRole.USER;
+  const canManagePublication = canEditContent;
   const categories = Array.from(
     new Set(articles.map((article) => article.category)),
   ).sort((a, b) => a.localeCompare(b, "fr"));
@@ -140,16 +139,16 @@ export default async function AdminActualitesPage({
             : searchParams?.unpublished === "1"
               ? "L'actualité est dépubliée."
               : searchParams?.seeded === "1"
-              ? "Articles de démonstration importés depuis le mock local."
-              : searchParams?.seeded === "0"
-                ? "Des articles existent déjà en base admin. Import mock local ignoré."
-                : searchParams?.error
-                  ? decodeURIComponent(searchParams.error)
-                  : null;
+                ? "Les articles existants ont été importés."
+                : searchParams?.seeded === "0"
+                  ? "Des articles existent déjà en base admin. Import ignoré."
+                  : searchParams?.error
+                    ? decodeURIComponent(searchParams.error)
+                    : null;
   const feedbackTone = searchParams?.error
     ? "error"
     : searchParams?.seeded === "1"
-      ? "mock"
+      ? "success"
       : "default";
 
   return (
@@ -163,41 +162,26 @@ export default async function AdminActualitesPage({
             Gérer les actualités
           </h2>
           <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-            Créez, modifiez, publiez ou dépubliez les informations visibles sur
-            le site public.
+            Consultez les informations visibles sur le site public. Les rôles
+            ADMIN et EDITOR peuvent aussi les créer ou les modifier.
           </p>
           <div className="flex flex-wrap gap-2">
             <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
               Base admin réelle
             </span>
-            {articles.length === 0 ? (
-              <span className="rounded-full border border-amber-500/25 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-800 dark:text-amber-200">
-                Mock local disponible
-              </span>
-            ) : null}
           </div>
         </div>
 
         <div className="flex flex-col justify-center gap-3 border-t border-border pt-5 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
-          {articles.length === 0 && canManagePublication ? (
-            <form action={seedMockNewsArticles} className="contents">
-              <AdminSubmitButton
-                icon={<Sparkles className="size-4" />}
-                loadingLabel="Import en cours..."
-                className="h-11 w-full px-4"
-              >
-                Importer mock local
-              </AdminSubmitButton>
-            </form>
+          {canEditContent ? (
+            <Link
+              href="/admin/actualites/nouveau"
+              className="admin-action admin-action-primary h-11 w-full"
+            >
+              <Plus className="size-4" />
+              Nouvel article
+            </Link>
           ) : null}
-
-          <Link
-            href="/admin/actualites/nouveau"
-            className="admin-action admin-action-primary h-11 w-full"
-          >
-            <Plus className="size-4" />
-            Nouvel article
-          </Link>
         </div>
       </section>
 
@@ -206,16 +190,11 @@ export default async function AdminActualitesPage({
           className={
             feedbackTone === "error"
               ? "rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive shadow-sm"
-              : feedbackTone === "mock"
-                ? "rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm font-medium text-amber-900 shadow-sm dark:text-amber-200"
+              : feedbackTone === "success"
+                ? "rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm font-medium text-emerald-800 shadow-sm dark:text-emerald-200"
                 : "admin-feedback"
           }
         >
-          {feedbackTone === "mock" ? (
-            <span className="mr-2 rounded-full border border-current/20 px-2 py-0.5 text-xs">
-              Mock local
-            </span>
-          ) : null}
           {message}
         </div>
       ) : null}
@@ -281,8 +260,7 @@ export default async function AdminActualitesPage({
 
         {articles.length === 0 ? (
           <div className="px-6 py-8 text-sm leading-6 text-muted-foreground">
-            Aucun article n&apos;est encore en base. Vous pouvez importer les
-            mocks ou créer votre premier contenu manuellement.
+            Aucun article n&apos;est encore en base.
           </div>
         ) : (
           <div className="divide-y divide-border">
@@ -364,13 +342,17 @@ export default async function AdminActualitesPage({
                           deleteMessage="Supprimer cette actualité ? Cette action est définitive."
                         />
                       </>
-                    ) : (
+                    ) : canEditContent ? (
                       <Link
                         href={`/admin/actualites/${article.id}`}
                         className="inline-flex h-9 items-center justify-center rounded-lg border border-border bg-background px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                       >
                         Modifier
                       </Link>
+                    ) : (
+                      <span className="inline-flex h-9 items-center justify-center rounded-lg border border-border bg-muted/40 px-3 text-sm font-medium text-muted-foreground">
+                        Lecture seule
+                      </span>
                     )}
                   </div>
                 </article>

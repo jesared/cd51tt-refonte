@@ -45,7 +45,7 @@ export default async function AdminEditCompetitionPage({
       mode="edit"
       competition={competition}
       linkedCalendarEvents={linkedCalendarEvents}
-      canPublish={session.role === "ADMIN"}
+      canPublish={session.role === "ADMIN" || session.role === "EDITOR"}
       errorMessage={
         searchParams?.error ? decodeURIComponent(searchParams.error) : null
       }

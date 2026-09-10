@@ -111,7 +111,6 @@ export function NewsArticleForm({
 
       <ConfirmableAdminForm
         action={saveNewsArticle}
-        encType="multipart/form-data"
         className="grid gap-6"
         contentLabel="cette actualité"
         contentType="news"

@@ -4,7 +4,6 @@ import { ClubsList } from "@/components/clubs/clubs-list";
 import { Badge } from "@/components/ui/badge";
 import { getPublicClubs } from "@/lib/admin-clubs";
 import { createPageMetadata } from "@/lib/metadata";
-import { clubs } from "@/lib/mock-data";
 
 export const metadata = createPageMetadata({
   title: "Clubs",
@@ -16,7 +15,7 @@ export const metadata = createPageMetadata({
 export const dynamic = "force-dynamic";
 
 export default async function ClubsPage() {
-  const directory = (await getPublicClubs()) ?? clubs;
+  const directory = (await getPublicClubs()) ?? [];
   const cities = Array.from(new Set(directory.map((club) => club.city)));
 
   return (

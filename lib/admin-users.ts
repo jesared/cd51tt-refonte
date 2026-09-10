@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { requireAdministratorSession } from "@/lib/admin-auth";
+import { recordAdminActivity } from "@/lib/admin-activity";
 import { hashAdminPassword } from "@/lib/admin-password";
 import { prisma } from "@/lib/prisma";
 
@@ -87,7 +88,9 @@ export async function getAdminUsers() {
       name: true,
       role: true,
       active: true,
+      mustChangePassword: true,
       lastLoginAt: true,
+      passwordChangedAt: true,
       createdAt: true,
       updatedAt: true,
     },
@@ -95,7 +98,7 @@ export async function getAdminUsers() {
 }
 
 export async function createAdminUser(formData: FormData) {
-  await requireAdministratorSession(USERS_PATH);
+  const session = await requireAdministratorSession(USERS_PATH);
 
   try {
     const values = userFormSchema.parse({
@@ -105,14 +108,24 @@ export async function createAdminUser(formData: FormData) {
       password: String(formData.get("password") ?? ""),
     });
 
-    await prisma.adminUser.create({
+    const createdUser = await prisma.adminUser.create({
       data: {
         email: values.email,
         name: values.name,
         passwordHash: hashAdminPassword(values.password),
         role: values.role,
         active: true,
+        mustChangePassword: true,
       },
+    });
+
+    await recordAdminActivity({
+      session,
+      action: "create",
+      entityType: "utilisateur",
+      entityId: createdUser.id,
+      entityLabel: createdUser.email,
+      message: `${session.name} a créé le compte ${createdUser.email} avec le rôle ${createdUser.role}.`,
     });
   } catch (error) {
     redirectWithError(getFirstErrorMessage(error));
@@ -134,7 +147,7 @@ export async function updateAdminUserRole(formData: FormData) {
 
     const user = await prisma.adminUser.findUnique({
       where: { id: values.id },
-      select: { id: true, active: true, role: true },
+      select: { id: true, active: true, email: true, role: true },
     });
 
     if (!user) {
@@ -153,9 +166,18 @@ export async function updateAdminUserRole(formData: FormData) {
       await ensureAnotherActiveAdmin(user.id);
     }
 
-    await prisma.adminUser.update({
+    const updatedUser = await prisma.adminUser.update({
       where: { id: values.id },
       data: { role: values.role },
+    });
+
+    await recordAdminActivity({
+      session,
+      action: "role",
+      entityType: "utilisateur",
+      entityId: updatedUser.id,
+      entityLabel: updatedUser.email,
+      message: `${session.name} a changé le rôle de ${updatedUser.email} de ${user.role} à ${updatedUser.role}.`,
     });
   } catch (error) {
     redirectWithError(getFirstErrorMessage(error));
@@ -163,7 +185,7 @@ export async function updateAdminUserRole(formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath(USERS_PATH);
-  redirect(`${USERS_PATH}?role=1`);
+  redirect(`${USERS_PATH}?roleUpdated=1`);
 }
 
 export async function toggleAdminUserActive(formData: FormData) {
@@ -176,7 +198,7 @@ export async function toggleAdminUserActive(formData: FormData) {
 
     const user = await prisma.adminUser.findUnique({
       where: { id: values.id },
-      select: { id: true, active: true, role: true },
+      select: { id: true, active: true, email: true, role: true },
     });
 
     if (!user) {
@@ -191,9 +213,20 @@ export async function toggleAdminUserActive(formData: FormData) {
       await ensureAnotherActiveAdmin(user.id);
     }
 
-    await prisma.adminUser.update({
+    const updatedUser = await prisma.adminUser.update({
       where: { id: values.id },
       data: { active: !user.active },
+    });
+
+    await recordAdminActivity({
+      session,
+      action: "active",
+      entityType: "utilisateur",
+      entityId: updatedUser.id,
+      entityLabel: updatedUser.email,
+      message: `${session.name} a ${
+        updatedUser.active ? "réactivé" : "désactivé"
+      } le compte ${updatedUser.email}.`,
     });
   } catch (error) {
     redirectWithError(getFirstErrorMessage(error));
@@ -205,7 +238,7 @@ export async function toggleAdminUserActive(formData: FormData) {
 }
 
 export async function resetAdminUserPassword(formData: FormData) {
-  await requireAdministratorSession(USERS_PATH);
+  const session = await requireAdministratorSession(USERS_PATH);
 
   try {
     const values = resetPasswordFormSchema.parse({
@@ -213,9 +246,22 @@ export async function resetAdminUserPassword(formData: FormData) {
       password: String(formData.get("password") ?? ""),
     });
 
-    await prisma.adminUser.update({
+    const updatedUser = await prisma.adminUser.update({
       where: { id: values.id },
-      data: { passwordHash: hashAdminPassword(values.password) },
+      data: {
+        passwordHash: hashAdminPassword(values.password),
+        mustChangePassword: true,
+        passwordChangedAt: null,
+      },
+    });
+
+    await recordAdminActivity({
+      session,
+      action: "password",
+      entityType: "utilisateur",
+      entityId: updatedUser.id,
+      entityLabel: updatedUser.email,
+      message: `${session.name} a réinitialisé le mot de passe de ${updatedUser.email}.`,
     });
   } catch (error) {
     redirectWithError(getFirstErrorMessage(error));

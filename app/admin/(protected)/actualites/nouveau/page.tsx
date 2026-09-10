@@ -22,7 +22,7 @@ export default async function AdminNewArticlePage({
   return (
     <NewsArticleForm
       mode="create"
-      canPublish={session.role === "ADMIN"}
+      canPublish={session.role === "ADMIN" || session.role === "EDITOR"}
       errorMessage={searchParams?.error ? decodeURIComponent(searchParams.error) : null}
     />
   );

@@ -3,8 +3,10 @@
 import crypto from "node:crypto";
 
 import { AdminUserRole, type AdminUser } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 
 import {
   hashAdminPassword,
@@ -16,6 +18,7 @@ const ADMIN_COOKIE_NAME = "cd51tt-admin-session";
 const SESSION_TTL_SECONDS = 60 * 60 * 12;
 const ADMIN_PERMISSION_ERROR = "Action réservée à un administrateur.";
 const EDITOR_ALLOWED_ROLES = [AdminUserRole.ADMIN, AdminUserRole.EDITOR] as const;
+const CHANGE_PASSWORD_PATH = "/admin/mot-de-passe";
 
 type LegacyCredentials = {
   email: string;
@@ -28,8 +31,28 @@ export type AdminSession = {
   email: string;
   name: string;
   role: AdminUserRole;
+  mustChangePassword: boolean;
   expiresAt: number;
 };
+
+const changePasswordFormSchema = z
+  .object({
+    currentPassword: z
+      .string()
+      .min(1, "Indiquez votre mot de passe actuel."),
+    newPassword: z
+      .string()
+      .min(10, "Le nouveau mot de passe doit contenir au moins 10 caractères."),
+    confirmPassword: z.string().min(1, "Confirmez le nouveau mot de passe."),
+  })
+  .refine((values) => values.newPassword === values.confirmPassword, {
+    message: "Les deux nouveaux mots de passe ne correspondent pas.",
+    path: ["confirmPassword"],
+  })
+  .refine((values) => values.currentPassword !== values.newPassword, {
+    message: "Le nouveau mot de passe doit être différent de l'ancien.",
+    path: ["newPassword"],
+  });
 
 function getLegacyCredentials(): LegacyCredentials {
   const isProduction = process.env.NODE_ENV === "production";
@@ -58,7 +81,12 @@ function timingSafeEqual(first: string, second: string) {
   return crypto.timingSafeEqual(firstBuffer, secondBuffer);
 }
 
-function buildSessionValue(user: Pick<AdminUser, "id" | "email" | "name" | "role">) {
+function buildSessionValue(
+  user: Pick<
+    AdminUser,
+    "id" | "email" | "name" | "role" | "mustChangePassword"
+  >,
+) {
   const { secret } = getLegacyCredentials();
 
   if (!secret) {
@@ -70,6 +98,7 @@ function buildSessionValue(user: Pick<AdminUser, "id" | "email" | "name" | "role
     email: user.email,
     name: user.name,
     role: user.role,
+    mustChangePassword: user.mustChangePassword,
     expiresAt: Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS,
   };
   const payload = Buffer.from(JSON.stringify(session)).toString("base64url");
@@ -122,6 +151,7 @@ async function readSessionValue(rawValue: string | undefined) {
       email: true,
       name: true,
       role: true,
+      mustChangePassword: true,
     },
   });
 
@@ -134,6 +164,7 @@ async function readSessionValue(rawValue: string | undefined) {
     email: user.email,
     name: user.name,
     role: user.role,
+    mustChangePassword: user.mustChangePassword,
   };
 }
 
@@ -168,6 +199,8 @@ async function findUserForLogin(email: string, password: string) {
       passwordHash: hashAdminPassword(password),
       role: AdminUserRole.ADMIN,
       active: true,
+      mustChangePassword: false,
+      passwordChangedAt: new Date(),
       lastLoginAt: new Date(),
     },
   });
@@ -256,7 +289,7 @@ export async function loginAdmin(formData: FormData) {
     maxAge: SESSION_TTL_SECONDS,
   });
 
-  redirect("/admin");
+  redirect(user.mustChangePassword ? CHANGE_PASSWORD_PATH : "/admin");
 }
 
 export async function logoutAdmin() {
@@ -264,4 +297,60 @@ export async function logoutAdmin() {
 
   cookieStore.delete(ADMIN_COOKIE_NAME);
   redirect("/admin/login");
+}
+
+function getPasswordErrorMessage(error: unknown) {
+  if (error instanceof z.ZodError) {
+    return error.issues[0]?.message ?? "Formulaire invalide.";
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "Impossible de changer le mot de passe pour le moment.";
+}
+
+export async function changeOwnAdminPassword(formData: FormData) {
+  const session = await requireAdminSession();
+
+  try {
+    const values = changePasswordFormSchema.parse({
+      currentPassword: String(formData.get("currentPassword") ?? ""),
+      newPassword: String(formData.get("newPassword") ?? ""),
+      confirmPassword: String(formData.get("confirmPassword") ?? ""),
+    });
+
+    const user = await prisma.adminUser.findUnique({
+      where: { id: session.userId },
+      select: { id: true, passwordHash: true, active: true },
+    });
+
+    if (!user?.active) {
+      throw new Error("Compte introuvable ou désactivé.");
+    }
+
+    if (!verifyAdminPassword(values.currentPassword, user.passwordHash)) {
+      throw new Error("Le mot de passe actuel est incorrect.");
+    }
+
+    await prisma.adminUser.update({
+      where: { id: user.id },
+      data: {
+        passwordHash: hashAdminPassword(values.newPassword),
+        mustChangePassword: false,
+        passwordChangedAt: new Date(),
+      },
+    });
+  } catch (error) {
+    redirect(
+      `${CHANGE_PASSWORD_PATH}?error=${encodeURIComponent(
+        getPasswordErrorMessage(error),
+      )}`,
+    );
+  }
+
+  revalidatePath("/admin");
+  revalidatePath(CHANGE_PASSWORD_PATH);
+  redirect("/admin?password=changed");
 }

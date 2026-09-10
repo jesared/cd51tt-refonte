@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { DocumentResource } from "@prisma/client";
+import type { CompetitionResource, DocumentResource } from "@prisma/client";
 import { ArrowLeft, Download, Eye, ExternalLink, Save } from "lucide-react";
 
 import { saveDocument } from "@/lib/admin-documents";
@@ -10,11 +10,11 @@ import {
   DOCUMENT_CATEGORY_OPTIONS,
   normalizeDocumentCategory,
 } from "@/lib/content-categories";
-import { competitions } from "@/lib/mock-data";
 
 type DocumentResourceFormProps = {
   mode: "create" | "edit";
   document?: DocumentResource;
+  competitions: CompetitionResource[];
   errorMessage?: string | null;
   saved?: boolean;
   canPublish?: boolean;
@@ -31,6 +31,7 @@ function toDateInputValue(date: Date | null | undefined) {
 export function DocumentResourceForm({
   mode,
   document,
+  competitions,
   errorMessage,
   saved = false,
   canPublish = true,
@@ -119,7 +120,6 @@ export function DocumentResourceForm({
 
       <ConfirmableAdminForm
         action={saveDocument}
-        encType="multipart/form-data"
         className="grid gap-6"
         contentLabel="ce document"
         contentType="document"

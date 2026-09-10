@@ -7,6 +7,7 @@ import { cache } from "react";
 import { z } from "zod";
 
 import { requireAdministratorSession } from "@/lib/admin-auth";
+import { recordAdminActivity } from "@/lib/admin-activity";
 import { ffttApiReadiness, ffttClient } from "@/lib/fftt/client";
 import { clubs, type Club } from "@/lib/mock-data";
 import { prisma } from "@/lib/prisma";
@@ -123,14 +124,14 @@ export async function getPublicClubs(): Promise<Club[] | null> {
       orderBy: [{ city: "asc" }, { name: "asc" }],
     });
 
-    return entries.length ? entries.map(toClub) : null;
+    return entries.map(toClub);
   } catch {
     return null;
   }
 }
 
 export async function saveClub(formData: FormData) {
-  await requireAdministratorSession("/admin/clubs");
+  const session = await requireAdministratorSession("/admin/clubs");
 
   const id = getStringValue(formData, "id") || undefined;
   let redirectPath = "/admin/clubs";
@@ -166,6 +167,17 @@ export async function saveClub(formData: FormData) {
       })
       : await prisma.clubResource.create({ data: payload });
 
+    await recordAdminActivity({
+      session,
+      action: values.id ? "update" : "create",
+      entityType: "club",
+      entityId: savedClub.id,
+      entityLabel: savedClub.name,
+      message: `${session.name} a ${
+        values.id ? "modifié" : "créé"
+      } le club ${savedClub.name}.`,
+    });
+
     revalidatePath("/admin");
     revalidatePath("/admin/clubs");
     revalidatePath("/clubs");
@@ -180,7 +192,7 @@ export async function saveClub(formData: FormData) {
 }
 
 export async function deleteClub(formData: FormData) {
-  await requireAdministratorSession("/admin/clubs");
+  const session = await requireAdministratorSession("/admin/clubs");
 
   const id = getStringValue(formData, "id");
 
@@ -189,7 +201,16 @@ export async function deleteClub(formData: FormData) {
   }
 
   try {
-    await prisma.clubResource.delete({ where: { id } });
+    const deletedClub = await prisma.clubResource.delete({ where: { id } });
+
+    await recordAdminActivity({
+      session,
+      action: "delete",
+      entityType: "club",
+      entityId: deletedClub.id,
+      entityLabel: deletedClub.name,
+      message: `${session.name} a supprimé le club ${deletedClub.name}.`,
+    });
   } catch (error) {
     const message = encodeURIComponent(serializeErrorMessage(error));
     redirect(`/admin/clubs?error=${message}`);
@@ -204,7 +225,7 @@ export async function deleteClub(formData: FormData) {
 }
 
 export async function syncFfttClubs() {
-  await requireAdministratorSession("/admin/clubs");
+  const session = await requireAdministratorSession("/admin/clubs");
 
   if (!(await hasClubTable())) {
     redirect(
@@ -247,6 +268,16 @@ export async function syncFfttClubs() {
     revalidatePath("/admin/clubs");
     revalidatePath("/clubs");
     revalidatePath("/");
+
+    await recordAdminActivity({
+      session,
+      action: "update",
+      entityType: "club",
+      entityLabel: "Synchronisation FFTT clubs",
+      message: `${session.name} a synchronisé ${syncedCount} clubs depuis ${
+        source === "fftt" ? "la FFTT" : "la source locale"
+      }.`,
+    });
   } catch (error) {
     const message = encodeURIComponent(serializeErrorMessage(error));
     redirect(`/admin/clubs?error=${message}`);

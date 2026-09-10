@@ -1,18 +1,16 @@
 import Link from "next/link";
-import { Download, Eye, EyeOff, Plus, Sparkles } from "lucide-react";
-import { DocumentResourceStatus } from "@prisma/client";
+import { Download, Eye, EyeOff, Plus } from "lucide-react";
+import { AdminUserRole, DocumentResourceStatus } from "@prisma/client";
 
 import { AdminListControls } from "@/components/admin/admin-list-controls";
 import { AdminRowActionsMenu } from "@/components/admin/admin-row-actions-menu";
-import { AdminSubmitButton } from "@/components/admin/admin-submit-button";
 import { PublicationConfirmationForm } from "@/components/admin/publication-confirmation-form";
 import {
   deleteDocument,
   getAdminDocuments,
-  seedMockDocuments,
   toggleDocumentPublication,
 } from "@/lib/admin-documents";
-import { requireEditorSession } from "@/lib/admin-auth";
+import { requireAdminSession } from "@/lib/admin-auth";
 import { getAdminCompetitions } from "@/lib/admin-competitions";
 import { matchesRecentUpdateFilter } from "@/lib/admin-list-filters";
 import { formatFrenchMonthYear } from "@/lib/documents";
@@ -74,9 +72,10 @@ export default async function AdminDocumentsPage({
   const [entries, competitions, session] = await Promise.all([
     getAdminDocuments(),
     getAdminCompetitions(),
-    requireEditorSession("/admin/documents"),
+    requireAdminSession(),
   ]);
-  const canManagePublication = session.role === "ADMIN";
+  const canEditContent = session.role !== AdminUserRole.USER;
+  const canManagePublication = canEditContent;
   const competitionTitleById = new Map(
     competitions.map((competition) => [competition.id, competition.title]),
   );
@@ -154,16 +153,16 @@ export default async function AdminDocumentsPage({
             : searchParams?.unpublished === "1"
               ? "Le document est dépublié."
               : searchParams?.seeded === "1"
-              ? "Documents de démonstration importés depuis le mock local."
-              : searchParams?.seeded === "0"
-                ? "Des documents existent déjà en base admin. Import mock local ignoré."
-                : searchParams?.error
-                  ? decodeURIComponent(searchParams.error)
-                  : null;
+                ? "Les documents existants ont été importés."
+                : searchParams?.seeded === "0"
+                  ? "Des documents existent déjà en base admin. Import ignoré."
+                  : searchParams?.error
+                    ? decodeURIComponent(searchParams.error)
+                    : null;
   const feedbackTone = searchParams?.error
     ? "error"
     : searchParams?.seeded === "1"
-      ? "mock"
+      ? "success"
       : "default";
 
   return (
@@ -177,41 +176,26 @@ export default async function AdminDocumentsPage({
             Gérer la base documentaire du comité
           </h2>
           <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-            Regroupez les guides, règlements, formulaires et supports utiles au
-            même endroit, puis choisissez ce qui doit apparaître sur le site.
+            Consultez les guides, règlements, formulaires et supports utiles.
+            Les rôles ADMIN et EDITOR peuvent aussi les mettre à jour.
           </p>
           <div className="flex flex-wrap gap-2">
             <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
               Base admin réelle
             </span>
-            {entries.length === 0 ? (
-              <span className="rounded-full border border-amber-500/25 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-800 dark:text-amber-200">
-                Mock local disponible
-              </span>
-            ) : null}
           </div>
         </div>
 
         <div className="flex flex-col justify-center gap-3 border-t border-border pt-5 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
-          {entries.length === 0 && canManagePublication ? (
-            <form action={seedMockDocuments} className="contents">
-              <AdminSubmitButton
-                icon={<Sparkles className="size-4" />}
-                loadingLabel="Import en cours..."
-                className="h-11 w-full px-4"
-              >
-                Importer mock local
-              </AdminSubmitButton>
-            </form>
+          {canEditContent ? (
+            <Link
+              href="/admin/documents/nouveau"
+              className="admin-action admin-action-primary h-11 w-full"
+            >
+              <Plus className="size-4" />
+              Nouveau document
+            </Link>
           ) : null}
-
-          <Link
-            href="/admin/documents/nouveau"
-            className="admin-action admin-action-primary h-11 w-full"
-          >
-            <Plus className="size-4" />
-            Nouveau document
-          </Link>
         </div>
       </section>
 
@@ -220,16 +204,11 @@ export default async function AdminDocumentsPage({
           className={
             feedbackTone === "error"
               ? "rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive shadow-sm"
-              : feedbackTone === "mock"
-                ? "rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm font-medium text-amber-900 shadow-sm dark:text-amber-200"
+              : feedbackTone === "success"
+                ? "rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm font-medium text-emerald-800 shadow-sm dark:text-emerald-200"
                 : "admin-feedback"
           }
         >
-          {feedbackTone === "mock" ? (
-            <span className="mr-2 rounded-full border border-current/20 px-2 py-0.5 text-xs">
-              Mock local
-            </span>
-          ) : null}
           {message}
         </div>
       ) : null}
@@ -292,8 +271,7 @@ export default async function AdminDocumentsPage({
 
         {entries.length === 0 ? (
           <div className="px-6 py-8 text-sm leading-6 text-muted-foreground">
-            Aucun document n&apos;est encore en base. Vous pouvez importer les
-            mocks ou créer votre première ressource manuellement.
+            Aucun document n&apos;est encore en base.
           </div>
         ) : (
           <div className="divide-y divide-border">
@@ -385,7 +363,7 @@ export default async function AdminDocumentsPage({
                           </a>
                         </AdminRowActionsMenu>
                       </>
-                    ) : (
+                    ) : canEditContent ? (
                       <>
                         <a
                           href={entry.fileUrl}
@@ -403,6 +381,16 @@ export default async function AdminDocumentsPage({
                           Modifier
                         </Link>
                       </>
+                    ) : (
+                      <a
+                        href={entry.fileUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-background px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                      >
+                        <Download className="size-4" />
+                        Ouvrir
+                      </a>
                     )}
                   </div>
                 </article>

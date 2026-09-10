@@ -10,6 +10,8 @@ import {
   requireAdministratorSession,
   requireEditorSession,
 } from "@/lib/admin-auth";
+import { recordAdminActivity } from "@/lib/admin-activity";
+import { assertCalendarEventCanBePublished } from "@/lib/admin-publication-guards";
 import { prisma } from "@/lib/prisma";
 
 const calendarEventFormSchema = z.object({
@@ -158,7 +160,7 @@ export async function saveCalendarEvent(formData: FormData) {
       date: getStringValue(formData, "date"),
       location: getStringValue(formData, "location"),
       published:
-        session.role === "ADMIN"
+        session.role === "ADMIN" || session.role === "EDITOR"
           ? getBooleanValue(formData, "published")
           : existingEvent?.published ?? false,
       sortOrder: getStringValue(formData, "sortOrder") || "0",
@@ -183,12 +185,27 @@ export async function saveCalendarEvent(formData: FormData) {
       sortOrder: values.sortOrder,
     };
 
+    if (payload.published) {
+      assertCalendarEventCanBePublished(payload, true);
+    }
+
     const savedEvent = values.id
       ? await prisma.calendarEvent.update({
         where: { id: values.id },
         data: payload,
       })
       : await prisma.calendarEvent.create({ data: payload });
+
+    await recordAdminActivity({
+      session,
+      action: values.id ? "update" : "create",
+      entityType: "echeance",
+      entityId: savedEvent.id,
+      entityLabel: savedEvent.title,
+      message: `${session.name} a ${
+        values.id ? "modifié" : "créé"
+      } l'échéance ${savedEvent.title}.`,
+    });
 
     revalidateCalendarPaths();
     redirectPath = `/admin/calendrier/${savedEvent.id}?saved=1`;
@@ -201,7 +218,7 @@ export async function saveCalendarEvent(formData: FormData) {
 }
 
 export async function deleteCalendarEvent(formData: FormData) {
-  await requireAdministratorSession("/admin/calendrier");
+  const session = await requireEditorSession("/admin/calendrier");
 
   const id = getStringValue(formData, "id");
 
@@ -210,7 +227,16 @@ export async function deleteCalendarEvent(formData: FormData) {
   }
 
   try {
-    await prisma.calendarEvent.delete({ where: { id } });
+    const deletedEvent = await prisma.calendarEvent.delete({ where: { id } });
+
+    await recordAdminActivity({
+      session,
+      action: "delete",
+      entityType: "echeance",
+      entityId: deletedEvent.id,
+      entityLabel: deletedEvent.title,
+      message: `${session.name} a supprimé l'échéance ${deletedEvent.title}.`,
+    });
   } catch (error) {
     const message = encodeURIComponent(serializeErrorMessage(error));
     redirect(`/admin/calendrier?error=${message}`);
@@ -221,7 +247,7 @@ export async function deleteCalendarEvent(formData: FormData) {
 }
 
 export async function toggleCalendarEventPublication(formData: FormData) {
-  await requireAdministratorSession("/admin/calendrier");
+  const session = await requireAdministratorSession("/admin/calendrier");
 
   const id = getStringValue(formData, "id");
   const published = getBooleanValue(formData, "published");
@@ -231,9 +257,39 @@ export async function toggleCalendarEventPublication(formData: FormData) {
   }
 
   try {
-    await prisma.calendarEvent.update({
+    if (published) {
+      const event = await prisma.calendarEvent.findUnique({ where: { id } });
+
+      if (!event) {
+        throw new Error("Échéance introuvable.");
+      }
+
+      const competitionExists = event.competitionId
+        ? Boolean(
+            await prisma.competitionResource.findUnique({
+              where: { id: event.competitionId },
+              select: { id: true },
+            }),
+          )
+        : false;
+
+      assertCalendarEventCanBePublished(event, competitionExists);
+    }
+
+    const updatedEvent = await prisma.calendarEvent.update({
       where: { id },
       data: { published },
+    });
+
+    await recordAdminActivity({
+      session,
+      action: published ? "publish" : "unpublish",
+      entityType: "echeance",
+      entityId: updatedEvent.id,
+      entityLabel: updatedEvent.title,
+      message: `${session.name} a ${
+        published ? "publié" : "dépublié"
+      } l'échéance ${updatedEvent.title}.`,
     });
   } catch (error) {
     const message = encodeURIComponent(serializeErrorMessage(error));

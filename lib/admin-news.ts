@@ -15,9 +15,11 @@ import {
   requireAdministratorSession,
   requireEditorSession,
 } from "@/lib/admin-auth";
+import { recordAdminActivity } from "@/lib/admin-activity";
 import { uploadFileToCloudinary } from "@/lib/cloudinary";
 import { normalizeNewsCategory } from "@/lib/content-categories";
 import { prisma } from "@/lib/prisma";
+import { assertNewsArticleCanBePublished } from "@/lib/admin-publication-guards";
 import {
   formatFrenchDate,
   slugifyArticleTitle,
@@ -287,15 +289,15 @@ export async function saveNewsArticle(formData: FormData) {
     const existingArticle = id
       ? await prisma.newsArticle.findUnique({
           where: { id },
-          select: { status: true, publishedAt: true },
+          select: { imageUrl: true, status: true, publishedAt: true },
         })
       : null;
     const status =
-      session.role === AdminUserRole.ADMIN
+      session.role !== AdminUserRole.USER
         ? requestedStatus
         : existingArticle?.status ?? NewsArticleStatus.DRAFT;
     const publishedAt =
-      session.role === AdminUserRole.ADMIN
+      session.role !== AdminUserRole.USER
         ? getStringValue(formData, "publishedAt") || undefined
         : existingArticle?.publishedAt?.toISOString();
 
@@ -338,6 +340,10 @@ export async function saveNewsArticle(formData: FormData) {
       publishedAt: toPublishedDate(values.publishedAt ?? "", values.status),
     };
 
+    if (payload.status === NewsArticleStatus.PUBLISHED) {
+      assertNewsArticleCanBePublished(payload);
+    }
+
     const savedArticle = values.id
       ? await prisma.newsArticle.update({
         where: { id: values.id },
@@ -346,6 +352,28 @@ export async function saveNewsArticle(formData: FormData) {
       : await prisma.newsArticle.create({
         data: payload,
       });
+
+    await recordAdminActivity({
+      session,
+      action: values.id ? "update" : "create",
+      entityType: "actualite",
+      entityId: savedArticle.id,
+      entityLabel: savedArticle.title,
+      message: `${session.name} a ${
+        values.id ? "modifié" : "créé"
+      } l'actualité ${savedArticle.title}.`,
+    });
+
+    if (uploadedImageUrl && existingArticle?.imageUrl !== uploadedImageUrl) {
+      await recordAdminActivity({
+        session,
+        action: "replace_image",
+        entityType: "actualite",
+        entityId: savedArticle.id,
+        entityLabel: savedArticle.title,
+        message: `${session.name} a remplacé l'image de l'actualité ${savedArticle.title}.`,
+      });
+    }
 
     revalidatePath("/admin");
     revalidatePath("/admin/actualites");
@@ -361,7 +389,7 @@ export async function saveNewsArticle(formData: FormData) {
 }
 
 export async function deleteNewsArticle(formData: FormData) {
-  await requireAdministratorSession("/admin/actualites");
+  const session = await requireEditorSession("/admin/actualites");
 
   const id = getStringValue(formData, "id");
 
@@ -369,8 +397,17 @@ export async function deleteNewsArticle(formData: FormData) {
     redirect("/admin/actualites?error=missing-id");
   }
 
-  await prisma.newsArticle.delete({
+  const deletedArticle = await prisma.newsArticle.delete({
     where: { id },
+  });
+
+  await recordAdminActivity({
+    session,
+    action: "delete",
+    entityType: "actualite",
+    entityId: deletedArticle.id,
+    entityLabel: deletedArticle.title,
+    message: `${session.name} a supprimé l'actualité ${deletedArticle.title}.`,
   });
 
   revalidatePath("/admin");
@@ -382,7 +419,7 @@ export async function deleteNewsArticle(formData: FormData) {
 }
 
 export async function toggleNewsArticlePublication(formData: FormData) {
-  await requireAdministratorSession("/admin/actualites");
+  const session = await requireAdministratorSession("/admin/actualites");
 
   const id = getStringValue(formData, "id");
   const nextStatus = getStringValue(formData, "status") as NewsArticleStatus;
@@ -391,13 +428,43 @@ export async function toggleNewsArticlePublication(formData: FormData) {
     redirect("/admin/actualites?error=Action%20de%20publication%20invalide.");
   }
 
-  await prisma.newsArticle.update({
-    where: { id },
-    data: {
-      status: nextStatus,
-      publishedAt: nextStatus === NewsArticleStatus.PUBLISHED ? new Date() : null,
-    },
-  });
+  try {
+    const article = await prisma.newsArticle.findUnique({ where: { id } });
+
+    if (!article) {
+      throw new Error("Actualité introuvable.");
+    }
+
+    const publishedAt =
+      nextStatus === NewsArticleStatus.PUBLISHED ? new Date() : null;
+
+    if (nextStatus === NewsArticleStatus.PUBLISHED) {
+      assertNewsArticleCanBePublished({ ...article, publishedAt });
+    }
+
+    const updatedArticle = await prisma.newsArticle.update({
+      where: { id },
+      data: {
+        status: nextStatus,
+        publishedAt,
+      },
+    });
+
+    await recordAdminActivity({
+      session,
+      action:
+        nextStatus === NewsArticleStatus.PUBLISHED ? "publish" : "unpublish",
+      entityType: "actualite",
+      entityId: updatedArticle.id,
+      entityLabel: updatedArticle.title,
+      message: `${session.name} a ${
+        nextStatus === NewsArticleStatus.PUBLISHED ? "publié" : "dépublié"
+      } l'actualité ${updatedArticle.title}.`,
+    });
+  } catch (error) {
+    const message = encodeURIComponent(serializeErrorMessage(error));
+    redirect(`/admin/actualites?error=${message}`);
+  }
 
   revalidatePath("/admin");
   revalidatePath("/admin/actualites");
@@ -423,7 +490,7 @@ export async function seedMockNewsArticles() {
       slug: article.slug,
       title: article.title,
       excerpt: article.excerpt,
-      content: `${article.excerpt}\n\nContenu de démonstration à enrichir dans l'administration.`,
+      content: `${article.excerpt}\n\nContenu à enrichir dans l'administration.`,
       category: normalizeNewsCategory(article.category) ?? article.category,
       imageUrl: article.imageUrl ?? null,
       readTime: article.readTime,

@@ -1,13 +1,16 @@
 import { AdminUserRole } from "@prisma/client";
 import {
+  Building2,
   CalendarClock,
   FileText,
+  Landmark,
   Newspaper,
   ScrollText,
   Settings2,
   ShieldCheck,
   Trophy,
   UserCog,
+  UserRoundCheck,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -47,6 +50,18 @@ function getEntityIcon(entityType: string) {
 
   if (entityType === "utilisateur") {
     return UserCog;
+  }
+
+  if (entityType === "club") {
+    return Building2;
+  }
+
+  if (entityType === "comite") {
+    return Landmark;
+  }
+
+  if (entityType === "cadre") {
+    return UserRoundCheck;
   }
 
   if (entityType === "parametres") {

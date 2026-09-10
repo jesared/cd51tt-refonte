@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { getPublishedDocumentCards } from "@/lib/admin-documents";
 import type { DocumentCardItem } from "@/lib/documents";
 import { createPageMetadata } from "@/lib/metadata";
-import { documents } from "@/lib/mock-data";
 
 export const metadata = createPageMetadata({
   title: "Documents",
@@ -18,11 +17,7 @@ export const dynamic = "force-dynamic";
 
 export default async function DocumentsPage() {
   const databaseDocuments = await getPublishedDocumentCards();
-  const fallbackDocuments: DocumentCardItem[] = documents.map((document) => ({
-    ...document,
-    href: document.href ?? "#",
-  }));
-  const library: DocumentCardItem[] = databaseDocuments ?? fallbackDocuments;
+  const library: DocumentCardItem[] = databaseDocuments ?? [];
   const categories = Array.from(
     new Set(library.map((document) => document.category)),
   );

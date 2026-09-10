@@ -29,7 +29,7 @@ export default async function NewCalendarEventPage({
       mode="create"
       competitionOptions={competitionOptions}
       defaultCompetitionId={searchParams?.competition}
-      canPublish={session.role === "ADMIN"}
+      canPublish={session.role === "ADMIN" || session.role === "EDITOR"}
       errorMessage={
         searchParams?.error ? decodeURIComponent(searchParams.error) : null
       }

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { DocumentResourceForm } from "@/components/admin/document-resource-form";
 import { requireEditorSession } from "@/lib/admin-auth";
+import { getAdminCompetitions } from "@/lib/admin-competitions";
 import { getAdminDocumentById } from "@/lib/admin-documents";
 import { createPageMetadata } from "@/lib/metadata";
 
@@ -25,9 +26,10 @@ export default async function AdminEditDocumentPage({
   params,
   searchParams,
 }: AdminEditDocumentPageProps) {
-  const [document, session] = await Promise.all([
+  const [document, session, competitions] = await Promise.all([
     getAdminDocumentById(params.id),
     requireEditorSession("/admin/documents"),
+    getAdminCompetitions(),
   ]);
 
   if (!document) {
@@ -38,7 +40,8 @@ export default async function AdminEditDocumentPage({
     <DocumentResourceForm
       mode="edit"
       document={document}
-      canPublish={session.role === "ADMIN"}
+      competitions={competitions}
+      canPublish={session.role === "ADMIN" || session.role === "EDITOR"}
       errorMessage={
         searchParams?.error ? decodeURIComponent(searchParams.error) : null
       }

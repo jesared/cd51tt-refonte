@@ -3,8 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { prisma } from "@/lib/prisma";
 import { requireAdministratorSession } from "@/lib/admin-auth";
+import { recordAdminActivity } from "@/lib/admin-activity";
+import { prisma } from "@/lib/prisma";
 import {
   affiliations,
   officeHours,
@@ -58,7 +59,7 @@ export async function getSiteSettings() {
 }
 
 export async function updateSiteSettings(formData: FormData) {
-  await requireAdministratorSession("/admin/site");
+  const session = await requireAdministratorSession("/admin/site");
 
   await prisma.siteSettings.upsert({
     where: { id: SITE_SETTINGS_ID },
@@ -107,6 +108,15 @@ export async function updateSiteSettings(formData: FormData) {
       facebookUrl: String(formData.get("facebookUrl") ?? "").trim(),
       instagramUrl: String(formData.get("instagramUrl") ?? "").trim(),
     },
+  });
+
+  await recordAdminActivity({
+    session,
+    action: "update",
+    entityType: "parametres",
+    entityId: String(SITE_SETTINGS_ID),
+    entityLabel: "Paramètres du site",
+    message: `${session.name} a modifié les paramètres du site.`,
   });
 
   revalidatePath("/admin");

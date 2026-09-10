@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CalendarDays, Eye, EyeOff, MapPin, Plus } from "lucide-react";
+import { AdminUserRole } from "@prisma/client";
 
 import { AdminListControls } from "@/components/admin/admin-list-controls";
 import { AdminRowActionsMenu } from "@/components/admin/admin-row-actions-menu";
@@ -11,7 +12,7 @@ import {
   getAdminCalendarEvents,
   toggleCalendarEventPublication,
 } from "@/lib/admin-calendar";
-import { requireEditorSession } from "@/lib/admin-auth";
+import { requireAdminSession } from "@/lib/admin-auth";
 import { matchesRecentUpdateFilter } from "@/lib/admin-list-filters";
 import { getAdminCompetitions } from "@/lib/admin-competitions";
 import { getCalendarEventTypeLabel, getCompetitionTitle } from "@/lib/calendar";
@@ -75,9 +76,10 @@ export default async function AdminCalendrierPage({
   const [calendarEvents, competitions, session] = await Promise.all([
     getAdminCalendarEvents(),
     getAdminCompetitions(),
-    requireEditorSession("/admin/calendrier"),
+    requireAdminSession(),
   ]);
-  const canManagePublication = session.role === "ADMIN";
+  const canEditContent = session.role !== AdminUserRole.USER;
+  const canManagePublication = canEditContent;
   const competitionTitles = new Map(
     competitions.map((competition) => [competition.id, competition.title]),
   );
@@ -176,19 +178,22 @@ export default async function AdminCalendrierPage({
             Gérer les échéances
           </h2>
           <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-            Centralisez les journées, tours, finales, convocations, résultats et
-            limites d&apos;inscription rattachés à une compétition.
+            Consultez les journées, tours, finales, convocations, résultats et
+            limites d&apos;inscription rattachés à une compétition. Les rôles ADMIN
+            et EDITOR peuvent aussi les mettre à jour.
           </p>
         </div>
 
         <div className="flex flex-col justify-center gap-3 border-t border-border pt-5 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
-          <Link
-            href="/admin/calendrier/nouveau"
-            className="admin-action admin-action-primary h-11 w-full"
-          >
-            <Plus className="size-4" />
-            Nouvelle échéance
-          </Link>
+          {canEditContent ? (
+            <Link
+              href="/admin/calendrier/nouveau"
+              className="admin-action admin-action-primary h-11 w-full"
+            >
+              <Plus className="size-4" />
+              Nouvelle échéance
+            </Link>
+          ) : null}
         </div>
       </section>
 
@@ -387,13 +392,17 @@ export default async function AdminCalendrierPage({
                             deleteMessage="Supprimer cette échéance ?"
                           />
                         </>
-                      ) : (
+                      ) : canEditContent ? (
                         <Link
                           href={`/admin/calendrier/${event.id}`}
                           className="inline-flex h-9 items-center justify-center rounded-lg border border-border bg-background px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                         >
                           Modifier
                         </Link>
+                      ) : (
+                        <span className="inline-flex h-9 items-center justify-center rounded-lg border border-border bg-muted/40 px-3 text-sm font-medium text-muted-foreground">
+                          Lecture seule
+                        </span>
                       )}
                     </div>
                   </article>
