@@ -21,6 +21,7 @@ import {
   Settings2,
   Trophy,
   Users,
+  UserCircle2,
   UserRoundCheck,
 } from "lucide-react";
 
@@ -161,6 +162,82 @@ type AdminShellProps = {
   };
 };
 
+function AdminAccountBlock({
+  email,
+  name,
+  roleLabel,
+}: {
+  email: string;
+  name: string;
+  roleLabel: string;
+}) {
+  const initials = name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
+
+  return (
+    <div className="mb-3 overflow-hidden rounded-xl border border-border bg-muted/35 shadow-sm">
+      <div className="h-1 bg-primary/70" />
+      <div className="p-3">
+        <div className="flex items-center gap-3">
+          <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-sm font-semibold text-primary shadow-inner">
+            {initials || <UserCircle2 className="size-4" />}
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <p className="truncate text-sm font-semibold leading-5 text-foreground">
+                {name}
+              </p>
+              <span className="shrink-0 rounded-full border border-border bg-background px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                {roleLabel}
+              </span>
+            </div>
+            <p className="truncate text-xs leading-5 text-muted-foreground">
+              {email}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AdminSidebarActions({
+  logoutAction,
+  onNavigate,
+}: {
+  logoutAction: () => Promise<void>;
+  onNavigate?: () => void;
+}) {
+  return (
+    <div className="grid grid-cols-2 overflow-hidden rounded-lg border border-border bg-muted/35 p-1 shadow-sm">
+      <Link
+        href="/"
+        onClick={onNavigate}
+        className="inline-flex h-9 min-w-0 items-center justify-center gap-1.5 rounded-md px-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-background hover:text-foreground hover:shadow-sm"
+        title="Voir le site public"
+      >
+        <ExternalLink className="size-3.5 shrink-0" />
+        <span className="truncate">Site public</span>
+      </Link>
+      <form action={logoutAction} className="min-w-0">
+        <button
+          type="submit"
+          className="inline-flex h-9 w-full min-w-0 items-center justify-center gap-1.5 rounded-md px-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-background hover:text-foreground hover:shadow-sm"
+          title="Se déconnecter"
+        >
+          <LogOut className="size-3.5 shrink-0" />
+          <span className="truncate">Déconnexion</span>
+        </button>
+      </form>
+    </div>
+  );
+}
+
 export function AdminShell({ children, logoutAction, session }: AdminShellProps) {
   const pathname = usePathname() ?? "/admin";
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -252,21 +329,12 @@ export function AdminShell({ children, logoutAction, session }: AdminShellProps)
         </nav>
 
         <div className="border-t border-border p-3">
-          <Link
-            href="/"
-            className="flex h-9 items-center rounded-md px-2 text-sm text-muted-foreground transition-[background-color,color,transform] duration-200 ease-out hover:bg-muted/70 hover:text-foreground"
-          >
-            Voir le site public
-          </Link>
-          <form action={logoutAction}>
-            <button
-              type="submit"
-              className="mt-1 flex h-9 w-full items-center gap-2 rounded-md px-2 text-sm text-muted-foreground transition-[background-color,color,transform] duration-200 ease-out hover:bg-muted/70 hover:text-foreground"
-            >
-              <LogOut className="size-4" />
-              Se déconnecter
-            </button>
-          </form>
+          <AdminAccountBlock
+            email={session.email}
+            name={session.name}
+            roleLabel={roleLabel}
+          />
+          <AdminSidebarActions logoutAction={logoutAction} />
         </div>
       </aside>
 
@@ -372,22 +440,15 @@ export function AdminShell({ children, logoutAction, session }: AdminShellProps)
                     </nav>
 
                     <div className="border-t border-border p-3">
-                      <Link
-                        href="/"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="flex h-10 items-center rounded-lg px-3 text-sm text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
-                      >
-                        Voir le site public
-                      </Link>
-                      <form action={logoutAction}>
-                        <button
-                          type="submit"
-                          className="mt-1 flex h-10 w-full items-center gap-2 rounded-lg px-3 text-sm text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
-                        >
-                          <LogOut className="size-4" />
-                          Se déconnecter
-                        </button>
-                      </form>
+                      <AdminAccountBlock
+                        email={session.email}
+                        name={session.name}
+                        roleLabel={roleLabel}
+                      />
+                      <AdminSidebarActions
+                        logoutAction={logoutAction}
+                        onNavigate={() => setMobileMenuOpen(false)}
+                      />
                     </div>
                   </div>
                 </SheetContent>
