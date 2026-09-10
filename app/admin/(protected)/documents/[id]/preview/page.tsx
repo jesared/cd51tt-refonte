@@ -11,6 +11,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { requireEditorSession } from "@/lib/admin-auth";
 import { getAdminDocumentById } from "@/lib/admin-documents";
 import { formatFrenchMonthYear } from "@/lib/documents";
 import { createPageMetadata } from "@/lib/metadata";
@@ -32,7 +33,10 @@ type AdminDocumentPreviewPageProps = {
 export default async function AdminDocumentPreviewPage({
   params,
 }: AdminDocumentPreviewPageProps) {
-  const document = await getAdminDocumentById(params.id);
+  const [document] = await Promise.all([
+    getAdminDocumentById(params.id),
+    requireEditorSession("/admin/documents"),
+  ]);
 
   if (!document) {
     notFound();

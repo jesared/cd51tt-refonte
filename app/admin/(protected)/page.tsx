@@ -12,6 +12,7 @@ import {
   Settings2,
   Trophy,
   UserRoundCheck,
+  Users,
 } from "lucide-react";
 import {
   CompetitionResourceStatus,
@@ -37,6 +38,8 @@ import {
   getAdminTechnicalStaffMembers,
 } from "@/lib/admin-people";
 import { getAdminStats } from "@/lib/admin-stats";
+import { requireAdminSession } from "@/lib/admin-auth";
+import { getAdminUsers } from "@/lib/admin-users";
 import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata = createPageMetadata({
@@ -55,15 +58,20 @@ type DashboardData = {
   committeeMembers: CommitteeMemberResource[];
   technicalStaffMembers: TechnicalStaffMemberResource[];
   licenseeCount: number | null;
+  adminUsersCount: number;
 };
 
-function getModules(data: DashboardData) {
+function getModules(
+  data: DashboardData,
+  canManageContent: boolean,
+  canManageStructure: boolean,
+) {
   const activeClubs = data.clubs.filter((club) => club.active);
   const publishedCalendarEvents = data.calendarEvents.filter(
     (event) => event.published,
   );
 
-  return [
+  const modules = [
     {
       href: "/admin/actualites",
       title: "Actualités",
@@ -149,7 +157,33 @@ function getModules(data: DashboardData) {
       state: "Prêt",
       icon: Settings2,
     },
+    {
+      href: "/admin/utilisateurs",
+      title: "Utilisateurs",
+      description: "Consulter les accès au back-office.",
+      count: data.adminUsersCount,
+      unit: "comptes",
+      state: "Admin",
+      icon: Users,
+    },
   ];
+
+  if (canManageStructure) {
+    return modules;
+  }
+
+  if (canManageContent) {
+    return modules.filter((module) =>
+        [
+          "/admin/actualites",
+          "/admin/documents",
+          "/admin/competitions",
+          "/admin/calendrier",
+        ].includes(module.href),
+    );
+  }
+
+  return [];
 }
 
 const checks = [
@@ -176,6 +210,9 @@ const checks = [
 ];
 
 export default async function AdminDashboardPage() {
+  const session = await requireAdminSession();
+  const canManageStructure = session.role === "ADMIN";
+  const canManageContent = session.role === "ADMIN" || session.role === "EDITOR";
   const [
     articles,
     documents,
@@ -185,15 +222,17 @@ export default async function AdminDashboardPage() {
     committeeMembers,
     technicalStaffMembers,
     stats,
+    adminUsers,
   ] = await Promise.all([
-    getAdminNewsArticles(),
-    getAdminDocuments(),
-    getAdminCompetitions(),
-    getAdminClubs(),
-    getAdminCalendarEvents(),
-    getAdminCommitteeMembers(),
-    getAdminTechnicalStaffMembers(),
-    getAdminStats(),
+    canManageContent ? getAdminNewsArticles() : Promise.resolve([]),
+    canManageContent ? getAdminDocuments() : Promise.resolve([]),
+    canManageContent ? getAdminCompetitions() : Promise.resolve([]),
+    canManageStructure ? getAdminClubs() : Promise.resolve([]),
+    canManageContent ? getAdminCalendarEvents() : Promise.resolve([]),
+    canManageStructure ? getAdminCommitteeMembers() : Promise.resolve([]),
+    canManageStructure ? getAdminTechnicalStaffMembers() : Promise.resolve([]),
+    canManageStructure ? getAdminStats() : Promise.resolve({ licenseeTotal: null }),
+    canManageStructure ? getAdminUsers() : Promise.resolve([]),
   ]);
 
   const data: DashboardData = {
@@ -205,8 +244,9 @@ export default async function AdminDashboardPage() {
     committeeMembers,
     technicalStaffMembers,
     licenseeCount: stats.licenseeTotal,
+    adminUsersCount: adminUsers.length,
   };
-  const modules = getModules(data);
+  const modules = getModules(data, canManageContent, canManageStructure);
   const publishedArticleCount = articles.filter(
     (article) => article.status === NewsArticleStatus.PUBLISHED,
   ).length;
@@ -291,6 +331,13 @@ export default async function AdminDashboardPage() {
           </div>
 
           <div className="divide-y divide-border">
+            {modules.length === 0 ? (
+              <div className="px-5 py-8 text-sm leading-6 text-muted-foreground">
+                Votre compte est actif, mais aucun module de mise à jour ne lui
+                est encore ouvert. Demandez à un administrateur de passer le
+                rôle en EDITOR ou ADMIN si nécessaire.
+              </div>
+            ) : null}
             {modules.map((item) => {
               const Icon = item.icon;
 

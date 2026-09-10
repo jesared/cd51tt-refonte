@@ -1,4 +1,5 @@
 import { NewsArticleForm } from "@/components/admin/news-article-form";
+import { requireEditorSession } from "@/lib/admin-auth";
 import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata = createPageMetadata({
@@ -16,9 +17,12 @@ type AdminNewArticlePageProps = {
 export default async function AdminNewArticlePage({
   searchParams,
 }: AdminNewArticlePageProps) {
+  const session = await requireEditorSession("/admin/actualites");
+
   return (
     <NewsArticleForm
       mode="create"
+      canPublish={session.role === "ADMIN"}
       errorMessage={searchParams?.error ? decodeURIComponent(searchParams.error) : null}
     />
   );

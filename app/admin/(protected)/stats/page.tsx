@@ -14,6 +14,7 @@ import {
 } from "@/components/admin/animated-stats";
 import { AdminSubmitButton } from "@/components/admin/admin-submit-button";
 import { Badge } from "@/components/ui/badge";
+import { requireAdministratorSession } from "@/lib/admin-auth";
 import { getAdminStats, syncFfttLicenseeStats } from "@/lib/admin-stats";
 import { ffttApiReadiness } from "@/lib/fftt/client";
 import { createPageMetadata } from "@/lib/metadata";
@@ -48,6 +49,8 @@ function formatDate(value: Date | null) {
 export default async function AdminStatsPage({
   searchParams,
 }: AdminStatsPageProps) {
+  await requireAdministratorSession("/admin");
+
   const stats = await getAdminStats();
   const successfulLicenseeStats = stats.licenseeStats.filter(
     (stat) => !stat.syncError,

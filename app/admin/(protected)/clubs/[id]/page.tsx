@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { ClubForm } from "@/components/admin/club-form";
+import { requireAdministratorSession } from "@/lib/admin-auth";
 import { getAdminClubById } from "@/lib/admin-clubs";
 import { createPageMetadata } from "@/lib/metadata";
 
@@ -24,6 +25,8 @@ export default async function AdminEditClubPage({
   params,
   searchParams,
 }: AdminEditClubPageProps) {
+  await requireAdministratorSession("/admin");
+
   const club = await getAdminClubById(params.id);
 
   if (!club) {

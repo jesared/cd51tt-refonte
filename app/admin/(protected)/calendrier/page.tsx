@@ -11,6 +11,7 @@ import {
   getAdminCalendarEvents,
   toggleCalendarEventPublication,
 } from "@/lib/admin-calendar";
+import { requireEditorSession } from "@/lib/admin-auth";
 import { matchesRecentUpdateFilter } from "@/lib/admin-list-filters";
 import { getAdminCompetitions } from "@/lib/admin-competitions";
 import { getCalendarEventTypeLabel, getCompetitionTitle } from "@/lib/calendar";
@@ -71,10 +72,12 @@ function getCalendarEventIncompleteReasons(
 export default async function AdminCalendrierPage({
   searchParams,
 }: AdminCalendrierPageProps) {
-  const [calendarEvents, competitions] = await Promise.all([
+  const [calendarEvents, competitions, session] = await Promise.all([
     getAdminCalendarEvents(),
     getAdminCompetitions(),
+    requireEditorSession("/admin/calendrier"),
   ]);
+  const canManagePublication = session.role === "ADMIN";
   const competitionTitles = new Map(
     competitions.map((competition) => [competition.id, competition.title]),
   );
@@ -343,44 +346,55 @@ export default async function AdminCalendrierPage({
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-                      <PublicationConfirmationForm
-                        action={toggleCalendarEventPublication}
-                        itemName={`${event.title} - ${competitionTitle}`}
-                        isPublished={event.published}
-                        incompleteReasons={getCalendarEventIncompleteReasons(
-                          event,
-                          competitionTitles,
-                        )}
-                      >
-                        <input type="hidden" name="id" value={event.id} />
-                        <input
-                          type="hidden"
-                          name="published"
-                          value={event.published ? "" : "on"}
-                        />
-                        <button
-                          type="submit"
-                          className={
-                            event.published
-                              ? "inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-background px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                              : "inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
-                          }
+                      {canManagePublication ? (
+                        <>
+                          <PublicationConfirmationForm
+                            action={toggleCalendarEventPublication}
+                            itemName={`${event.title} - ${competitionTitle}`}
+                            isPublished={event.published}
+                            incompleteReasons={getCalendarEventIncompleteReasons(
+                              event,
+                              competitionTitles,
+                            )}
+                          >
+                            <input type="hidden" name="id" value={event.id} />
+                            <input
+                              type="hidden"
+                              name="published"
+                              value={event.published ? "" : "on"}
+                            />
+                            <button
+                              type="submit"
+                              className={
+                                event.published
+                                  ? "inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-background px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                                  : "inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
+                              }
+                            >
+                              {event.published ? (
+                                <EyeOff className="size-4" />
+                              ) : (
+                                <Eye className="size-4" />
+                              )}
+                              {event.published ? "Dépublier" : "Publier"}
+                            </button>
+                          </PublicationConfirmationForm>
+                          <AdminRowActionsMenu
+                            editHref={`/admin/calendrier/${event.id}`}
+                            deleteAction={deleteCalendarEvent}
+                            deleteId={event.id}
+                            deleteLabel={`${event.title} - ${competitionTitle}`}
+                            deleteMessage="Supprimer cette échéance ?"
+                          />
+                        </>
+                      ) : (
+                        <Link
+                          href={`/admin/calendrier/${event.id}`}
+                          className="inline-flex h-9 items-center justify-center rounded-lg border border-border bg-background px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                         >
-                          {event.published ? (
-                            <EyeOff className="size-4" />
-                          ) : (
-                            <Eye className="size-4" />
-                          )}
-                          {event.published ? "Dépublier" : "Publier"}
-                        </button>
-                      </PublicationConfirmationForm>
-                      <AdminRowActionsMenu
-                        editHref={`/admin/calendrier/${event.id}`}
-                        deleteAction={deleteCalendarEvent}
-                        deleteId={event.id}
-                        deleteLabel={`${event.title} - ${competitionTitle}`}
-                        deleteMessage="Supprimer cette échéance ?"
-                      />
+                          Modifier
+                        </Link>
+                      )}
                     </div>
                   </article>
                 );

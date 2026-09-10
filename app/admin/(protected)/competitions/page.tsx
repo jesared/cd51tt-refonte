@@ -18,6 +18,7 @@ import {
   getAdminCompetitions,
   toggleCompetitionPublication,
 } from "@/lib/admin-competitions";
+import { requireEditorSession } from "@/lib/admin-auth";
 import { getAdminCalendarEvents } from "@/lib/admin-calendar";
 import { matchesRecentUpdateFilter } from "@/lib/admin-list-filters";
 import { getAdminDocuments } from "@/lib/admin-documents";
@@ -90,11 +91,13 @@ function getCompetitionIncompleteReasons(
 export default async function AdminCompetitionsPage({
   searchParams,
 }: AdminCompetitionsPageProps) {
-  const [competitionEntries, calendarEvents, documents] = await Promise.all([
+  const [competitionEntries, calendarEvents, documents, session] = await Promise.all([
     getAdminCompetitions(),
     getAdminCalendarEvents(),
     getAdminDocuments(),
+    requireEditorSession("/admin/competitions"),
   ]);
+  const canManagePublication = session.role === "ADMIN";
   const query = normalizeSearchValue(searchParams?.q ?? "");
   const publicationFilter = searchParams?.statut;
   const sportFilter = searchParams?.sport;
@@ -424,41 +427,52 @@ export default async function AdminCompetitionsPage({
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-                    <PublicationConfirmationForm
-                      action={toggleCompetitionPublication}
-                      itemName={competition.title}
-                      isPublished={isPublished}
-                      incompleteReasons={incompleteReasons}
-                    >
-                      <input type="hidden" name="id" value={competition.id} />
-                      <input
-                        type="hidden"
-                        name="published"
-                        value={isPublished ? "" : "on"}
-                      />
-                      <button
-                        type="submit"
-                        className={
-                          isPublished
-                            ? "inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-background px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                            : "inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
-                        }
+                    {canManagePublication ? (
+                      <>
+                        <PublicationConfirmationForm
+                          action={toggleCompetitionPublication}
+                          itemName={competition.title}
+                          isPublished={isPublished}
+                          incompleteReasons={incompleteReasons}
+                        >
+                          <input type="hidden" name="id" value={competition.id} />
+                          <input
+                            type="hidden"
+                            name="published"
+                            value={isPublished ? "" : "on"}
+                          />
+                          <button
+                            type="submit"
+                            className={
+                              isPublished
+                                ? "inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-background px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                                : "inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
+                            }
+                          >
+                            {isPublished ? (
+                              <EyeOff className="size-4" />
+                            ) : (
+                              <Eye className="size-4" />
+                            )}
+                            {isPublished ? "Dépublier" : "Publier"}
+                          </button>
+                        </PublicationConfirmationForm>
+                        <AdminRowActionsMenu
+                          editHref={`/admin/competitions/${competition.id}`}
+                          deleteAction={deleteCompetition}
+                          deleteId={competition.id}
+                          deleteLabel={competition.title}
+                          deleteMessage="Supprimer cette compétition ? Les documents et échéances liés garderont leur identifiant de compétition."
+                        />
+                      </>
+                    ) : (
+                      <Link
+                        href={`/admin/competitions/${competition.id}`}
+                        className="inline-flex h-9 items-center justify-center rounded-lg border border-border bg-background px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                       >
-                        {isPublished ? (
-                          <EyeOff className="size-4" />
-                        ) : (
-                          <Eye className="size-4" />
-                        )}
-                        {isPublished ? "Dépublier" : "Publier"}
-                      </button>
-                    </PublicationConfirmationForm>
-                    <AdminRowActionsMenu
-                      editHref={`/admin/competitions/${competition.id}`}
-                      deleteAction={deleteCompetition}
-                      deleteId={competition.id}
-                      deleteLabel={competition.title}
-                      deleteMessage="Supprimer cette compétition ? Les documents et échéances liés garderont leur identifiant de compétition."
-                    />
+                        Modifier
+                      </Link>
+                    )}
                   </div>
                 </article>
               );

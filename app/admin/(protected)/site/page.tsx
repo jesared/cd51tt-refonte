@@ -3,6 +3,7 @@ import { AtSign, ExternalLink, Save, Settings2, Share2 } from "lucide-react";
 
 import { SaveResultActions } from "@/components/admin/save-result-actions";
 import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
+import { requireAdministratorSession } from "@/lib/admin-auth";
 import { getSiteSettings, updateSiteSettings } from "@/lib/admin-site-settings";
 import { createPageMetadata } from "@/lib/metadata";
 
@@ -74,6 +75,8 @@ function HiddenSettings({
 export default async function AdminSiteSettingsPage({
   searchParams,
 }: AdminSitePageProps) {
+  await requireAdministratorSession("/admin");
+
   const settings = await getSiteSettings();
   const updated = searchParams?.updated === "1";
 

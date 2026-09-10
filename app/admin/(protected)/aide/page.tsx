@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { requireEditorSession } from "@/lib/admin-auth";
 import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata = createPageMetadata({
@@ -81,7 +82,9 @@ const guideSections = [
   },
 ];
 
-export default function AdminHelpPage() {
+export default async function AdminHelpPage() {
+  await requireEditorSession("/admin");
+
   return (
     <div className="space-y-6">
       <section className="grid gap-6 rounded-[1.5rem] border border-border bg-background p-6 lg:grid-cols-[minmax(0,1fr)_minmax(220px,280px)] lg:items-stretch">

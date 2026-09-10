@@ -1,4 +1,5 @@
 import { DocumentResourceForm } from "@/components/admin/document-resource-form";
+import { requireEditorSession } from "@/lib/admin-auth";
 import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata = createPageMetadata({
@@ -13,16 +14,18 @@ type AdminNewDocumentPageProps = {
   };
 };
 
-export default function AdminNewDocumentPage({
+export default async function AdminNewDocumentPage({
   searchParams,
 }: AdminNewDocumentPageProps) {
+  const session = await requireEditorSession("/admin/documents");
+
   return (
     <DocumentResourceForm
       mode="create"
+      canPublish={session.role === "ADMIN"}
       errorMessage={
         searchParams?.error ? decodeURIComponent(searchParams.error) : null
       }
     />
   );
 }
-

@@ -6,7 +6,10 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import { z } from "zod";
 
-import { requireAdminSession } from "@/lib/admin-auth";
+import {
+  requireAdministratorSession,
+  requireEditorSession,
+} from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 
 const calendarEventFormSchema = z.object({
@@ -136,12 +139,17 @@ export async function getPublishedCalendarEvents(): Promise<CalendarEvent[] | nu
 }
 
 export async function saveCalendarEvent(formData: FormData) {
-  await requireAdminSession();
-
   const id = getStringValue(formData, "id") || undefined;
+  const session = await requireEditorSession(buildCalendarEventPath(id));
   let redirectPath = "/admin/calendrier";
 
   try {
+    const existingEvent = id
+      ? await prisma.calendarEvent.findUnique({
+          where: { id },
+          select: { published: true },
+        })
+      : null;
     const values = calendarEventFormSchema.parse({
       id,
       competitionId: getStringValue(formData, "competitionId"),
@@ -149,7 +157,10 @@ export async function saveCalendarEvent(formData: FormData) {
       type: getStringValue(formData, "type"),
       date: getStringValue(formData, "date"),
       location: getStringValue(formData, "location"),
-      published: getBooleanValue(formData, "published"),
+      published:
+        session.role === "ADMIN"
+          ? getBooleanValue(formData, "published")
+          : existingEvent?.published ?? false,
       sortOrder: getStringValue(formData, "sortOrder") || "0",
     });
 
@@ -190,7 +201,7 @@ export async function saveCalendarEvent(formData: FormData) {
 }
 
 export async function deleteCalendarEvent(formData: FormData) {
-  await requireAdminSession();
+  await requireAdministratorSession("/admin/calendrier");
 
   const id = getStringValue(formData, "id");
 
@@ -210,7 +221,7 @@ export async function deleteCalendarEvent(formData: FormData) {
 }
 
 export async function toggleCalendarEventPublication(formData: FormData) {
-  await requireAdminSession();
+  await requireAdministratorSession("/admin/calendrier");
 
   const id = getStringValue(formData, "id");
   const published = getBooleanValue(formData, "published");

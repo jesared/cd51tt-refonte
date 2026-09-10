@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
+import { requireAdministratorSession } from "@/lib/admin-auth";
 import {
   affiliations,
   officeHours,
@@ -57,6 +58,8 @@ export async function getSiteSettings() {
 }
 
 export async function updateSiteSettings(formData: FormData) {
+  await requireAdministratorSession("/admin/site");
+
   await prisma.siteSettings.upsert({
     where: { id: SITE_SETTINGS_ID },
     update: {

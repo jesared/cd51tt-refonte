@@ -10,6 +10,7 @@ import {
   getAdminClubs,
   syncFfttClubs,
 } from "@/lib/admin-clubs";
+import { requireAdministratorSession } from "@/lib/admin-auth";
 import { ffttApiReadiness } from "@/lib/fftt/client";
 import { createPageMetadata } from "@/lib/metadata";
 
@@ -43,6 +44,8 @@ function normalizeSearchValue(value: string) {
 export default async function AdminClubsPage({
   searchParams,
 }: AdminClubsPageProps) {
+  await requireAdministratorSession("/admin");
+
   const clubs = await getAdminClubs();
   const activeClubs = clubs.filter((club) => club.active);
   const cities = Array.from(new Set(clubs.map((club) => club.city))).sort(

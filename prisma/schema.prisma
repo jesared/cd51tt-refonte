@@ -28,6 +28,45 @@ enum CalendarEventType {
   RESULTAT
 }
 
+enum AdminUserRole {
+  ADMIN
+  EDITOR
+  USER
+}
+
+model AdminUser {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  name         String
+  passwordHash String
+  role         AdminUserRole @default(EDITOR)
+  active       Boolean       @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([role])
+  @@index([active])
+}
+
+model AdminActivityLog {
+  id             String         @id @default(cuid())
+  adminUserId    String?
+  adminUserName  String
+  adminUserEmail String
+  adminUserRole  AdminUserRole
+  action         String
+  entityType     String
+  entityId       String?
+  entityLabel    String
+  message        String
+  createdAt      DateTime       @default(now())
+
+  @@index([createdAt(sort: Desc)])
+  @@index([adminUserId])
+  @@index([entityType, entityId])
+}
+
 model SiteSettings {
   id                 Int      @id
   siteName           String

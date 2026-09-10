@@ -1,4 +1,5 @@
 import { ClubForm } from "@/components/admin/club-form";
+import { requireAdministratorSession } from "@/lib/admin-auth";
 import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata = createPageMetadata({
@@ -13,9 +14,11 @@ type AdminNewClubPageProps = {
   };
 };
 
-export default function AdminNewClubPage({
+export default async function AdminNewClubPage({
   searchParams,
 }: AdminNewClubPageProps) {
+  await requireAdministratorSession("/admin");
+
   return (
     <ClubForm
       mode="create"

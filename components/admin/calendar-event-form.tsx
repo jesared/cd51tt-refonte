@@ -19,6 +19,7 @@ type CalendarEventFormProps = {
   mode: "create" | "edit";
   errorMessage?: string | null;
   saved?: boolean;
+  canPublish?: boolean;
 };
 
 function toDateInputValue(date: Date | null | undefined) {
@@ -43,6 +44,7 @@ export function CalendarEventForm({
   errorMessage,
   mode,
   saved = false,
+  canPublish = true,
 }: CalendarEventFormProps) {
   const isEdit = mode === "edit";
   const hasCompetitions = competitionOptions.length > 0;
@@ -229,15 +231,21 @@ export function CalendarEventForm({
               </div>
             </div>
 
-            <label className="flex min-h-12 items-center gap-3 rounded-xl border border-border px-3 text-sm text-muted-foreground">
-              <input
-                type="checkbox"
-                name="published"
-                defaultChecked={event?.published ?? false}
-                className="size-4 rounded border border-input"
-              />
-              Publier cette échéance sur le site
-            </label>
+            {canPublish ? (
+              <label className="flex min-h-12 items-center gap-3 rounded-xl border border-border px-3 text-sm text-muted-foreground">
+                <input
+                  type="checkbox"
+                  name="published"
+                  defaultChecked={event?.published ?? false}
+                  className="size-4 rounded border border-input"
+                />
+                Publier cette échéance sur le site
+              </label>
+            ) : (
+              <p className="rounded-xl border border-border bg-muted/40 px-3 py-3 text-sm text-muted-foreground">
+                Enregistré sans changer l&apos;état Publié / Brouillon.
+              </p>
+            )}
           </div>
         </section>
 

@@ -12,6 +12,7 @@ import {
   seedMockDocuments,
   toggleDocumentPublication,
 } from "@/lib/admin-documents";
+import { requireEditorSession } from "@/lib/admin-auth";
 import { getAdminCompetitions } from "@/lib/admin-competitions";
 import { matchesRecentUpdateFilter } from "@/lib/admin-list-filters";
 import { formatFrenchMonthYear } from "@/lib/documents";
@@ -70,10 +71,12 @@ function getDocumentIncompleteReasons(
 export default async function AdminDocumentsPage({
   searchParams,
 }: AdminDocumentsPageProps) {
-  const [entries, competitions] = await Promise.all([
+  const [entries, competitions, session] = await Promise.all([
     getAdminDocuments(),
     getAdminCompetitions(),
+    requireEditorSession("/admin/documents"),
   ]);
+  const canManagePublication = session.role === "ADMIN";
   const competitionTitleById = new Map(
     competitions.map((competition) => [competition.id, competition.title]),
   );
@@ -190,7 +193,7 @@ export default async function AdminDocumentsPage({
         </div>
 
         <div className="flex flex-col justify-center gap-3 border-t border-border pt-5 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
-          {entries.length === 0 ? (
+          {entries.length === 0 && canManagePublication ? (
             <form action={seedMockDocuments} className="contents">
               <AdminSubmitButton
                 icon={<Sparkles className="size-4" />}
@@ -338,47 +341,69 @@ export default async function AdminDocumentsPage({
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-                    <PublicationConfirmationForm
-                      action={toggleDocumentPublication}
-                      itemName={entry.title}
-                      isPublished={isPublished}
-                      incompleteReasons={getDocumentIncompleteReasons(entry)}
-                    >
-                      <input type="hidden" name="id" value={entry.id} />
-                      <input
-                        type="hidden"
-                        name="published"
-                        value={isPublished ? "" : "on"}
-                      />
-                      <button
-                        type="submit"
-                        className={publishButtonClass(isPublished)}
-                      >
-                        {isPublished ? (
-                          <EyeOff className="size-4" />
-                        ) : (
-                          <Eye className="size-4" />
-                        )}
-                        {isPublished ? "Dépublier" : "Publier"}
-                      </button>
-                    </PublicationConfirmationForm>
-                    <AdminRowActionsMenu
-                      editHref={`/admin/documents/${entry.id}`}
-                      deleteAction={deleteDocument}
-                      deleteId={entry.id}
-                      deleteLabel={entry.title}
-                      deleteMessage="Supprimer ce document ? Cette action est définitive."
-                    >
-                      <a
-                        href={entry.fileUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center gap-2 rounded-md px-2 py-2 text-sm transition-colors hover:bg-accent"
-                      >
-                        <Download className="size-4" />
-                        Ouvrir
-                      </a>
-                    </AdminRowActionsMenu>
+                    {canManagePublication ? (
+                      <>
+                        <PublicationConfirmationForm
+                          action={toggleDocumentPublication}
+                          itemName={entry.title}
+                          isPublished={isPublished}
+                          incompleteReasons={getDocumentIncompleteReasons(entry)}
+                        >
+                          <input type="hidden" name="id" value={entry.id} />
+                          <input
+                            type="hidden"
+                            name="published"
+                            value={isPublished ? "" : "on"}
+                          />
+                          <button
+                            type="submit"
+                            className={publishButtonClass(isPublished)}
+                          >
+                            {isPublished ? (
+                              <EyeOff className="size-4" />
+                            ) : (
+                              <Eye className="size-4" />
+                            )}
+                            {isPublished ? "Dépublier" : "Publier"}
+                          </button>
+                        </PublicationConfirmationForm>
+                        <AdminRowActionsMenu
+                          editHref={`/admin/documents/${entry.id}`}
+                          deleteAction={deleteDocument}
+                          deleteId={entry.id}
+                          deleteLabel={entry.title}
+                          deleteMessage="Supprimer ce document ? Cette action est définitive."
+                        >
+                          <a
+                            href={entry.fileUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center gap-2 rounded-md px-2 py-2 text-sm transition-colors hover:bg-accent"
+                          >
+                            <Download className="size-4" />
+                            Ouvrir
+                          </a>
+                        </AdminRowActionsMenu>
+                      </>
+                    ) : (
+                      <>
+                        <a
+                          href={entry.fileUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-background px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                        >
+                          <Download className="size-4" />
+                          Ouvrir
+                        </a>
+                        <Link
+                          href={`/admin/documents/${entry.id}`}
+                          className="inline-flex h-9 items-center justify-center rounded-lg border border-border bg-background px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                        >
+                          Modifier
+                        </Link>
+                      </>
+                    )}
                   </div>
                 </article>
               );

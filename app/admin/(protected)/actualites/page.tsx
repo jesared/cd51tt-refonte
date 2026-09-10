@@ -12,6 +12,7 @@ import {
   seedMockNewsArticles,
   toggleNewsArticlePublication,
 } from "@/lib/admin-news";
+import { requireEditorSession } from "@/lib/admin-auth";
 import { matchesRecentUpdateFilter } from "@/lib/admin-list-filters";
 import { createPageMetadata } from "@/lib/metadata";
 import { formatFrenchDate } from "@/lib/news";
@@ -61,7 +62,11 @@ function getArticleIncompleteReasons(
 export default async function AdminActualitesPage({
   searchParams,
 }: AdminActualitesPageProps) {
-  const articles = await getAdminNewsArticles();
+  const [articles, session] = await Promise.all([
+    getAdminNewsArticles(),
+    requireEditorSession("/admin/actualites"),
+  ]);
+  const canManagePublication = session.role === "ADMIN";
   const categories = Array.from(
     new Set(articles.map((article) => article.category)),
   ).sort((a, b) => a.localeCompare(b, "fr"));
@@ -174,7 +179,7 @@ export default async function AdminActualitesPage({
         </div>
 
         <div className="flex flex-col justify-center gap-3 border-t border-border pt-5 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
-          {articles.length === 0 ? (
+          {articles.length === 0 && canManagePublication ? (
             <form action={seedMockNewsArticles} className="contents">
               <AdminSubmitButton
                 icon={<Sparkles className="size-4" />}
@@ -321,41 +326,52 @@ export default async function AdminActualitesPage({
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-                    <PublicationConfirmationForm
-                      action={toggleNewsArticlePublication}
-                      itemName={article.title}
-                      isPublished={isPublished}
-                      incompleteReasons={getArticleIncompleteReasons(article)}
-                    >
-                      <input type="hidden" name="id" value={article.id} />
-                      <input
-                        type="hidden"
-                        name="status"
-                        value={isPublished ? "DRAFT" : "PUBLISHED"}
-                      />
-                      <button
-                        type="submit"
-                        className={
-                          isPublished
-                            ? "inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-background px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                            : "inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
-                        }
+                    {canManagePublication ? (
+                      <>
+                        <PublicationConfirmationForm
+                          action={toggleNewsArticlePublication}
+                          itemName={article.title}
+                          isPublished={isPublished}
+                          incompleteReasons={getArticleIncompleteReasons(article)}
+                        >
+                          <input type="hidden" name="id" value={article.id} />
+                          <input
+                            type="hidden"
+                            name="status"
+                            value={isPublished ? "DRAFT" : "PUBLISHED"}
+                          />
+                          <button
+                            type="submit"
+                            className={
+                              isPublished
+                                ? "inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-background px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                                : "inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
+                            }
+                          >
+                            {isPublished ? (
+                              <EyeOff className="size-4" />
+                            ) : (
+                              <Eye className="size-4" />
+                            )}
+                            {isPublished ? "Dépublier" : "Publier"}
+                          </button>
+                        </PublicationConfirmationForm>
+                        <AdminRowActionsMenu
+                          editHref={`/admin/actualites/${article.id}`}
+                          deleteAction={deleteNewsArticle}
+                          deleteId={article.id}
+                          deleteLabel={article.title}
+                          deleteMessage="Supprimer cette actualité ? Cette action est définitive."
+                        />
+                      </>
+                    ) : (
+                      <Link
+                        href={`/admin/actualites/${article.id}`}
+                        className="inline-flex h-9 items-center justify-center rounded-lg border border-border bg-background px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                       >
-                        {isPublished ? (
-                          <EyeOff className="size-4" />
-                        ) : (
-                          <Eye className="size-4" />
-                        )}
-                        {isPublished ? "Dépublier" : "Publier"}
-                      </button>
-                    </PublicationConfirmationForm>
-                    <AdminRowActionsMenu
-                      editHref={`/admin/actualites/${article.id}`}
-                      deleteAction={deleteNewsArticle}
-                      deleteId={article.id}
-                      deleteLabel={article.title}
-                      deleteMessage="Supprimer cette actualité ? Cette action est définitive."
-                    />
+                        Modifier
+                      </Link>
+                    )}
                   </div>
                 </article>
               );

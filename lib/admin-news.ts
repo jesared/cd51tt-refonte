@@ -1,12 +1,20 @@
 "use server";
 
-import { NewsArticleStatus, Prisma, type NewsArticle } from "@prisma/client";
+import {
+  AdminUserRole,
+  NewsArticleStatus,
+  Prisma,
+  type NewsArticle,
+} from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import { z } from "zod";
 
-import { requireAdminSession } from "@/lib/admin-auth";
+import {
+  requireAdministratorSession,
+  requireEditorSession,
+} from "@/lib/admin-auth";
 import { uploadFileToCloudinary } from "@/lib/cloudinary";
 import { normalizeNewsCategory } from "@/lib/content-categories";
 import { prisma } from "@/lib/prisma";
@@ -268,15 +276,29 @@ export async function getPublishedNewsArticleBySlug(
 }
 
 export async function saveNewsArticle(formData: FormData) {
-  await requireAdminSession();
-
   const id = getStringValue(formData, "id") || undefined;
-  const status = getBooleanValue(formData, "published")
+  const session = await requireEditorSession(buildArticlePath(id));
+  const requestedStatus = getBooleanValue(formData, "published")
     ? NewsArticleStatus.PUBLISHED
     : NewsArticleStatus.DRAFT;
   let redirectPath = "/admin/actualites";
 
   try {
+    const existingArticle = id
+      ? await prisma.newsArticle.findUnique({
+          where: { id },
+          select: { status: true, publishedAt: true },
+        })
+      : null;
+    const status =
+      session.role === AdminUserRole.ADMIN
+        ? requestedStatus
+        : existingArticle?.status ?? NewsArticleStatus.DRAFT;
+    const publishedAt =
+      session.role === AdminUserRole.ADMIN
+        ? getStringValue(formData, "publishedAt") || undefined
+        : existingArticle?.publishedAt?.toISOString();
+
     const values = articleFormSchema.parse({
       id,
       title: getStringValue(formData, "title"),
@@ -287,7 +309,7 @@ export async function saveNewsArticle(formData: FormData) {
       imageUrl: getStringValue(formData, "imageUrl") || undefined,
       status,
       featured: getBooleanValue(formData, "featured"),
-      publishedAt: getStringValue(formData, "publishedAt") || undefined,
+      publishedAt,
     });
     const uploadedImageUrl = await uploadFileToCloudinary(
       formData.get("imageUpload") as File | null,
@@ -339,7 +361,7 @@ export async function saveNewsArticle(formData: FormData) {
 }
 
 export async function deleteNewsArticle(formData: FormData) {
-  await requireAdminSession();
+  await requireAdministratorSession("/admin/actualites");
 
   const id = getStringValue(formData, "id");
 
@@ -360,7 +382,7 @@ export async function deleteNewsArticle(formData: FormData) {
 }
 
 export async function toggleNewsArticlePublication(formData: FormData) {
-  await requireAdminSession();
+  await requireAdministratorSession("/admin/actualites");
 
   const id = getStringValue(formData, "id");
   const nextStatus = getStringValue(formData, "status") as NewsArticleStatus;
@@ -390,7 +412,7 @@ export async function toggleNewsArticlePublication(formData: FormData) {
 }
 
 export async function seedMockNewsArticles() {
-  await requireAdminSession();
+  await requireAdministratorSession("/admin/actualites");
 
   if ((await prisma.newsArticle.count()) > 0) {
     redirect("/admin/actualites?seeded=0");

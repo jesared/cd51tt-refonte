@@ -1,4 +1,5 @@
 import { PeopleMemberForm } from "@/components/admin/people-member-form";
+import { requireAdministratorSession } from "@/lib/admin-auth";
 import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata = createPageMetadata({
@@ -13,9 +14,11 @@ type AdminNewTechnicalStaffPageProps = {
   };
 };
 
-export default function AdminNewTechnicalStaffPage({
+export default async function AdminNewTechnicalStaffPage({
   searchParams,
 }: AdminNewTechnicalStaffPageProps) {
+  await requireAdministratorSession("/admin");
+
   return (
     <PeopleMemberForm
       kind="technical"

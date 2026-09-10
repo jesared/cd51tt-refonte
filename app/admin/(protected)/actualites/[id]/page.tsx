@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { NewsArticleForm } from "@/components/admin/news-article-form";
+import { requireEditorSession } from "@/lib/admin-auth";
 import { getAdminNewsArticleById } from "@/lib/admin-news";
 import { createPageMetadata } from "@/lib/metadata";
 
@@ -24,7 +25,10 @@ export default async function AdminEditArticlePage({
   params,
   searchParams,
 }: AdminEditArticlePageProps) {
-  const article = await getAdminNewsArticleById(params.id);
+  const [article, session] = await Promise.all([
+    getAdminNewsArticleById(params.id),
+    requireEditorSession("/admin/actualites"),
+  ]);
 
   if (!article) {
     notFound();
@@ -34,6 +38,7 @@ export default async function AdminEditArticlePage({
     <NewsArticleForm
       mode="edit"
       article={article}
+      canPublish={session.role === "ADMIN"}
       errorMessage={searchParams?.error ? decodeURIComponent(searchParams.error) : null}
       saved={searchParams?.saved === "1"}
     />

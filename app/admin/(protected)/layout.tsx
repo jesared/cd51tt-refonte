@@ -6,7 +6,11 @@ export default async function AdminProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  await requireAdminSession();
+  const session = await requireAdminSession();
 
-  return <AdminShell logoutAction={logoutAdmin}>{children}</AdminShell>;
+  return (
+    <AdminShell logoutAction={logoutAdmin} session={session}>
+      {children}
+    </AdminShell>
+  );
 }

@@ -30,6 +30,7 @@ type CompetitionFormProps = {
   linkedCalendarEvents?: CalendarEvent[];
   errorMessage?: string | null;
   saved?: boolean;
+  canPublish?: boolean;
 };
 
 const actionFields = [
@@ -118,6 +119,7 @@ export function CompetitionForm({
   linkedCalendarEvents = [],
   errorMessage,
   saved = false,
+  canPublish = true,
 }: CompetitionFormProps) {
   const isEdit = mode === "edit";
   const selectedTags = parseJsonArray<CompetitionTag>(competition?.tags, []);
@@ -591,20 +593,29 @@ export function CompetitionForm({
           </div>
         </section>
 
-        <section className="rounded-[1.5rem] border border-border bg-background p-6">
-          <h3 className="text-lg font-semibold">Publication</h3>
-          <div className="mt-5">
-            <label className="flex min-h-12 items-center gap-3 rounded-xl border border-border px-3 text-sm text-muted-foreground">
-              <input
-                type="checkbox"
-                name="published"
-                defaultChecked={competition?.status === "PUBLISHED"}
-                className="size-4 rounded border border-input"
-              />
-              Publier cette compétition sur le site
-            </label>
-          </div>
-        </section>
+        {canPublish ? (
+          <section className="rounded-[1.5rem] border border-border bg-background p-6">
+            <h3 className="text-lg font-semibold">Publication</h3>
+            <div className="mt-5">
+              <label className="flex min-h-12 items-center gap-3 rounded-xl border border-border px-3 text-sm text-muted-foreground">
+                <input
+                  type="checkbox"
+                  name="published"
+                  defaultChecked={competition?.status === "PUBLISHED"}
+                  className="size-4 rounded border border-input"
+                />
+                Publier cette compétition sur le site
+              </label>
+            </div>
+          </section>
+        ) : (
+          <section className="rounded-[1.5rem] border border-border bg-background p-6">
+            <h3 className="text-lg font-semibold">Publication</h3>
+            <p className="mt-3 rounded-xl border border-border bg-muted/40 px-3 py-3 text-sm text-muted-foreground">
+              Enregistré sans changer l&apos;état Publié / Brouillon.
+            </p>
+          </section>
+        )}
 
         <div className="flex justify-end">
           <button

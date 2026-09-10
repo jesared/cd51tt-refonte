@@ -1,4 +1,5 @@
 import {
+  AdminUserRole,
   CompetitionResourceStatus,
   Prisma,
   type CompetitionResource,
@@ -8,7 +9,10 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import { z } from "zod";
 
-import { requireAdminSession } from "@/lib/admin-auth";
+import {
+  requireAdministratorSession,
+  requireEditorSession,
+} from "@/lib/admin-auth";
 import type {
   Competition,
   CompetitionAction,
@@ -323,16 +327,26 @@ export async function getPublishedCompetitionItemById(
 export async function saveCompetition(formData: FormData) {
   "use server";
 
-  await requireAdminSession();
-
   const id = getStringValue(formData, "id") || undefined;
-  const status = getBooleanValue(formData, "published")
+  const session = await requireEditorSession(buildCompetitionPath(id));
+  const requestedStatus = getBooleanValue(formData, "published")
     ? CompetitionResourceStatus.PUBLISHED
     : CompetitionResourceStatus.DRAFT;
   const removeImage = getBooleanValue(formData, "removeImage");
   let redirectPath = "/admin/competitions";
 
   try {
+    const existingCompetition = id
+      ? await prisma.competitionResource.findUnique({
+          where: { id },
+          select: { status: true },
+        })
+      : null;
+    const status =
+      session.role === AdminUserRole.ADMIN
+        ? requestedStatus
+        : existingCompetition?.status ?? CompetitionResourceStatus.DRAFT;
+
     const uploadedImageUrl = await getUploadedCompetitionImageUrl(
       formData.get("imageUpload") as File | null,
     );
@@ -426,7 +440,7 @@ export async function saveCompetition(formData: FormData) {
 export async function deleteCompetition(formData: FormData) {
   "use server";
 
-  await requireAdminSession();
+  await requireAdministratorSession("/admin/competitions");
 
   const id = getStringValue(formData, "id");
 
@@ -448,7 +462,7 @@ export async function deleteCompetition(formData: FormData) {
 export async function toggleCompetitionPublication(formData: FormData) {
   "use server";
 
-  await requireAdminSession();
+  await requireAdministratorSession("/admin/competitions");
 
   const id = getStringValue(formData, "id");
   const status = getBooleanValue(formData, "published")

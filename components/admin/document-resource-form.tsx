@@ -17,6 +17,7 @@ type DocumentResourceFormProps = {
   document?: DocumentResource;
   errorMessage?: string | null;
   saved?: boolean;
+  canPublish?: boolean;
 };
 
 function toDateInputValue(date: Date | null | undefined) {
@@ -32,6 +33,7 @@ export function DocumentResourceForm({
   document,
   errorMessage,
   saved = false,
+  canPublish = true,
 }: DocumentResourceFormProps) {
   const isEdit = mode === "edit";
   const previewHref = document ? `/admin/documents/${document.id}/preview` : null;
@@ -262,15 +264,21 @@ export function DocumentResourceForm({
               />
             </div>
 
-            <label className="flex min-h-12 items-center gap-3 rounded-xl border border-border px-3 text-sm text-muted-foreground">
-              <input
-                type="checkbox"
-                name="published"
-                defaultChecked={document?.status === "PUBLISHED"}
-                className="size-4 rounded border border-input"
-              />
-              Publier ce document sur le site
-            </label>
+            {canPublish ? (
+              <label className="flex min-h-12 items-center gap-3 rounded-xl border border-border px-3 text-sm text-muted-foreground">
+                <input
+                  type="checkbox"
+                  name="published"
+                  defaultChecked={document?.status === "PUBLISHED"}
+                  className="size-4 rounded border border-input"
+                />
+                Publier ce document sur le site
+              </label>
+            ) : (
+              <p className="rounded-xl border border-border bg-muted/40 px-3 py-3 text-sm text-muted-foreground">
+                Enregistré sans changer l&apos;état Publié / Brouillon.
+              </p>
+            )}
           </div>
         </section>
 

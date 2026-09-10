@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { CalendarEventForm } from "@/components/admin/calendar-event-form";
+import { requireEditorSession } from "@/lib/admin-auth";
 import { getAdminCalendarEventById } from "@/lib/admin-calendar";
 import { getAdminCompetitions } from "@/lib/admin-competitions";
 import { createPageMetadata } from "@/lib/metadata";
@@ -25,9 +26,10 @@ export default async function EditCalendarEventPage({
   params,
   searchParams,
 }: EditCalendarEventPageProps) {
-  const [event, competitionOptions] = await Promise.all([
+  const [event, competitionOptions, session] = await Promise.all([
     getAdminCalendarEventById(params.id),
     getAdminCompetitions(),
+    requireEditorSession("/admin/calendrier"),
   ]);
 
   if (!event) {
@@ -39,6 +41,7 @@ export default async function EditCalendarEventPage({
       mode="edit"
       event={event}
       competitionOptions={competitionOptions}
+      canPublish={session.role === "ADMIN"}
       errorMessage={
         searchParams?.error ? decodeURIComponent(searchParams.error) : null
       }

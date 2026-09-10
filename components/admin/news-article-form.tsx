@@ -16,6 +16,7 @@ type NewsArticleFormProps = {
   article?: NewsArticle;
   errorMessage?: string | null;
   saved?: boolean;
+  canPublish?: boolean;
 };
 
 function toDatetimeLocalValue(date: Date | null | undefined) {
@@ -35,6 +36,7 @@ export function NewsArticleForm({
   article,
   errorMessage,
   saved = false,
+  canPublish = true,
 }: NewsArticleFormProps) {
   const isEdit = mode === "edit";
   const previewHref = article ? `/admin/actualites/${article.id}/preview` : null;
@@ -221,32 +223,38 @@ export function NewsArticleForm({
         </section>
 
         <section className="rounded-[1.5rem] border border-border bg-background p-6">
-          <h3 className="text-lg font-semibold">Publication</h3>
+          <h3 className="text-lg font-semibold">
+            {canPublish ? "Publication" : "Mise en avant"}
+          </h3>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
-            <div className="grid gap-2">
-              <label htmlFor="publishedAt" className="text-sm font-medium">
-                Date
-              </label>
-              <input
-                id="publishedAt"
-                name="publishedAt"
-                type="datetime-local"
-                defaultValue={toDatetimeLocalValue(article?.publishedAt)}
-                className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
-              />
-            </div>
+            {canPublish ? (
+              <div className="grid gap-2">
+                <label htmlFor="publishedAt" className="text-sm font-medium">
+                  Date
+                </label>
+                <input
+                  id="publishedAt"
+                  name="publishedAt"
+                  type="datetime-local"
+                  defaultValue={toDatetimeLocalValue(article?.publishedAt)}
+                  className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
+                />
+              </div>
+            ) : null}
           </div>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <label className="flex min-h-12 items-center gap-3 rounded-xl border border-border px-3 text-sm text-muted-foreground">
-              <input
-                type="checkbox"
-                name="published"
-                defaultChecked={article?.status === "PUBLISHED"}
-                className="size-4 rounded border border-input"
-              />
-              Publier cette actualité
-            </label>
+            {canPublish ? (
+              <label className="flex min-h-12 items-center gap-3 rounded-xl border border-border px-3 text-sm text-muted-foreground">
+                <input
+                  type="checkbox"
+                  name="published"
+                  defaultChecked={article?.status === "PUBLISHED"}
+                  className="size-4 rounded border border-input"
+                />
+                Publier cette actualité
+              </label>
+            ) : null}
 
             <label className="flex min-h-12 items-center gap-3 rounded-xl border border-border px-3 text-sm text-muted-foreground">
               <input

@@ -11,6 +11,7 @@ import {
   getAdminCommitteeMembers,
   seedCommitteeMembers,
 } from "@/lib/admin-people";
+import { requireAdministratorSession } from "@/lib/admin-auth";
 import { getCloudinaryCircleAvatarUrl } from "@/lib/cloudinary-url";
 import { createPageMetadata } from "@/lib/metadata";
 
@@ -43,6 +44,8 @@ function normalizeSearchValue(value: string) {
 export default async function AdminComitePage({
   searchParams,
 }: AdminComitePageProps) {
+  await requireAdministratorSession("/admin");
+
   const members = await getAdminCommitteeMembers();
   const areas = Array.from(new Set(members.map((member) => member.area))).sort(
     (a, b) => a.localeCompare(b, "fr"),

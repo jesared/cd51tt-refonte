@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { PeopleMemberForm } from "@/components/admin/people-member-form";
+import { requireAdministratorSession } from "@/lib/admin-auth";
 import { getAdminTechnicalStaffMemberById } from "@/lib/admin-people";
 import { createPageMetadata } from "@/lib/metadata";
 
@@ -24,6 +25,8 @@ export default async function AdminEditTechnicalStaffPage({
   params,
   searchParams,
 }: AdminEditTechnicalStaffPageProps) {
+  await requireAdministratorSession("/admin");
+
   const member = await getAdminTechnicalStaffMemberById(params.id);
 
   if (!member) {

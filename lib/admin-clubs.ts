@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import { z } from "zod";
 
-import { requireAdminSession } from "@/lib/admin-auth";
+import { requireAdministratorSession } from "@/lib/admin-auth";
 import { ffttApiReadiness, ffttClient } from "@/lib/fftt/client";
 import { clubs, type Club } from "@/lib/mock-data";
 import { prisma } from "@/lib/prisma";
@@ -130,7 +130,7 @@ export async function getPublicClubs(): Promise<Club[] | null> {
 }
 
 export async function saveClub(formData: FormData) {
-  await requireAdminSession();
+  await requireAdministratorSession("/admin/clubs");
 
   const id = getStringValue(formData, "id") || undefined;
   let redirectPath = "/admin/clubs";
@@ -180,7 +180,7 @@ export async function saveClub(formData: FormData) {
 }
 
 export async function deleteClub(formData: FormData) {
-  await requireAdminSession();
+  await requireAdministratorSession("/admin/clubs");
 
   const id = getStringValue(formData, "id");
 
@@ -204,7 +204,7 @@ export async function deleteClub(formData: FormData) {
 }
 
 export async function syncFfttClubs() {
-  await requireAdminSession();
+  await requireAdministratorSession("/admin/clubs");
 
   if (!(await hasClubTable())) {
     redirect(

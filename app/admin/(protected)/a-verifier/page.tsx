@@ -15,6 +15,7 @@ import {
   getAdminQualityCheckGroups,
   type AdminCheckGroup,
 } from "@/lib/admin-quality-checks";
+import { requireEditorSession } from "@/lib/admin-auth";
 import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata = createPageMetadata({
@@ -38,6 +39,8 @@ function getGroupIcon(group: AdminCheckGroup) {
 }
 
 export default async function AdminReviewPage() {
+  await requireEditorSession("/admin");
+
   const groups = await getAdminQualityCheckGroups();
   const totalIssues = groups.reduce(
     (count, group) => count + group.items.length,

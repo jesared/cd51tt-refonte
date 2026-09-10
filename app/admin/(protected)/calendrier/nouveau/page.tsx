@@ -1,4 +1,5 @@
 import { CalendarEventForm } from "@/components/admin/calendar-event-form";
+import { requireEditorSession } from "@/lib/admin-auth";
 import { getAdminCompetitions } from "@/lib/admin-competitions";
 import { createPageMetadata } from "@/lib/metadata";
 
@@ -18,13 +19,17 @@ type NewCalendarEventPageProps = {
 export default async function NewCalendarEventPage({
   searchParams,
 }: NewCalendarEventPageProps) {
-  const competitionOptions = await getAdminCompetitions();
+  const [competitionOptions, session] = await Promise.all([
+    getAdminCompetitions(),
+    requireEditorSession("/admin/calendrier"),
+  ]);
 
   return (
     <CalendarEventForm
       mode="create"
       competitionOptions={competitionOptions}
       defaultCompetitionId={searchParams?.competition}
+      canPublish={session.role === "ADMIN"}
       errorMessage={
         searchParams?.error ? decodeURIComponent(searchParams.error) : null
       }

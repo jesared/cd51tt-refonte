@@ -17,8 +17,10 @@ import {
   LogOut,
   Menu,
   Newspaper,
+  ScrollText,
   Settings2,
   Trophy,
+  Users,
   UserRoundCheck,
 } from "lucide-react";
 
@@ -33,6 +35,8 @@ import {
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
+type AdminRole = "ADMIN" | "EDITOR" | "USER";
+
 const adminNavigation = [
   {
     href: "/admin",
@@ -45,68 +49,99 @@ const adminNavigation = [
     label: "À vérifier",
     icon: ListChecks,
     section: "Pilotage",
+    roles: ["ADMIN", "EDITOR"],
   },
   {
     href: "/admin/aide",
     label: "Aide",
     icon: CircleHelp,
     section: "Pilotage",
+    roles: ["ADMIN", "EDITOR"],
+  },
+  {
+    href: "/admin/activite",
+    label: "Activité",
+    icon: ScrollText,
+    section: "Pilotage",
+    roles: ["ADMIN"],
   },
   {
     href: "/admin/actualites",
     label: "Actualités",
     icon: Newspaper,
     section: "Contenu",
+    roles: ["ADMIN", "EDITOR"],
   },
   {
     href: "/admin/documents",
     label: "Documents",
     icon: FileText,
     section: "Contenu",
+    roles: ["ADMIN", "EDITOR"],
   },
   {
     href: "/admin/competitions",
     label: "Compétitions",
     icon: Trophy,
     section: "Sportif",
+    roles: ["ADMIN", "EDITOR"],
   },
   {
     href: "/admin/calendrier",
     label: "Échéances",
     icon: CalendarDays,
     section: "Sportif",
+    roles: ["ADMIN", "EDITOR"],
   },
   {
     href: "/admin/clubs",
     label: "Clubs",
     icon: Building2,
     section: "data",
+    roles: ["ADMIN"],
   },
   {
     href: "/admin/stats",
     label: "Stats",
     icon: BarChart3,
     section: "data",
+    roles: ["ADMIN"],
   },
   {
     href: "/admin/comite",
     label: "Comité",
     icon: Landmark,
     section: "data",
+    roles: ["ADMIN"],
   },
   {
     href: "/admin/cadres-techniques",
     label: "Cadres techniques",
     icon: UserRoundCheck,
     section: "data",
+    roles: ["ADMIN"],
+  },
+  {
+    href: "/admin/utilisateurs",
+    label: "Utilisateurs",
+    icon: Users,
+    section: "settings",
+    roles: ["ADMIN"],
   },
   {
     href: "/admin/site",
     label: "Paramètres",
     icon: Settings2,
     section: "settings",
+    roles: ["ADMIN"],
   },
-];
+] satisfies Array<{
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  section: string;
+  roles?: AdminRole[];
+}>;
 
 const sections = [
   { id: "Pilotage", label: "Pilotage" },
@@ -119,11 +154,29 @@ const sections = [
 type AdminShellProps = {
   children: React.ReactNode;
   logoutAction: () => Promise<void>;
+  session: {
+    email: string;
+    name: string;
+    role: AdminRole;
+  };
 };
 
-export function AdminShell({ children, logoutAction }: AdminShellProps) {
+export function AdminShell({ children, logoutAction, session }: AdminShellProps) {
   const pathname = usePathname() ?? "/admin";
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const visibleNavigation = adminNavigation.filter(
+    (item) =>
+      !item.roles || (item.roles as readonly AdminRole[]).includes(session.role),
+  );
+  const visibleSections = sections.filter((section) =>
+    visibleNavigation.some((item) => item.section === section.id),
+  );
+  const roleLabel =
+    session.role === "ADMIN"
+      ? "Admin"
+      : session.role === "EDITOR"
+        ? "Éditeur"
+        : "Utilisateur";
 
   return (
     <div className="min-h-screen bg-muted/35 text-foreground">
@@ -146,13 +199,13 @@ export function AdminShell({ children, logoutAction }: AdminShellProps) {
         </div>
 
         <nav className="flex-1 overflow-y-auto px-2 py-4">
-          {sections.map((section) => (
+          {visibleSections.map((section) => (
             <div key={section.id} className="mb-5">
               <p className="mb-1 px-2 text-[11px] font-medium uppercase text-muted-foreground">
                 {section.label}
               </p>
               <div className="space-y-0.5">
-                {adminNavigation
+                {visibleNavigation
                   .filter((item) => item.section === section.id)
                   .map((item) => {
                     const Icon = item.icon;
@@ -274,13 +327,13 @@ export function AdminShell({ children, logoutAction }: AdminShellProps) {
                     </div>
 
                     <nav className="flex-1 overflow-y-auto px-3 py-4">
-                      {sections.map((section) => (
+                      {visibleSections.map((section) => (
                         <div key={section.id} className="mb-5">
                           <p className="mb-1 px-2 text-[11px] font-medium uppercase text-muted-foreground">
                             {section.label}
                           </p>
                           <div className="space-y-1">
-                            {adminNavigation
+                            {visibleNavigation
                               .filter((item) => item.section === section.id)
                               .map((item) => {
                                 const Icon = item.icon;
@@ -349,9 +402,12 @@ export function AdminShell({ children, logoutAction }: AdminShellProps) {
             </div>
 
             <div className="flex items-center overflow-hidden rounded-full border border-border bg-muted/40 p-1 shadow-sm">
-              <span className="inline-flex h-8 items-center gap-2 rounded-full bg-background px-3 text-xs font-medium text-foreground shadow-sm">
+              <span
+                className="inline-flex h-8 max-w-[12rem] items-center gap-2 rounded-full bg-background px-3 text-xs font-medium text-foreground shadow-sm"
+                title={`${session.name} - ${session.email}`}
+              >
                 <span className="size-1.5 rounded-full bg-emerald-500" />
-                Local
+                <span className="truncate">{roleLabel}</span>
               </span>
               <div className="mx-1 h-5 w-px bg-border" />
               <ThemeToggle className="h-8 w-8 rounded-full border-0 bg-transparent shadow-none hover:bg-background hover:shadow-sm" />

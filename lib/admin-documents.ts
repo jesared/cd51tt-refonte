@@ -1,6 +1,7 @@
 "use server";
 
 import {
+  AdminUserRole,
   DocumentResourceStatus,
   Prisma,
   type DocumentResource,
@@ -10,7 +11,10 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import { z } from "zod";
 
-import { requireAdminSession } from "@/lib/admin-auth";
+import {
+  requireAdministratorSession,
+  requireEditorSession,
+} from "@/lib/admin-auth";
 import { uploadFileToCloudinary } from "@/lib/cloudinary";
 import { normalizeDocumentCategory } from "@/lib/content-categories";
 import { formatFrenchMonthYear, type DocumentCardItem } from "@/lib/documents";
@@ -183,15 +187,25 @@ export async function getPublishedDocumentCards(): Promise<
 }
 
 export async function saveDocument(formData: FormData) {
-  await requireAdminSession();
-
   const id = getStringValue(formData, "id") || undefined;
-  const status = getBooleanValue(formData, "published")
+  const session = await requireEditorSession(buildDocumentPath(id));
+  const requestedStatus = getBooleanValue(formData, "published")
     ? DocumentResourceStatus.PUBLISHED
     : DocumentResourceStatus.DRAFT;
   let redirectPath = "/admin/documents";
 
   try {
+    const existingDocument = id
+      ? await prisma.documentResource.findUnique({
+          where: { id },
+          select: { status: true },
+        })
+      : null;
+    const status =
+      session.role === AdminUserRole.ADMIN
+        ? requestedStatus
+        : existingDocument?.status ?? DocumentResourceStatus.DRAFT;
+
     const uploadedFileUrl = await uploadFileToCloudinary(
       formData.get("fileUpload") as File | null,
       "document",
@@ -248,7 +262,7 @@ export async function saveDocument(formData: FormData) {
 }
 
 export async function deleteDocument(formData: FormData) {
-  await requireAdminSession();
+  await requireAdministratorSession("/admin/documents");
 
   const id = getStringValue(formData, "id");
 
@@ -273,7 +287,7 @@ export async function deleteDocument(formData: FormData) {
 }
 
 export async function toggleDocumentPublication(formData: FormData) {
-  await requireAdminSession();
+  await requireAdministratorSession("/admin/documents");
 
   const id = getStringValue(formData, "id");
   const status = getBooleanValue(formData, "published")
@@ -307,7 +321,7 @@ export async function toggleDocumentPublication(formData: FormData) {
 }
 
 export async function seedMockDocuments() {
-  await requireAdminSession();
+  await requireAdministratorSession("/admin/documents");
 
   if (!(await hasDocumentResourceTable())) {
     redirect(

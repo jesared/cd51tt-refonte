@@ -21,7 +21,7 @@ type LoginPageProps = {
 const errorMessages: Record<string, string> = {
   credentials:
     "Identifiants invalides. Vérifiez l'adresse email et le mot de passe.",
-  config: "Les identifiants admin ne sont pas configurés.",
+  config: "La clé de session admin n'est pas configurée.",
 };
 
 export default async function AdminLoginPage({ searchParams }: LoginPageProps) {
@@ -61,7 +61,7 @@ export default async function AdminLoginPage({ searchParams }: LoginPageProps) {
             <div>
               <h2 className="text-lg font-semibold">S’identifier</h2>
               <p className="text-sm text-muted-foreground">
-                Email et mot de passe administrateur.
+                Email et mot de passe de votre compte admin.
               </p>
             </div>
           </div>

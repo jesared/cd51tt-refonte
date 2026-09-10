@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 
-import { requireAdminSession } from "@/lib/admin-auth";
+import { requireAdministratorSession } from "@/lib/admin-auth";
 import { getAdminClubs } from "@/lib/admin-clubs";
 import { ffttClient } from "@/lib/fftt/client";
 import { prisma } from "@/lib/prisma";
@@ -147,7 +147,7 @@ export async function getPublicLicenseeTotal() {
 }
 
 export async function syncFfttLicenseeStats() {
-  await requireAdminSession();
+  await requireAdministratorSession("/admin/stats");
 
   if (!(await hasLicenseeStatsTable())) {
     redirect(

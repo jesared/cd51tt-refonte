@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { PeopleMemberForm } from "@/components/admin/people-member-form";
+import { requireAdministratorSession } from "@/lib/admin-auth";
 import { getAdminCommitteeMemberById } from "@/lib/admin-people";
 import { createPageMetadata } from "@/lib/metadata";
 
@@ -24,6 +25,8 @@ export default async function AdminEditCommitteeMemberPage({
   params,
   searchParams,
 }: AdminEditCommitteeMemberPageProps) {
+  await requireAdministratorSession("/admin");
+
   const member = await getAdminCommitteeMemberById(params.id);
 
   if (!member) {

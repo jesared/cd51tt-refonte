@@ -10,7 +10,7 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import { z } from "zod";
 
-import { requireAdminSession } from "@/lib/admin-auth";
+import { requireAdministratorSession } from "@/lib/admin-auth";
 import { uploadFileToCloudinary } from "@/lib/cloudinary";
 import {
   actualCommitteeMembers,
@@ -234,11 +234,11 @@ export async function getPublicTechnicalStaffMembers(): Promise<
 }
 
 export async function savePeopleMember(formData: FormData) {
-  await requireAdminSession();
-
   const rawKind = getStringValue(formData, "kind") as PeopleKind;
   const id = getStringValue(formData, "id") || undefined;
   const kind: PeopleKind = rawKind === "technical" ? "technical" : "committee";
+  await requireAdministratorSession(getListPath(kind));
+
   let redirectPath = getListPath(kind);
 
   try {
@@ -318,11 +318,10 @@ export async function savePeopleMember(formData: FormData) {
 }
 
 export async function deletePeopleMember(formData: FormData) {
-  await requireAdminSession();
-
   const kind = getStringValue(formData, "kind") as PeopleKind;
   const id = getStringValue(formData, "id");
   const safeKind: PeopleKind = kind === "technical" ? "technical" : "committee";
+  await requireAdministratorSession(getListPath(safeKind));
 
   if (!id) {
     redirect(`${getListPath(safeKind)}?error=Identifiant%20manquant.`);
@@ -352,7 +351,7 @@ export async function deletePeopleMember(formData: FormData) {
 }
 
 export async function seedCommitteeMembers() {
-  await requireAdminSession();
+  await requireAdministratorSession("/admin/comite");
 
   if (!(await hasCommitteeMemberTable())) {
     redirect(
@@ -384,7 +383,7 @@ export async function seedCommitteeMembers() {
 }
 
 export async function seedTechnicalStaffMembers() {
-  await requireAdminSession();
+  await requireAdministratorSession("/admin/cadres-techniques");
 
   if (!(await hasTechnicalStaffTable())) {
     redirect(

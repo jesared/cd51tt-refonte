@@ -5,6 +5,7 @@ import { ArrowLeft, CalendarDays, Clock, Edit3, ExternalLink } from "lucide-reac
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { requireEditorSession } from "@/lib/admin-auth";
 import { getAdminNewsArticleById } from "@/lib/admin-news";
 import { createPageMetadata } from "@/lib/metadata";
 import { formatFrenchDate } from "@/lib/news";
@@ -25,7 +26,10 @@ type AdminArticlePreviewPageProps = {
 export default async function AdminArticlePreviewPage({
   params,
 }: AdminArticlePreviewPageProps) {
-  const article = await getAdminNewsArticleById(params.id);
+  const [article] = await Promise.all([
+    getAdminNewsArticleById(params.id),
+    requireEditorSession("/admin/actualites"),
+  ]);
 
   if (!article) {
     notFound();
