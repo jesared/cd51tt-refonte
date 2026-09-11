@@ -5,6 +5,7 @@ import { ArrowUpDown, Building2, Mail, MapPin, Phone, Search, X } from "lucide-r
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { getGoogleMapsSearchUrl } from "@/lib/maps";
 import type { Club } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
@@ -179,7 +180,14 @@ export function ClubsList({ clubs }: ClubsListProps) {
                 <div className="mt-6 space-y-3 text-sm text-muted-foreground">
                   <div className="flex items-start gap-2">
                     <MapPin className="mt-0.5 size-4 shrink-0 text-primary" />
-                    <span>{club.venue}</span>
+                    <a
+                      href={getGoogleMapsSearchUrl(`${club.venue}, ${club.city}`)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="font-medium text-primary transition-colors hover:text-foreground hover:underline"
+                    >
+                      {club.venue}
+                    </a>
                   </div>
                   {contact.email ? (
                     <a

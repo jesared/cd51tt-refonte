@@ -4,6 +4,7 @@ import { ArrowLeft, Save } from "lucide-react";
 
 import { saveCalendarEvent } from "@/lib/admin-calendar";
 import { ConfirmableAdminForm } from "@/components/admin/confirmable-admin-form";
+import { PlaceAutocompleteInput } from "@/components/admin/place-autocomplete-input";
 import { SaveResultActions } from "@/components/admin/save-result-actions";
 import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
 
@@ -195,23 +196,15 @@ export function CalendarEventForm({
             </div>
 
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_160px]">
-              <div className="grid gap-2">
-                <label htmlFor="location" className="text-sm font-medium">
-                  Lieu
-                </label>
-                <input
-                  id="location"
-                  name="location"
-                  required
-                  defaultValue={event?.location ?? ""}
-                  placeholder="Salle, club recevant, extranet..."
-                  className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
-                />
-                <p className="text-xs leading-5 text-muted-foreground">
-                  Exemple : Complexe René Tys, club recevant, extranet, lieu à
-                  confirmer.
-                </p>
-              </div>
+              <PlaceAutocompleteInput
+                id="location"
+                name="location"
+                label="Lieu"
+                required
+                defaultValue={event?.location ?? ""}
+                placeholder="Salle, club recevant, extranet..."
+                hint="Exemple : Complexe René Tys, club recevant, extranet, lieu à confirmer."
+              />
 
               <div className="grid gap-2">
                 <label htmlFor="sortOrder" className="text-sm font-medium">

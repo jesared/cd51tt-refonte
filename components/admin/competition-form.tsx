@@ -18,6 +18,7 @@ import {
 import { SaveResultActions } from "@/components/admin/save-result-actions";
 import { ConfirmableAdminForm } from "@/components/admin/confirmable-admin-form";
 import { ImageUploadField } from "@/components/admin/image-upload-field";
+import { PlaceAutocompleteInput } from "@/components/admin/place-autocomplete-input";
 import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
 import {
   formatCalendarEventDate,
@@ -231,19 +232,18 @@ export function CompetitionForm({
 
             <div className="grid gap-2">
               <label htmlFor="summary" className="text-sm font-medium">
-                Résumé
+                Information courte visible sur le site
               </label>
               <textarea
                 id="summary"
                 name="summary"
                 rows={4}
-                required
                 defaultValue={competition?.summary ?? ""}
                 className="rounded-xl border border-input bg-background px-3 py-3 text-sm leading-6 outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
               />
               <p className="text-xs leading-5 text-muted-foreground">
-                Résumez en une ou deux phrases ce que les clubs doivent savoir.
-                Exemple : format, public concerné, période et point d’attention.
+                Facultatif. Si rien n’est indiqué, le site affichera :
+                Consulter le règlement pour les modalités complètes.
               </p>
             </div>
 
@@ -426,23 +426,15 @@ export function CompetitionForm({
               </p>
             </div>
 
-            <div className="grid gap-2">
-              <label htmlFor="location" className="text-sm font-medium">
-                Lieu
-              </label>
-              <input
-                id="location"
-                name="location"
-                required
-                defaultValue={competition?.location ?? ""}
-                placeholder="Complexe René Tys, salles des clubs recevants..."
-                className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
-              />
-              <p className="text-xs leading-5 text-muted-foreground">
-                Exemple : Complexe René Tys, salles des clubs recevants, lieu à
-                confirmer.
-              </p>
-            </div>
+            <PlaceAutocompleteInput
+              id="location"
+              name="location"
+              label="Lieu"
+              required
+              defaultValue={competition?.location ?? ""}
+              placeholder="Complexe René Tys, salles des clubs recevants..."
+              hint="Exemple : Complexe René Tys, salles des clubs recevants, lieu à confirmer."
+            />
 
             <div className="grid gap-2">
               <label htmlFor="manager" className="text-sm font-medium">

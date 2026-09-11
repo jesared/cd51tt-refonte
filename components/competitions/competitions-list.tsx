@@ -31,6 +31,7 @@ import type {
   CompetitionAction,
   CompetitionTag,
 } from "@/lib/mock-data";
+import { getGoogleMapsSearchUrl } from "@/lib/maps";
 import { cn } from "@/lib/utils";
 
 type CompetitionFilter = "Toutes" | Competition["status"] | CompetitionTag;
@@ -270,7 +271,16 @@ function CompetitionDetails({
             <MapPin className="size-3.5" />
             Lieu
           </dt>
-          <dd className="mt-1 text-foreground">{competition.location}</dd>
+          <dd className="mt-1">
+            <a
+              href={getGoogleMapsSearchUrl(competition.location)}
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-primary transition-colors hover:text-foreground hover:underline"
+            >
+              {competition.location}
+            </a>
+          </dd>
         </div>
         <div>
           <dt className="flex items-center gap-1.5 text-xs font-medium uppercase text-muted-foreground">
@@ -378,7 +388,14 @@ function CompetitionListRow({ competition }: { competition: Competition }) {
       <div className="mt-4 flex flex-col gap-3 border-t border-border pt-4 lg:flex-row lg:items-center lg:justify-between">
         <p className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground">
           <MapPin className="size-4 shrink-0 text-primary" />
-          <span className="truncate">{competition.location}</span>
+          <a
+            href={getGoogleMapsSearchUrl(competition.location)}
+            target="_blank"
+            rel="noreferrer"
+            className="truncate font-medium text-primary transition-colors hover:text-foreground hover:underline"
+          >
+            {competition.location}
+          </a>
         </p>
         <CompetitionActions competition={competition} />
         <Link

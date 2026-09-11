@@ -94,7 +94,9 @@ export function assertCompetitionCanBePublished(
     !hasText(competition.registrationDeadline)
       ? "indiquer la date limite d’inscription"
       : null,
-    !hasText(competition.summary, 40) ? "rédiger un résumé plus complet" : null,
+    !hasText(competition.summary)
+      ? "renseigner une information courte ou laisser le texte par défaut"
+      : null,
     !hasText(competition.period) ? "indiquer la période" : null,
     !hasText(competition.format) ? "indiquer le format" : null,
     !hasText(competition.location) ? "indiquer le lieu" : null,

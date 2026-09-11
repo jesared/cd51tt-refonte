@@ -17,6 +17,7 @@ import { getPublishedCalendarEvents } from "@/lib/admin-calendar";
 import { getPublishedCompetitionItemById } from "@/lib/admin-competitions";
 import { getPublishedDocumentCards } from "@/lib/admin-documents";
 import { getCalendarEventTypeLabel } from "@/lib/calendar";
+import { getGoogleMapsSearchUrl } from "@/lib/maps";
 import { createPageMetadata } from "@/lib/metadata";
 import { cn } from "@/lib/utils";
 
@@ -186,8 +187,15 @@ export default async function CompetitionDetailPage({
                           {getCalendarEventTypeLabel(event.type)}
                         </Badge>
                       </div>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {event.location}
+                      <p className="mt-1 text-sm">
+                        <a
+                          href={getGoogleMapsSearchUrl(event.location)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-medium text-primary transition-colors hover:text-foreground hover:underline"
+                        >
+                          {event.location}
+                        </a>
                       </p>
                     </div>
                     <p className="text-sm font-medium">
@@ -255,7 +263,16 @@ export default async function CompetitionDetailPage({
                 <MapPin className="size-3.5" />
                 Lieu
               </dt>
-              <dd className="mt-1">{competition.location}</dd>
+              <dd className="mt-1">
+                <a
+                  href={getGoogleMapsSearchUrl(competition.location)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-medium text-primary transition-colors hover:text-foreground hover:underline"
+                >
+                  {competition.location}
+                </a>
+              </dd>
             </div>
             <div>
               <dt className="flex items-center gap-1.5 text-xs font-medium uppercase text-muted-foreground">

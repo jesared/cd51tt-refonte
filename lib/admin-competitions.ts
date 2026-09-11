@@ -56,14 +56,13 @@ const actionFormSchema = z.object({
 
 const IMAGE_UPLOAD_ERROR_MESSAGE =
   "L’image n’a pas pu être envoyée. Vérifiez que le fichier est une image et qu’il fait moins de 15 Mo.";
+const DEFAULT_COMPETITION_SUMMARY =
+  "Consulter le règlement pour les modalités complètes.";
 
 const competitionFormSchema = z.object({
   id: z.string().trim().optional(),
   title: z.string().trim().min(3, "Le titre doit contenir au moins 3 caracteres."),
-  summary: z
-    .string()
-    .trim()
-    .min(20, "Le resume doit contenir au moins 20 caracteres."),
+  summary: z.string().trim().optional(),
   imageUrl: z
     .string()
     .trim()
@@ -406,7 +405,7 @@ export async function saveCompetition(formData: FormData) {
 
     const payload = {
       title: values.title,
-      summary: values.summary,
+      summary: values.summary || DEFAULT_COMPETITION_SUMMARY,
       imageUrl: values.imageUrl || null,
       period: values.period,
       sportStatus: values.sportStatus,

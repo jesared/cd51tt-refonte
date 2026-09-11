@@ -10,6 +10,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { getPublishedCalendarEvents } from "@/lib/admin-calendar";
 import { getPublishedCompetitionItems } from "@/lib/admin-competitions";
 import { getCalendarEventTypeLabel, getCompetitionTitle } from "@/lib/calendar";
+import { getGoogleMapsSearchUrl } from "@/lib/maps";
 import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata = createPageMetadata({
@@ -131,7 +132,14 @@ export default async function CalendrierPage() {
                     </p>
                     <p className="flex items-center gap-2 text-muted-foreground">
                       <MapPin className="size-4" />
-                      {event.location}
+                      <a
+                        href={getGoogleMapsSearchUrl(event.location)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-medium text-primary transition-colors hover:text-foreground hover:underline"
+                      >
+                        {event.location}
+                      </a>
                     </p>
                   </div>
                 </article>

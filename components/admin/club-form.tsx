@@ -3,6 +3,7 @@ import type { ClubResource } from "@prisma/client";
 import { ArrowLeft, Save } from "lucide-react";
 
 import { saveClub } from "@/lib/admin-clubs";
+import { PlaceAutocompleteInput } from "@/components/admin/place-autocomplete-input";
 import { SaveResultActions } from "@/components/admin/save-result-actions";
 import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
 
@@ -97,18 +98,14 @@ export function ClubForm({
                 />
               </div>
 
-              <div className="grid gap-2">
-                <label htmlFor="venue" className="text-sm font-medium">
-                  Salle
-                </label>
-                <input
-                  id="venue"
-                  name="venue"
-                  required
-                  defaultValue={club?.venue ?? ""}
-                  className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
-                />
-              </div>
+              <PlaceAutocompleteInput
+                id="venue"
+                name="venue"
+                label="Salle"
+                required
+                defaultValue={club?.venue ?? ""}
+                placeholder="Nom ou adresse de la salle"
+              />
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
