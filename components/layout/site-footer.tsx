@@ -1,10 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ExternalLink } from "lucide-react";
 
 import type { PublicSiteSettings } from "@/lib/site-settings";
 
 export function SiteFooter({ settings }: { settings: PublicSiteSettings }) {
-  const { quickContactLinks, siteConfig } = settings;
+  const { quickContactLinks, siteConfig, socialLinks } = settings;
 
   return (
     <footer className="border-t border-border bg-card/80">
@@ -38,7 +39,7 @@ export function SiteFooter({ settings }: { settings: PublicSiteSettings }) {
             la Marne.
           </p>
 
-          <div className="flex">
+          <div className="flex flex-wrap gap-2">
             {quickContactLinks.slice(0, 1).map((link) => (
               <Link
                 key={link.href}
@@ -48,6 +49,20 @@ export function SiteFooter({ settings }: { settings: PublicSiteSettings }) {
                 {link.label}
               </Link>
             ))}
+            {socialLinks
+              .filter((link) => link.label === "Facebook")
+              .map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-medium text-foreground transition-colors hover:border-primary/45 hover:bg-accent"
+                >
+                  Facebook
+                  <ExternalLink className="size-3.5" />
+                </a>
+              ))}
           </div>
         </div>
 

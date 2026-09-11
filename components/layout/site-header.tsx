@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
+  ExternalLink,
   MapPin,
   Monitor,
   MoonStar,
@@ -25,12 +26,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { mainNavigation, siteConfig } from "@/lib/site";
+import type { PublicSiteSettings } from "@/lib/site-settings";
 import { cn } from "@/lib/utils";
 
 type SiteHeaderProps = {
   pathname: string;
   mobileMenuTrigger: ReactNode;
   siteConfig: typeof siteConfig;
+  socialLinks: PublicSiteSettings["socialLinks"];
 };
 
 const primaryHeaderHrefs = [
@@ -63,6 +66,7 @@ export function SiteHeader({
   pathname,
   mobileMenuTrigger,
   siteConfig,
+  socialLinks,
 }: SiteHeaderProps) {
   const { setTheme, theme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -72,6 +76,7 @@ export function SiteHeader({
     isActivePath(item.href),
   );
   const activeTheme = mounted ? theme ?? "system" : "system";
+  const facebookLink = socialLinks.find((link) => link.label === "Facebook");
 
   useEffect(() => {
     setMounted(true);
@@ -195,6 +200,21 @@ export function SiteHeader({
         </nav>
 
         <div className="flex items-center gap-2">
+          {facebookLink ? (
+            <a
+              href={facebookLink.href}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Suivre le CD51TT sur Facebook"
+              title="Facebook"
+              className={cn(
+                buttonVariants({ variant: "outline", size: "icon-sm" }),
+                "hidden h-10 w-10 sm:inline-flex",
+              )}
+            >
+              <ExternalLink className="size-4" />
+            </a>
+          ) : null}
           <div className="lg:hidden">{mobileMenuTrigger}</div>
           <Link
             href="/clubs"

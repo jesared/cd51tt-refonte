@@ -14,6 +14,7 @@ type PlaceAutocompleteInputProps = {
   placeholder?: string;
   required?: boolean;
   hint?: string;
+  showAutocompleteStatus?: boolean;
   className?: string;
 };
 
@@ -77,6 +78,7 @@ export function PlaceAutocompleteInput({
   placeholder,
   required = false,
   hint,
+  showAutocompleteStatus = false,
   className,
 }: PlaceAutocompleteInputProps) {
   const hintId = useId();
@@ -155,14 +157,21 @@ export function PlaceAutocompleteInput({
           </a>
         ) : null}
       </div>
-      <p id={hint ? hintId : undefined} className="text-xs leading-5 text-muted-foreground">
-        {hint}
-        {apiKey
-          ? isAutocompleteReady
-            ? " Les suggestions Google Maps sont actives."
-            : " Les suggestions Google Maps se chargent."
-          : " Ajoutez NEXT_PUBLIC_GOOGLE_MAPS_API_KEY pour activer les suggestions Google Maps."}
-      </p>
+      {hint || showAutocompleteStatus ? (
+        <p
+          id={hint ? hintId : undefined}
+          className="text-xs leading-5 text-muted-foreground"
+        >
+          {hint}
+          {showAutocompleteStatus
+            ? apiKey
+              ? isAutocompleteReady
+                ? " Suggestions Google Maps actives."
+                : " Suggestions Google Maps en chargement."
+              : " Suggestions Google Maps désactivées."
+            : null}
+        </p>
+      ) : null}
     </div>
   );
 }

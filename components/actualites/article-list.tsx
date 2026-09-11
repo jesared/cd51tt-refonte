@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ArrowRight, Search, Sparkles, X } from "lucide-react";
+import { ArrowRight, ExternalLink, Search, Sparkles, X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 
 type ArticleListProps = {
   articles: ArticleCardItem[];
+  facebookUrl?: string;
 };
 
 const ALL_CATEGORIES = "all";
@@ -75,7 +76,7 @@ function ArticleRow({ article }: { article: ArticleCardItem }) {
   );
 }
 
-export function ArticleList({ articles }: ArticleListProps) {
+export function ArticleList({ articles, facebookUrl }: ArticleListProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(ALL_CATEGORIES);
 
@@ -111,8 +112,28 @@ export function ArticleList({ articles }: ArticleListProps) {
 
   if (articles.length === 0) {
     return (
-      <div className="rounded-lg border border-border bg-card p-8 text-sm text-muted-foreground">
-        Aucune actualité publiée pour le moment.
+      <div className="rounded-lg border border-border bg-card p-8">
+        <div className="max-w-2xl space-y-3">
+          <p className="text-sm font-medium text-foreground">
+            Aucune actualité publiée sur le site pour le moment.
+          </p>
+          <p className="text-sm leading-6 text-muted-foreground">
+            Les actualités affichées ici sont celles rédigées et publiées depuis
+            l’administration du site. Facebook reste accessible comme canal
+            complémentaire.
+          </p>
+          {facebookUrl ? (
+            <a
+              href={facebookUrl}
+              target="_blank"
+              rel="noreferrer"
+              className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+            >
+              Voir les publications Facebook
+              <ExternalLink className="size-4" />
+            </a>
+          ) : null}
+        </div>
       </div>
     );
   }

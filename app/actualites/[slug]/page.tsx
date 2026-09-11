@@ -1,12 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CalendarDays, Clock } from "lucide-react";
+import { ArrowLeft, CalendarDays, Clock, Share2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { getPublishedNewsArticleBySlug } from "@/lib/admin-news";
 import { createPageMetadata } from "@/lib/metadata";
+import { siteConfig } from "@/lib/site";
+import { getFacebookShareUrl } from "@/lib/social";
 import { cn } from "@/lib/utils";
 
 type ArticlePageProps = {
@@ -50,6 +52,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     .split(/\n{2,}/)
     .map((paragraph) => paragraph.trim())
     .filter(Boolean);
+  const articleUrl = new URL(`/actualites/${article.slug}`, siteConfig.url).toString();
 
   return (
     <article className="mx-auto max-w-3xl space-y-8">
@@ -72,6 +75,15 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             <Clock className="size-4" />
             {article.readTime}
           </span>
+          <a
+            href={getFacebookShareUrl(articleUrl)}
+            target="_blank"
+            rel="noreferrer"
+            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+          >
+            <Share2 className="size-4" />
+            Partager
+          </a>
         </div>
 
         <div className="space-y-4">

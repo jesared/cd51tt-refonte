@@ -11,6 +11,7 @@ import {
   siteConfig,
   socialLinks,
 } from "@/lib/site";
+import { normalizeFacebookUrl } from "@/lib/social";
 
 const SITE_SETTINGS_ID = 1;
 
@@ -90,7 +91,7 @@ export const getPublicSiteSettings = cache(async () => {
         },
       ],
       socialLinks: [
-        { href: settings.facebookUrl, label: "Facebook" },
+        { href: normalizeFacebookUrl(settings.facebookUrl), label: "Facebook" },
         { href: settings.instagramUrl, label: "Instagram" },
       ].filter((link) => link.href),
     } satisfies PublicSiteSettings;

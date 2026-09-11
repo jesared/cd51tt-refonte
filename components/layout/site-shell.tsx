@@ -64,6 +64,7 @@ export function SiteShell({
           pathname={pathname}
           mobileMenuTrigger={mobileMenuTrigger}
           siteConfig={settings.siteConfig}
+          socialLinks={settings.socialLinks}
         />
         <main className="relative z-10 flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           <div key={pathname} className="public-page-transition mx-auto max-w-7xl">

@@ -195,7 +195,7 @@ export function CalendarEventForm({
               </div>
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_160px]">
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_180px] lg:items-start">
               <PlaceAutocompleteInput
                 id="location"
                 name="location"
@@ -204,9 +204,10 @@ export function CalendarEventForm({
                 defaultValue={event?.location ?? ""}
                 placeholder="Salle, club recevant, extranet..."
                 hint="Exemple : Complexe René Tys, club recevant, extranet, lieu à confirmer."
+                className="min-w-0"
               />
 
-              <div className="grid gap-2">
+              <div className="grid min-w-0 gap-2">
                 <label htmlFor="sortOrder" className="text-sm font-medium">
                   Ordre
                 </label>
