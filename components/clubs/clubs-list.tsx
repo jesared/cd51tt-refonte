@@ -1,7 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowUpDown, Building2, Mail, MapPin, Phone, Search, X } from "lucide-react";
+import {
+  ArrowUpDown,
+  Building2,
+  Mail,
+  MapPin,
+  Navigation,
+  Phone,
+  Search,
+  X,
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -156,6 +165,7 @@ export function ClubsList({ clubs }: ClubsListProps) {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filteredClubs.map((club) => {
             const contact = parseClubContact(club.contact);
+            const mapsUrl = getGoogleMapsSearchUrl(`${club.venue}, ${club.city}`);
 
             return (
               <article
@@ -180,14 +190,7 @@ export function ClubsList({ clubs }: ClubsListProps) {
                 <div className="mt-6 space-y-3 text-sm text-muted-foreground">
                   <div className="flex items-start gap-2">
                     <MapPin className="mt-0.5 size-4 shrink-0 text-primary" />
-                    <a
-                      href={getGoogleMapsSearchUrl(`${club.venue}, ${club.city}`)}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="font-medium text-primary transition-colors hover:text-foreground hover:underline"
-                    >
-                      {club.venue}
-                    </a>
+                    <span>{club.venue}</span>
                   </div>
                   {contact.email ? (
                     <a
@@ -204,6 +207,15 @@ export function ClubsList({ clubs }: ClubsListProps) {
                       <span>{contact.phone}</span>
                     </div>
                   ) : null}
+                  <a
+                    href={mapsUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex h-9 w-fit items-center gap-2 rounded-lg border border-border bg-background px-3 text-sm font-medium text-primary transition-colors hover:border-primary/45 hover:bg-accent hover:text-foreground"
+                  >
+                    Itinéraire
+                    <Navigation className="size-4" />
+                  </a>
                 </div>
               </article>
             );

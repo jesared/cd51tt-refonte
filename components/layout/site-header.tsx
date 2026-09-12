@@ -206,12 +206,13 @@ export function SiteHeader({
               target="_blank"
               rel="noreferrer"
               aria-label="Suivre le CD51TT sur Facebook"
-              title="Facebook"
+              title="Suivre le CD51TT sur Facebook"
               className={cn(
-                buttonVariants({ variant: "outline", size: "icon-sm" }),
-                "hidden h-10 w-10 sm:inline-flex",
+                buttonVariants({ variant: "outline", size: "sm" }),
+                "hidden h-10 gap-2 px-3 sm:inline-flex",
               )}
             >
+              <span className="hidden xl:inline">Facebook</span>
               <ExternalLink className="size-4" />
             </a>
           ) : null}

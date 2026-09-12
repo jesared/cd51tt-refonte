@@ -125,8 +125,24 @@ export default async function ComitePage() {
           </article>
           ))
         ) : (
-          <div className="rounded-lg border border-border bg-card p-8 text-sm leading-6 text-muted-foreground md:col-span-2 xl:col-span-3">
-            Aucun membre du comité publié pour le moment.
+          <div className="grid gap-5 rounded-lg border border-border bg-card p-6 md:col-span-2 md:grid-cols-[minmax(0,1fr)_auto] md:items-center xl:col-span-3">
+            <div>
+              <h2 className="text-xl font-semibold tracking-tight">
+                Aucun membre publié dans l’organigramme.
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+                Les responsables et leurs missions seront visibles ici dès que
+                la fiche comité sera complétée depuis l’administration. En
+                attendant, la page contact reste le meilleur point d’entrée.
+              </p>
+            </div>
+            <Link
+              href="/contact"
+              className={buttonVariants({ variant: "default", size: "lg" })}
+            >
+              Contacter le comité
+              <ArrowRight className="size-4" />
+            </Link>
           </div>
         )}
       </section>

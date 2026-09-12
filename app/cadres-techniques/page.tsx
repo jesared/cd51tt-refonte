@@ -1,7 +1,9 @@
-import { ClipboardList, Users } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, ClipboardList, Users } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
 import { getPublicTechnicalStaffMembers } from "@/lib/admin-people";
 import { getCloudinaryCircleAvatarUrl } from "@/lib/cloudinary-url";
 import { createPageMetadata } from "@/lib/metadata";
@@ -88,8 +90,24 @@ export default async function CadresTechniquesPage() {
           </article>
           ))
         ) : (
-          <div className="rounded-lg border border-border bg-card p-8 text-sm leading-6 text-muted-foreground md:col-span-2 xl:col-span-3">
-            Aucun cadre technique publié pour le moment.
+          <div className="grid gap-5 rounded-lg border border-border bg-card p-6 md:col-span-2 md:grid-cols-[minmax(0,1fr)_auto] md:items-center xl:col-span-3">
+            <div>
+              <h2 className="text-xl font-semibold tracking-tight">
+                Aucun cadre technique publié.
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+                Les cadres techniques seront affichés ici dès que leurs fiches
+                seront complétées et publiées. Pour une demande sportive ou
+                technique, vous pouvez contacter le comité.
+              </p>
+            </div>
+            <Link
+              href="/contact"
+              className={buttonVariants({ variant: "default", size: "lg" })}
+            >
+              Contacter le comité
+              <ArrowRight className="size-4" />
+            </Link>
           </div>
         )}
       </section>

@@ -1,6 +1,6 @@
-import { Mail, MapPin, Phone, Send } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 
-import { buttonVariants } from "@/components/ui/button";
+import { ContactMailForm } from "@/components/contact/contact-mail-form";
 import { createPageMetadata } from "@/lib/metadata";
 import { getPublicSiteSettings } from "@/lib/site-settings";
 
@@ -119,23 +119,14 @@ export default async function ContactPage() {
             Envoyer un message
           </h2>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Le formulaire en ligne n&apos;est pas encore activé. Pour envoyer
-            une demande au comité, utilisez l&apos;adresse email officielle.
+            Remplissez les informations utiles : votre messagerie s’ouvrira
+            avec un email déjà préparé pour le comité.
           </p>
         </div>
 
         <div className="grid gap-4 rounded-md border border-border bg-background p-4">
           {email ? (
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm font-medium">{email}</p>
-              <a
-                href={`mailto:${email}?subject=Demande%20depuis%20le%20site%20CD51TT`}
-                className={buttonVariants({ variant: "default", size: "lg" })}
-              >
-                Écrire au comité
-                <Send className="size-4" />
-              </a>
-            </div>
+            <ContactMailForm recipientEmail={email} />
           ) : (
             <p className="text-sm font-medium text-muted-foreground">
               Aucune adresse email n&apos;est configurée pour le moment.

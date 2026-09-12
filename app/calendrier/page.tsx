@@ -79,8 +79,34 @@ export default async function CalendrierPage() {
       </section>
 
       {publishedEvents.length === 0 ? (
-        <section className="rounded-lg border border-border bg-card p-8 text-sm leading-6 text-muted-foreground">
-          Aucun événement n&apos;est publié pour le moment.
+        <section className="grid gap-5 rounded-lg border border-border bg-card p-6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+          <div>
+            <h2 className="text-xl font-semibold tracking-tight">
+              Aucun événement publié sur le calendrier.
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+              Les échéances apparaîtront ici dès qu’elles seront créées et
+              publiées depuis l’administration. En attendant, vous pouvez
+              consulter les compétitions ou contacter le comité pour une date
+              précise.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2 sm:justify-end">
+            <Link
+              href="/competitions"
+              className={buttonVariants({ variant: "default", size: "lg" })}
+            >
+              Voir les compétitions
+              <Trophy className="size-4" />
+            </Link>
+            <Link
+              href="/contact"
+              className={buttonVariants({ variant: "outline", size: "lg" })}
+            >
+              Contacter le comité
+              <ArrowRight className="size-4" />
+            </Link>
+          </div>
         </section>
       ) : (
         <>

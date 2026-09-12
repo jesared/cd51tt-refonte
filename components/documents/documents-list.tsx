@@ -81,18 +81,19 @@ export function DocumentsList({ documents }: DocumentsListProps) {
       <section className="grid gap-5 rounded-lg border border-border bg-card p-6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
         <div>
           <h2 className="text-xl font-semibold tracking-tight">
-            Aucun document publié
+            Aucun document publié dans la base documentaire.
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-            La base documentaire est vide pour le moment. Vous pouvez contacter
-            le comité pour demander un formulaire ou revenir plus tard.
+            Les formulaires, règlements et convocations apparaîtront ici dès
+            qu’ils seront ajoutés et publiés depuis l’administration. Pour une
+            demande urgente, contactez directement le comité.
           </p>
         </div>
         <a
           href="/contact"
           className={buttonVariants({ variant: "default", size: "lg" })}
         >
-          Contacter le comité
+          Demander un document
           <Mail className="size-4" />
         </a>
       </section>
