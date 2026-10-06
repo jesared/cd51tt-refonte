@@ -1,7 +1,5 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
 import {
   ExternalLink,
   MapPin,
@@ -11,9 +9,11 @@ import {
   ShieldCheck,
   SunMedium,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import type { ReactNode } from "react";
 import { useTheme } from "next-themes";
+import Image from "next/image";
+import Link from "next/link";
+import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -75,7 +75,7 @@ export function SiteHeader({
   const hasActiveMoreItem = moreHeaderNavigation.some((item) =>
     isActivePath(item.href),
   );
-  const activeTheme = mounted ? theme ?? "system" : "system";
+  const activeTheme = mounted ? (theme ?? "system") : "system";
   const facebookLink = socialLinks.find((link) => link.label === "Facebook");
 
   useEffect(() => {
@@ -87,7 +87,7 @@ export function SiteHeader({
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:h-16 lg:px-8">
         <div className="flex min-w-0 items-center gap-2">
           <Link href="/" className="flex min-w-0 items-center gap-3">
-            <div className="relative size-10 shrink-0 overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-border lg:size-11">
+            <div className="relative size-10 shrink-0 overflow-hidden rounded-md  shadow-sm ring-1 ring-border lg:size-11">
               <Image
                 src="/branding/comite-logo.png"
                 alt="Logo du Comité de la Marne de Tennis de Table"
