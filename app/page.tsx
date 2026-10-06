@@ -1,5 +1,3 @@
-import Image from "next/image";
-import Link from "next/link";
 import {
   ArrowRight,
   Building2,
@@ -11,6 +9,8 @@ import {
   Trophy,
   Users,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
 import { AnimatedMetrics } from "@/components/home/animated-metrics";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
@@ -68,13 +68,21 @@ export default async function HomePage() {
   const licenseeTotal = await getPublicLicenseeTotal();
   const directory = databaseClubs ?? [];
   const highlightedArticles = publishedArticles.slice(0, 3);
-  const featuredArticle = highlightedArticles.find((article) => article.featured);
+  const featuredArticle = highlightedArticles.find(
+    (article) => article.featured,
+  );
   const secondaryArticles = featuredArticle
-    ? highlightedArticles.filter((article) => article.slug !== featuredArticle.slug)
+    ? highlightedArticles.filter(
+        (article) => article.slug !== featuredArticle.slug,
+      )
     : highlightedArticles;
   const cities = Array.from(new Set(directory.map((club) => club.city)));
   const homeMetrics = [
-    { label: "Clubs affiliés", value: directory.length, tone: "clubs" as const },
+    {
+      label: "Clubs affiliés",
+      value: directory.length,
+      tone: "clubs" as const,
+    },
     ...(licenseeTotal === null
       ? []
       : [
@@ -84,7 +92,11 @@ export default async function HomePage() {
             tone: "licensees" as const,
           },
         ]),
-    { label: "Villes représentées", value: cities.length, tone: "cities" as const },
+    {
+      label: "Villes représentées",
+      value: cities.length,
+      tone: "cities" as const,
+    },
   ];
 
   return (
@@ -125,13 +137,22 @@ export default async function HomePage() {
           <div className="absolute inset-0 bg-muted" />
           <div className="relative flex h-full min-h-[280px] flex-col justify-between p-6">
             <div className="flex items-center justify-between">
-              <div className="relative size-24 overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-border">
+              <div className="relative size-24 overflow-hidden rounded-md shadow-sm ring-1 ring-border">
+                {/* Logo thème clair */}
                 <Image
                   src="/branding/comite-logo.png"
                   alt="Logo du Comité de la Marne de Tennis de Table"
                   fill
                   priority
-                  className="object-contain p-1"
+                  className="object-contain p-1 dark:hidden"
+                />
+
+                {/* Logo thème sombre */}
+                <Image
+                  src="/branding/comite-logo-dark.png"
+                  alt="Logo du Comité de la Marne de Tennis de Table"
+                  fill
+                  className="hidden object-contain p-1 dark:block"
                 />
               </div>
               <Badge variant="outline" className="bg-background/80">
@@ -201,69 +222,69 @@ export default async function HomePage() {
       {featuredArticle ? (
         <ScrollReveal>
           <section className="grid gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
-          <div className="interactive-card overflow-hidden rounded-lg border border-border bg-card">
-            {featuredArticle.imageUrl ? (
-              <div className="relative aspect-[16/9] bg-muted">
-                <Image
-                  src={featuredArticle.imageUrl}
-                  alt=""
-                  fill
-                  sizes="(min-width: 1024px) 46rem, 100vw"
-                  className="object-cover"
-                />
+            <div className="interactive-card overflow-hidden rounded-lg border border-border bg-card">
+              {featuredArticle.imageUrl ? (
+                <div className="relative aspect-[16/9] bg-muted">
+                  <Image
+                    src={featuredArticle.imageUrl}
+                    alt=""
+                    fill
+                    sizes="(min-width: 1024px) 46rem, 100vw"
+                    className="object-cover"
+                  />
+                </div>
+              ) : null}
+
+              <div className="p-6 sm:p-7">
+                <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                  <Badge>{featuredArticle.category}</Badge>
+                  <span>{featuredArticle.date}</span>
+                  <span>{featuredArticle.readTime}</span>
+                </div>
+                <h2 className="mt-5 max-w-3xl text-2xl font-semibold tracking-tight sm:text-3xl">
+                  {featuredArticle.title}
+                </h2>
+                <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">
+                  {featuredArticle.excerpt}
+                </p>
+                <Link
+                  href={`/actualites/${featuredArticle.slug}`}
+                  className={cn(
+                    buttonVariants({ variant: "outline", size: "sm" }),
+                    "mt-6",
+                  )}
+                >
+                  Lire l&apos;actualité
+                  <ArrowRight className="size-3.5" />
+                </Link>
               </div>
-            ) : null}
+            </div>
 
-            <div className="p-6 sm:p-7">
-            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-              <Badge>{featuredArticle.category}</Badge>
-              <span>{featuredArticle.date}</span>
-              <span>{featuredArticle.readTime}</span>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Newspaper className="size-4 text-primary" />
+                <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  À la une
+                </h2>
+              </div>
+              {secondaryArticles.map((article) => (
+                <Link
+                  key={article.slug}
+                  href={`/actualites/${article.slug}`}
+                  className="interactive-card block rounded-lg border border-border bg-card p-5 hover:bg-accent"
+                >
+                  <p className="text-sm font-medium text-primary">
+                    {article.category}
+                  </p>
+                  <h3 className="mt-2 text-base font-semibold leading-6">
+                    {article.title}
+                  </h3>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {article.date}
+                  </p>
+                </Link>
+              ))}
             </div>
-            <h2 className="mt-5 max-w-3xl text-2xl font-semibold tracking-tight sm:text-3xl">
-              {featuredArticle.title}
-            </h2>
-            <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">
-              {featuredArticle.excerpt}
-            </p>
-            <Link
-              href={`/actualites/${featuredArticle.slug}`}
-              className={cn(
-                buttonVariants({ variant: "outline", size: "sm" }),
-                "mt-6",
-              )}
-            >
-              Lire l&apos;actualité
-              <ArrowRight className="size-3.5" />
-            </Link>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Newspaper className="size-4 text-primary" />
-              <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                À la une
-              </h2>
-            </div>
-            {secondaryArticles.map((article) => (
-              <Link
-                key={article.slug}
-                href={`/actualites/${article.slug}`}
-                className="interactive-card block rounded-lg border border-border bg-card p-5 hover:bg-accent"
-              >
-                <p className="text-sm font-medium text-primary">
-                  {article.category}
-                </p>
-                <h3 className="mt-2 text-base font-semibold leading-6">
-                  {article.title}
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {article.date}
-                </p>
-              </Link>
-            ))}
-          </div>
           </section>
         </ScrollReveal>
       ) : null}
@@ -350,21 +371,21 @@ export default async function HomePage() {
 
       <ScrollReveal>
         <section className="interactive-card flex flex-col gap-4 rounded-lg border border-border bg-card p-6 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-xl font-semibold tracking-tight">
-            Besoin d&apos;un document ?
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Retrouvez les formulaires, règlements et supports pratiques.
-          </p>
-        </div>
-        <Link
-          href="/documents"
-          className={buttonVariants({ variant: "default", size: "lg" })}
-        >
-          Accéder aux documents
-          <Download className="size-4" />
-        </Link>
+          <div>
+            <h2 className="text-xl font-semibold tracking-tight">
+              Besoin d&apos;un document ?
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Retrouvez les formulaires, règlements et supports pratiques.
+            </p>
+          </div>
+          <Link
+            href="/documents"
+            className={buttonVariants({ variant: "default", size: "lg" })}
+          >
+            Accéder aux documents
+            <Download className="size-4" />
+          </Link>
         </section>
       </ScrollReveal>
     </div>
