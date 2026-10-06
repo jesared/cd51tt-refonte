@@ -87,16 +87,28 @@ export function SiteHeader({
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:h-16 lg:px-8">
         <div className="flex min-w-0 items-center gap-2">
           <Link href="/" className="flex min-w-0 items-center gap-3">
-            <div className="relative size-10 shrink-0 overflow-hidden rounded-md  shadow-sm ring-1 ring-border lg:size-11">
+            <div className="relative size-10 shrink-0 overflow-hidden rounded-md shadow-sm ring-1 ring-border lg:size-11">
+              {/* Logo thème clair */}
               <Image
                 src="/branding/comite-logo.png"
                 alt="Logo du Comité de la Marne de Tennis de Table"
                 fill
                 priority
                 sizes="(min-width: 1024px) 2.75rem, 2.5rem"
-                className="object-contain p-0.5"
+                className="object-contain p-0.5 dark:hidden"
+              />
+
+              {/* Logo thème sombre */}
+              <Image
+                src="/branding/comite-logo-dark.png"
+                alt="Logo du Comité de la Marne de Tennis de Table"
+                fill
+                priority
+                sizes="(min-width: 1024px) 2.75rem, 2.5rem"
+                className="hidden object-contain p-0.5 dark:block"
               />
             </div>
+
             <p className="truncate text-sm font-semibold leading-none sm:text-base">
               {siteConfig.shortName}
             </p>
