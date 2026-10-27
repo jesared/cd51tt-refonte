@@ -340,6 +340,13 @@ export default async function AdminCompetitionsPage({
                       >
                         {competition.sportStatus}
                       </span>
+                      {competition.ffttApprovalStatus ? (
+                        <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
+                          {competition.ffttApprovalStatus === "HOMOLOGUE"
+                            ? "Homologué FFTT"
+                            : "Non homologué FFTT"}
+                        </span>
+                      ) : null}
                     </div>
 
                     <p className="line-clamp-2 max-w-3xl text-sm leading-6 text-muted-foreground">

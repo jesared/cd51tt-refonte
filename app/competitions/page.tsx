@@ -117,7 +117,8 @@ export default async function CompetitionsPage() {
                 {formatEventDate(nextCalendarEvent.date)}
               </h2>
               <p className="text-sm leading-6 text-muted-foreground">
-                {nextCalendarCompetitionTitle} · {nextCalendarEvent.location}
+                {nextCalendarCompetitionTitle}
+                {nextCalendarEvent.location ? ` · ${nextCalendarEvent.location}` : ""}
               </p>
               {nextCalendarEvent.organizerClub ? <p className="text-sm text-muted-foreground">Club organisateur : {nextCalendarEvent.organizerClub}</p> : null}
             </div>

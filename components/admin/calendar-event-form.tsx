@@ -154,10 +154,9 @@ export function CalendarEventForm({
                 id="location"
                 name="location"
                 label="Lieu"
-                required
                 defaultValue={event?.location ?? ""}
                 placeholder="Salle, club recevant, extranet..."
-                hint="Exemple : Complexe René Tys, club recevant, extranet, lieu à confirmer."
+                hint="Facultatif : vous pouvez publier les dates sans lieu connu."
                 className="min-w-0"
               />
               <div className="grid gap-2">
@@ -174,6 +173,9 @@ export function CalendarEventForm({
                 </datalist>
                 <p className="text-xs leading-5 text-muted-foreground">
                   Suggestions issues de l’annuaire des clubs synchronisé avec la FFTT. Vous pouvez aussi saisir un autre nom.
+                </p>
+                <p className="text-xs leading-5 text-muted-foreground">
+                  Facultatif : laissez ce champ vide pour publier une date de championnat sans organisateur connu.
                 </p>
               </div>
               </div>

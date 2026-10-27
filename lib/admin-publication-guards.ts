@@ -31,7 +31,7 @@ type PublishableDocument = Pick<
 
 type PublishableCalendarEvent = Pick<
   CalendarEvent,
-  "title" | "competitionId" | "date" | "location" | "type"
+  "title" | "competitionId" | "date" | "type"
 >;
 
 function hasText(value: string | null | undefined, minLength = 1) {
@@ -124,7 +124,6 @@ export function assertCalendarEventCanBePublished(
       ? "choisir une compétition existante"
       : null,
     !hasText(event.title, 3) ? "renseigner le libellé" : null,
-    !hasText(event.location, 2) ? "indiquer le lieu" : null,
   ].filter(Boolean) as string[];
 
   buildPublicationError(`l’échéance "${event.title}"`, issues);

@@ -62,7 +62,6 @@ function getCalendarEventIncompleteReasons(
 ) {
   return [
     !event.title ? "Libellé manquant" : null,
-    !event.location ? "Lieu manquant" : null,
     !event.competitionId && event.type !== "REUNION" ? "Compétition non liée" : null,
     event.competitionId && !competitionTitles.has(event.competitionId)
       ? "Compétition liée introuvable"
@@ -344,10 +343,12 @@ export default async function AdminCalendrierPage({
                           <CalendarDays className="size-4 text-primary" />
                           {formatEventDate(event.date)}
                         </span>
-                        <span className="inline-flex items-center gap-2">
-                          <MapPin className="size-4 text-primary" />
-                          {event.location}
-                        </span>
+                        {event.location ? (
+                          <span className="inline-flex items-center gap-2">
+                            <MapPin className="size-4 text-primary" />
+                            {event.location}
+                          </span>
+                        ) : null}
                         {event.organizerClub ? <span>Club organisateur : {event.organizerClub}</span> : null}
                       </div>
                     </div>

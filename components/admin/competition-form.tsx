@@ -246,6 +246,25 @@ export function CompetitionForm({
                 </p>
               </div>
 
+              <div className="grid gap-2">
+                <label htmlFor="ffttApprovalStatus" className="text-sm font-medium">
+                  Homologation FFTT
+                </label>
+                <select
+                  id="ffttApprovalStatus"
+                  name="ffttApprovalStatus"
+                  defaultValue={competition?.ffttApprovalStatus ?? ""}
+                  className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
+                >
+                  <option value="">Non renseigné</option>
+                  <option value="HOMOLOGUE">Homologué FFTT</option>
+                  <option value="NON_HOMOLOGUE">Non homologué FFTT</option>
+                </select>
+                <p className="text-xs leading-5 text-muted-foreground">
+                  Indiquez si cette compétition est homologuée par la FFTT.
+                </p>
+              </div>
+
             </div>
 
             <div className="grid gap-4 md:grid-cols-[1fr_160px]">

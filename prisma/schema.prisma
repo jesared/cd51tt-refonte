@@ -21,6 +21,11 @@ enum CompetitionResourceStatus {
   PUBLISHED
 }
 
+enum CompetitionFfttApprovalStatus {
+  HOMOLOGUE
+  NON_HOMOLOGUE
+}
+
 enum CalendarEventType {
   JOURNEE
   CONVOCATION
@@ -137,6 +142,7 @@ model CompetitionResource {
   imageUrl             String?
   period               String
   sportStatus          String
+  ffttApprovalStatus   CompetitionFfttApprovalStatus?
   statusDetail         String
   format               String
   nextDate             String

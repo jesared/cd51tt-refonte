@@ -116,6 +116,13 @@ export default async function AdminCompetitionPreviewPage({
             <Badge variant={competition.status === "En cours" ? "default" : "secondary"}>
               {competition.status}
             </Badge>
+            {competition.ffttApprovalStatus ? (
+              <Badge variant="outline">
+                {competition.ffttApprovalStatus === "HOMOLOGUE"
+                  ? "Homologué FFTT"
+                  : "Non homologué FFTT"}
+              </Badge>
+            ) : null}
             <Badge variant={isPublished ? "secondary" : "outline"}>
               {isPublished ? "Publié" : "Brouillon"}
             </Badge>
@@ -209,9 +216,11 @@ export default async function AdminCompetitionPreviewPage({
                           {event.published ? "Publié" : "Brouillon"}
                         </Badge>
                       </div>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {event.location}
-                      </p>
+                      {event.location ? (
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {event.location}
+                        </p>
+                      ) : null}
                       {event.organizerClub ? <p className="text-sm text-muted-foreground">Club organisateur : {event.organizerClub}</p> : null}
                     </div>
                     <p className="text-sm font-medium">

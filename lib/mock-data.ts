@@ -40,6 +40,7 @@ export type Competition = {
   period: string;
   status: "Ouvert" | "À venir" | "En cours" | "Terminé";
   statusDetail: string;
+  ffttApprovalStatus?: "HOMOLOGUE" | "NON_HOMOLOGUE" | null;
   format: string;
   nextDate: string;
   registrationDeadline: string;

@@ -158,17 +158,19 @@ export default async function CalendrierPage() {
                       {formatEventDate(event.date)}
                     </p>
                     {event.organizerClub ? <p className="text-sm text-muted-foreground">Club organisateur : {event.organizerClub}</p> : null}
-                    <p className="flex items-center gap-2 text-muted-foreground">
-                      <MapPin className="size-4" />
-                      <a
-                        href={getGoogleMapsSearchUrl(event.location)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="font-medium text-primary transition-colors hover:text-foreground hover:underline"
-                      >
-                        {event.location}
-                      </a>
-                    </p>
+                    {event.location ? (
+                      <p className="flex items-center gap-2 text-muted-foreground">
+                        <MapPin className="size-4" />
+                        <a
+                          href={getGoogleMapsSearchUrl(event.location)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-medium text-primary transition-colors hover:text-foreground hover:underline"
+                        >
+                          {event.location}
+                        </a>
+                      </p>
+                    ) : null}
                   </div>
                 </article>
               ))}

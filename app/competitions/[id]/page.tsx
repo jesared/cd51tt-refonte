@@ -98,6 +98,13 @@ export default async function CompetitionDetailPage({
             >
               {competition.status}
             </Badge>
+            {competition.ffttApprovalStatus ? (
+              <Badge variant="outline">
+                {competition.ffttApprovalStatus === "HOMOLOGUE"
+                  ? "Homologué FFTT"
+                  : "Non homologué FFTT"}
+              </Badge>
+            ) : null}
             <span className="text-sm text-muted-foreground">
               Format : {competition.format}
             </span>
@@ -185,16 +192,18 @@ export default async function CompetitionDetailPage({
                           {getCalendarEventTypeLabel(event.type)}
                         </Badge>
                       </div>
-                      <p className="mt-1 text-sm">
-                        <a
-                          href={getGoogleMapsSearchUrl(event.location)}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="font-medium text-primary transition-colors hover:text-foreground hover:underline"
-                        >
-                          {event.location}
-                        </a>
-                      </p>
+                      {event.location ? (
+                        <p className="mt-1 text-sm">
+                          <a
+                            href={getGoogleMapsSearchUrl(event.location)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="font-medium text-primary transition-colors hover:text-foreground hover:underline"
+                          >
+                            {event.location}
+                          </a>
+                        </p>
+                      ) : null}
                       {event.organizerClub ? <p className="text-sm text-muted-foreground">Club organisateur : {event.organizerClub}</p> : null}
                     </div>
                     <p className="text-sm font-medium">

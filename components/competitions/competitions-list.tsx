@@ -75,6 +75,13 @@ function CompetitionBadges({ competition }: { competition: Competition }) {
       >
         {competition.status}
       </Badge>
+      {competition.ffttApprovalStatus ? (
+        <Badge variant="outline">
+          {competition.ffttApprovalStatus === "HOMOLOGUE"
+            ? "Homologué FFTT"
+            : "Non homologué FFTT"}
+        </Badge>
+      ) : null}
       <span className="text-xs text-muted-foreground">
         Format : {competition.format}
       </span>

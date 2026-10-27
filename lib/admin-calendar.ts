@@ -21,7 +21,7 @@ const calendarEventFormSchema = z.object({
   type: z.nativeEnum(CalendarEventType),
   organizerClub: z.string().trim().optional(),
   date: z.string().trim().min(1, "La date est requise."),
-  location: z.string().trim().min(2, "Le lieu est requis."),
+  location: z.string().trim().optional(),
   published: z.boolean(),
   sortOrder: z.coerce.number().int().default(0),
 });
@@ -186,7 +186,7 @@ export async function saveCalendarEvent(formData: FormData) {
       title: values.title,
       type: values.type,
       date: toEventDate(values.date),
-      location: values.location,
+      location: values.location ?? "",
       organizerClub: values.organizerClub || null,
       published: values.published,
       sortOrder: values.sortOrder,
