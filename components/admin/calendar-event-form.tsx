@@ -14,9 +14,16 @@ type CalendarCompetitionOption = {
   title: string;
 };
 
+type OrganizerClubOption = {
+  name: string;
+  city: string;
+  ffttId: string | null;
+};
+
 type CalendarEventFormProps = {
   event?: CalendarEvent;
   competitionOptions: CalendarCompetitionOption[];
+  organizerClubOptions: OrganizerClubOption[];
   defaultCompetitionId?: string;
   mode: "create" | "edit";
   errorMessage?: string | null;
@@ -34,6 +41,7 @@ function toDateInputValue(date: Date | null | undefined) {
 
 export function CalendarEventForm({
   competitionOptions,
+  organizerClubOptions,
   defaultCompetitionId,
   event,
   errorMessage,
@@ -154,7 +162,19 @@ export function CalendarEventForm({
               />
               <div className="grid gap-2">
                 <label htmlFor="organizerClub" className="text-sm font-medium">Club organisateur</label>
-                <input id="organizerClub" name="organizerClub" defaultValue={event?.organizerClub ?? ""} placeholder="Nom du club organisateur" className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20" />
+                <input id="organizerClub" name="organizerClub" list="organizer-club-options" defaultValue={event?.organizerClub ?? ""} placeholder="Rechercher ou saisir un club" className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20" />
+                <datalist id="organizer-club-options">
+                  {organizerClubOptions.map((club) => (
+                    <option
+                      key={`${club.name}-${club.city}`}
+                      value={club.name}
+                      label={`${club.city}${club.ffttId ? " · FFTT" : " · Annuaire"}`}
+                    />
+                  ))}
+                </datalist>
+                <p className="text-xs leading-5 text-muted-foreground">
+                  Suggestions issues de l’annuaire des clubs synchronisé avec la FFTT. Vous pouvez aussi saisir un autre nom.
+                </p>
               </div>
               </div>
 
