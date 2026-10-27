@@ -184,7 +184,10 @@ const hasCompetitionResourceTable = cache(async () => {
   }
 });
 
-function normalizeJsonArray<T>(value: Prisma.JsonValue, fallback: T[]): T[] {
+function normalizeJsonArray<T>(
+  value: Prisma.JsonValue | undefined,
+  fallback: T[],
+): T[] {
   return Array.isArray(value) ? (value as T[]) : fallback;
 }
 
