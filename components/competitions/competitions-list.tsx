@@ -29,12 +29,11 @@ import {
 import type {
   Competition,
   CompetitionAction,
-  CompetitionTag,
 } from "@/lib/mock-data";
 import { getGoogleMapsSearchUrl } from "@/lib/maps";
 import { cn } from "@/lib/utils";
 
-type CompetitionFilter = "Toutes" | Competition["status"] | CompetitionTag;
+type CompetitionFilter = "Toutes" | Competition["status"];
 type CompetitionView = "cards" | "list";
 
 const filters: CompetitionFilter[] = [
@@ -43,10 +42,6 @@ const filters: CompetitionFilter[] = [
   "En cours",
   "À venir",
   "Terminé",
-  "Équipes",
-  "Individuel",
-  "Jeunes",
-  "Seniors",
 ];
 
 const views: Array<{
@@ -66,19 +61,12 @@ const actionIcons: Record<CompetitionAction["type"], LucideIcon> = {
   registration: PenLine,
 };
 
-function isCompetitionTag(filter: CompetitionFilter): filter is CompetitionTag {
-  return ["Équipes", "Individuel", "Jeunes", "Seniors"].includes(filter);
-}
-
 function matchesFilter(competition: Competition, filter: CompetitionFilter) {
   if (filter === "Toutes") {
     return true;
   }
 
-  return (
-    competition.status === filter ||
-    (isCompetitionTag(filter) && competition.tags.includes(filter))
-  );
+  return competition.status === filter;
 }
 
 function CompetitionBadges({ competition }: { competition: Competition }) {
@@ -89,10 +77,9 @@ function CompetitionBadges({ competition }: { competition: Competition }) {
       >
         {competition.status}
       </Badge>
-      {competition.statusDetail ? (
-        <Badge variant="outline">{competition.statusDetail}</Badge>
-      ) : null}
-      <Badge variant="outline">{competition.format}</Badge>
+      <span className="text-xs text-muted-foreground">
+        Format : {competition.format}
+      </span>
     </div>
   );
 }

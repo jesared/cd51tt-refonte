@@ -24,7 +24,6 @@ import { matchesRecentUpdateFilter } from "@/lib/admin-list-filters";
 import { getAdminDocuments } from "@/lib/admin-documents";
 import { getCompetitionNextDateLabel } from "@/lib/calendar";
 import { createPageMetadata } from "@/lib/metadata";
-import type { CompetitionTag } from "@/lib/mock-data";
 
 export const metadata = createPageMetadata({
   title: "Admin compétitions",
@@ -44,7 +43,6 @@ type AdminCompetitionsPageProps = {
     q?: string;
     statut?: string;
     sport?: string;
-    tag?: string;
     image?: string;
     echeance?: string;
     maj?: string;
@@ -64,10 +62,6 @@ function getSportStatusTone(status: string) {
   return "border border-border text-muted-foreground";
 }
 
-function parseJsonArray<T>(value: unknown, fallback: T[]): T[] {
-  return Array.isArray(value) ? (value as T[]) : fallback;
-}
-
 function normalizeSearchValue(value: string) {
   return value
     .normalize("NFD")
@@ -77,14 +71,12 @@ function normalizeSearchValue(value: string) {
 
 function getCompetitionIncompleteReasons(
   competition: Awaited<ReturnType<typeof getAdminCompetitions>>[number],
-  hasPublishedEvent: boolean,
 ) {
   return [
     !competition.imageUrl ? "Image manquante" : null,
     !competition.summary ? "Résumé manquant" : null,
     !competition.registrationDeadline ? "Date limite d’inscription manquante" : null,
     !competition.location ? "Lieu manquant" : null,
-    !hasPublishedEvent ? "Aucune échéance publiée liée" : null,
   ].filter((reason): reason is string => Boolean(reason));
 }
 
@@ -102,7 +94,6 @@ export default async function AdminCompetitionsPage({
   const query = normalizeSearchValue(searchParams?.q ?? "");
   const publicationFilter = searchParams?.statut;
   const sportFilter = searchParams?.sport;
-  const tagFilter = searchParams?.tag;
   const imageFilter = searchParams?.image;
   const deadlineFilter = searchParams?.echeance;
   const updateFilter = searchParams?.maj;
@@ -113,16 +104,8 @@ export default async function AdminCompetitionsPage({
   const sportStatusOptions = Array.from(
     new Set(competitionEntries.map((competition) => competition.sportStatus)),
   ).sort((a, b) => a.localeCompare(b, "fr"));
-  const tagOptions = Array.from(
-    new Set(
-      competitionEntries.flatMap((competition) =>
-        parseJsonArray<CompetitionTag>(competition.tags, []),
-      ),
-    ),
-  ).sort((a, b) => a.localeCompare(b, "fr"));
   const filteredCompetitions = competitionEntries
     .filter((competition) => {
-      const tags = parseJsonArray<CompetitionTag>(competition.tags, []);
       const matchesSearch =
         !query ||
         normalizeSearchValue(
@@ -135,7 +118,6 @@ export default async function AdminCompetitionsPage({
         (publicationFilter === "draft" &&
           competition.status === CompetitionResourceStatus.DRAFT);
       const matchesSport = !sportFilter || competition.sportStatus === sportFilter;
-      const matchesTag = !tagFilter || tags.includes(tagFilter as CompetitionTag);
       const hasImage = Boolean(competition.imageUrl);
       const hasLinkedDeadline = calendarEvents.some(
         (event) => event.competitionId === competition.id,
@@ -157,7 +139,6 @@ export default async function AdminCompetitionsPage({
         matchesSearch &&
         matchesPublication &&
         matchesSport &&
-        matchesTag &&
         matchesImage &&
         matchesDeadline &&
         matchesUpdated
@@ -204,7 +185,7 @@ export default async function AdminCompetitionsPage({
           </h2>
           <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
             Consultez les compétitions visibles sur la page publique, avec leurs
-            échéances, responsables, tags et liens utiles. Les rôles ADMIN et
+                échéances, responsables et liens utiles. Les rôles ADMIN et
             EDITOR peuvent aussi les mettre à jour.
           </p>
           <div className="flex flex-wrap gap-2">
@@ -275,15 +256,6 @@ export default async function AdminCompetitionsPage({
                 })),
               },
               {
-                name: "tag",
-                label: "Tag",
-                defaultLabel: "Tous les tags",
-                options: tagOptions.map((tag) => ({
-                  label: tag,
-                  value: tag,
-                })),
-              },
-              {
                 name: "image",
                 label: "Image",
                 defaultLabel: "Toutes les images",
@@ -334,20 +306,10 @@ export default async function AdminCompetitionsPage({
             {filteredCompetitions.map((competition) => {
               const isPublished =
                 competition.status === CompetitionResourceStatus.PUBLISHED;
-              const tags = parseJsonArray<CompetitionTag>(competition.tags, []);
-              const visibleTags = tags.slice(0, 2);
-              const hiddenTagCount = tags.length - visibleTags.length;
               const documentCount = documents.filter(
                 (document) => document.competitionId === competition.id,
               ).length;
-              const hasPublishedEvent = calendarEvents.some(
-                (event) =>
-                  event.competitionId === competition.id && event.published,
-              );
-              const incompleteReasons = getCompetitionIncompleteReasons(
-                competition,
-                hasPublishedEvent,
-              );
+              const incompleteReasons = getCompetitionIncompleteReasons(competition);
 
               return (
                 <article
@@ -386,21 +348,6 @@ export default async function AdminCompetitionsPage({
                       {competition.summary}
                     </p>
 
-                    <div className="flex flex-wrap gap-2">
-                      {visibleTags.map((tag) => (
-                        <span
-                          key={`${competition.id}-${tag}`}
-                          className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                      {hiddenTagCount > 0 ? (
-                        <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
-                          +{hiddenTagCount}
-                        </span>
-                      ) : null}
-                    </div>
                   </div>
 
                   <div className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-3 lg:grid-cols-1">

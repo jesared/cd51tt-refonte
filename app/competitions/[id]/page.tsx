@@ -99,10 +99,9 @@ export default async function CompetitionDetailPage({
             >
               {competition.status}
             </Badge>
-            {competition.statusDetail ? (
-              <Badge variant="outline">{competition.statusDetail}</Badge>
-            ) : null}
-            <Badge variant="outline">{competition.format}</Badge>
+            <span className="text-sm text-muted-foreground">
+              Format : {competition.format}
+            </span>
           </div>
 
           <div className="space-y-3">
