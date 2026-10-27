@@ -76,11 +76,6 @@ const competitionFormSchema = z.object({
   statusDetail: z.string().trim().optional(),
   format: z.string().trim().min(2, "Le format est requis."),
   nextDate: z.string().trim().optional(),
-  registrationDeadline: z
-    .string()
-    .trim()
-    .min(2, "La limite d'inscription est requise."),
-  location: z.string().trim().min(2, "Le lieu est requis."),
   manager: z.string().trim().min(2, "Le responsable est requis."),
   tags: z
     .array(z.enum(COMPETITION_TAG_OPTIONS))
@@ -100,20 +95,6 @@ function getBooleanValue(formData: FormData, key: string) {
 
 function getStringValues(formData: FormData, key: string) {
   return formData.getAll(key).map((value) => String(value).trim());
-}
-
-function formatDateInputValue(rawDate: string) {
-  const parsedDate = new Date(`${rawDate}T12:00:00`);
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    throw new Error("La date limite d'inscription n'est pas valide.");
-  }
-
-  return new Intl.DateTimeFormat("fr-FR", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  }).format(parsedDate);
 }
 
 function isValidActionHref(href: string) {
@@ -343,7 +324,14 @@ export async function saveCompetition(formData: FormData) {
     const existingCompetition = id
       ? await prisma.competitionResource.findUnique({
           where: { id },
-          select: { imageUrl: true, status: true, statusDetail: true, tags: true },
+          select: {
+            imageUrl: true,
+            status: true,
+            statusDetail: true,
+            tags: true,
+            location: true,
+            registrationDeadline: true,
+          },
         })
       : null;
     const status =
@@ -366,8 +354,6 @@ export async function saveCompetition(formData: FormData) {
       sportStatus: getStringValue(formData, "sportStatus"),
       format: getStringValue(formData, "format"),
       nextDate: getStringValue(formData, "nextDate"),
-      registrationDeadline: getStringValue(formData, "registrationDeadline"),
-      location: getStringValue(formData, "location"),
       manager: getStringValue(formData, "manager"),
       tags: getStringValues(formData, "tags"),
       actions: getCompetitionActions(formData),
@@ -414,8 +400,8 @@ export async function saveCompetition(formData: FormData) {
       statusDetail: existingCompetition?.statusDetail ?? "",
       format: values.format,
       nextDate: values.nextDate || "Aucune échéance planifiée",
-      registrationDeadline: formatDateInputValue(values.registrationDeadline),
-      location: values.location,
+      registrationDeadline: existingCompetition?.registrationDeadline ?? "",
+      location: existingCompetition?.location ?? "",
       manager: values.manager,
       tags:
         values.tags.length > 0

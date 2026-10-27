@@ -119,6 +119,7 @@ export default async function CompetitionsPage() {
               <p className="text-sm leading-6 text-muted-foreground">
                 {nextCalendarCompetitionTitle} · {nextCalendarEvent.location}
               </p>
+              {nextCalendarEvent.organizerClub ? <p className="text-sm text-muted-foreground">Club organisateur : {nextCalendarEvent.organizerClub}</p> : null}
             </div>
           </div>
 

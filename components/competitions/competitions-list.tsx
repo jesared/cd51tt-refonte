@@ -13,7 +13,6 @@ import {
   LayoutGrid,
   List as ListIcon,
   ListChecks,
-  MapPin,
   PenLine,
   UserRound,
 } from "lucide-react";
@@ -30,7 +29,6 @@ import type {
   Competition,
   CompetitionAction,
 } from "@/lib/mock-data";
-import { getGoogleMapsSearchUrl } from "@/lib/maps";
 import { cn } from "@/lib/utils";
 
 type CompetitionFilter = "Toutes" | Competition["status"];
@@ -253,30 +251,6 @@ function CompetitionDetails({
         )}
       >
         <div>
-          <dt className="text-xs font-medium uppercase text-muted-foreground">
-            Limite d&apos;inscription
-          </dt>
-          <dd className="mt-1 text-foreground">
-            {competition.registrationDeadline}
-          </dd>
-        </div>
-        <div>
-          <dt className="flex items-center gap-1.5 text-xs font-medium uppercase text-muted-foreground">
-            <MapPin className="size-3.5" />
-            Lieu
-          </dt>
-          <dd className="mt-1">
-            <a
-              href={getGoogleMapsSearchUrl(competition.location)}
-              target="_blank"
-              rel="noreferrer"
-              className="font-medium text-primary transition-colors hover:text-foreground hover:underline"
-            >
-              {competition.location}
-            </a>
-          </dd>
-        </div>
-        <div>
           <dt className="flex items-center gap-1.5 text-xs font-medium uppercase text-muted-foreground">
             <UserRound className="size-3.5" />
             Responsable
@@ -368,12 +342,6 @@ function CompetitionListRow({ competition }: { competition: Competition }) {
           </div>
           <div className="min-w-0">
             <dt className="text-xs font-medium uppercase text-muted-foreground">
-              Limite
-            </dt>
-            <dd className="mt-1 break-words">{competition.registrationDeadline}</dd>
-          </div>
-          <div className="min-w-0">
-            <dt className="text-xs font-medium uppercase text-muted-foreground">
               Responsable
             </dt>
             <dd className="mt-1 break-words">{competition.manager}</dd>
@@ -381,18 +349,7 @@ function CompetitionListRow({ competition }: { competition: Competition }) {
         </dl>
       </div>
 
-      <div className="mt-5 flex min-w-0 flex-col gap-4 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="flex min-w-0 items-start gap-2 text-sm text-muted-foreground">
-          <MapPin className="mt-0.5 size-4 shrink-0 text-primary" />
-          <a
-            href={getGoogleMapsSearchUrl(competition.location)}
-            target="_blank"
-            rel="noreferrer"
-            className="min-w-0 break-words font-medium text-primary transition-colors hover:text-foreground hover:underline"
-          >
-            {competition.location}
-          </a>
-        </p>
+      <div className="mt-5 flex min-w-0 flex-col gap-4 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-end">
         <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
           <CompetitionActions competition={competition} compact inline />
           <Link

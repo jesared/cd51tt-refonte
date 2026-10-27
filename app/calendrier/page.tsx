@@ -49,6 +49,7 @@ export default async function CalendrierPage() {
     title: event.title,
     type: getCalendarEventTypeLabel(event.type),
     location: event.location,
+    organizerClub: event.organizerClub,
     status: "published",
   }));
   const nextEvents = publishedEvents.slice(0, 6);
@@ -156,6 +157,7 @@ export default async function CalendrierPage() {
                       <CalendarDays className="size-4 text-primary" />
                       {formatEventDate(event.date)}
                     </p>
+                    {event.organizerClub ? <p className="text-sm text-muted-foreground">Club organisateur : {event.organizerClub}</p> : null}
                     <p className="flex items-center gap-2 text-muted-foreground">
                       <MapPin className="size-4" />
                       <a

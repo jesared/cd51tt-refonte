@@ -8,7 +8,6 @@ import {
   Edit3,
   ExternalLink,
   FileText,
-  MapPin,
   Trophy,
   UserRound,
 } from "lucide-react";
@@ -213,6 +212,7 @@ export default async function AdminCompetitionPreviewPage({
                       <p className="mt-1 text-sm text-muted-foreground">
                         {event.location}
                       </p>
+                      {event.organizerClub ? <p className="text-sm text-muted-foreground">Club organisateur : {event.organizerClub}</p> : null}
                     </div>
                     <p className="text-sm font-medium">
                       {formatEventDate(event.date)}
@@ -269,19 +269,6 @@ export default async function AdminCompetitionPreviewPage({
             Organisation
           </h2>
           <dl className="mt-5 space-y-4 text-sm">
-            <div>
-              <dt className="text-xs font-medium uppercase text-muted-foreground">
-                Limite d&apos;inscription
-              </dt>
-              <dd className="mt-1">{competition.registrationDeadline}</dd>
-            </div>
-            <div>
-              <dt className="flex items-center gap-1.5 text-xs font-medium uppercase text-muted-foreground">
-                <MapPin className="size-3.5" />
-                Lieu
-              </dt>
-              <dd className="mt-1">{competition.location}</dd>
-            </div>
             <div>
               <dt className="flex items-center gap-1.5 text-xs font-medium uppercase text-muted-foreground">
                 <UserRound className="size-3.5" />

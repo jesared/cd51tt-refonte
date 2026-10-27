@@ -17,6 +17,7 @@ export type SportsCalendarEvent = {
   title: string;
   type: string;
   location: string;
+  organizerClub?: string | null;
   status: SportsCalendarEventStatus;
 };
 
@@ -29,6 +30,7 @@ const typeColors: Record<string, string> = {
   Convocation: "#8b5cf6",
   Inscription: "#f59e0b",
   Résultat: "#10b981",
+  Réunion: "#ec4899",
 };
 
 const mobileCalendarQuery = "(max-width: 639px)";
@@ -45,6 +47,7 @@ function toCalendarEvents(events: SportsCalendarEvent[]): EventInput[] {
     extendedProps: {
       competitionTitle: event.competitionTitle,
       location: event.location,
+      organizerClub: event.organizerClub,
       status: event.status,
       type: event.type,
     },

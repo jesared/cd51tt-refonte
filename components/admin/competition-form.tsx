@@ -18,7 +18,6 @@ import {
 import { SaveResultActions } from "@/components/admin/save-result-actions";
 import { ConfirmableAdminForm } from "@/components/admin/confirmable-admin-form";
 import { ImageUploadField } from "@/components/admin/image-upload-field";
-import { PlaceAutocompleteInput } from "@/components/admin/place-autocomplete-input";
 import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
 import {
   formatCalendarEventDate,
@@ -69,50 +68,6 @@ function getAction(
   type: CompetitionAction["type"],
 ) {
   return actions.find((action) => action.type === type);
-}
-
-const frenchMonthIndexes: Record<string, string> = {
-  janvier: "01",
-  fevrier: "02",
-  février: "02",
-  mars: "03",
-  avril: "04",
-  mai: "05",
-  juin: "06",
-  juillet: "07",
-  aout: "08",
-  août: "08",
-  septembre: "09",
-  octobre: "10",
-  novembre: "11",
-  decembre: "12",
-  décembre: "12",
-};
-
-function toDateInputValue(value: string | null | undefined) {
-  if (!value) {
-    return "";
-  }
-
-  const isoDateMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
-
-  if (isoDateMatch) {
-    return isoDateMatch[0];
-  }
-
-  const frenchDateMatch = value
-    .trim()
-    .toLowerCase()
-    .match(/^(\d{1,2})\s+([a-zéû]+)\s+(\d{4})$/i);
-
-  if (!frenchDateMatch) {
-    return "";
-  }
-
-  const [, day, month, year] = frenchDateMatch;
-  const monthNumber = frenchMonthIndexes[month];
-
-  return monthNumber ? `${year}-${monthNumber}-${day.padStart(2, "0")}` : "";
 }
 
 export function CompetitionForm({
@@ -367,36 +322,9 @@ export function CompetitionForm({
               />
             </div>
 
-            <div className="grid gap-2">
-              <label
-                htmlFor="registrationDeadline"
-                className="text-sm font-medium"
-              >
-                Date limite d’inscription *
-              </label>
-              <input
-                id="registrationDeadline"
-                name="registrationDeadline"
-                type="date"
-                required
-                defaultValue={toDateInputValue(competition?.registrationDeadline)}
-                className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
-              />
-              <p className="text-xs leading-5 text-muted-foreground">
-                Sélectionnez la date limite. Si les inscriptions sont déjà
-                closes, gardez la vraie date de clôture.
-              </p>
-            </div>
-
-            <PlaceAutocompleteInput
-              id="location"
-              name="location"
-              label="Lieu *"
-              required
-              defaultValue={competition?.location ?? ""}
-              placeholder="Complexe René Tys, salles des clubs recevants..."
-              hint="Exemple : Complexe René Tys, salles des clubs recevants, lieu à confirmer."
-            />
+            <p className="text-sm text-muted-foreground md:col-span-2">
+              Le lieu et le club organisateur se renseignent sur chaque échéance liée à la compétition.
+            </p>
 
             <div className="grid gap-2">
               <label htmlFor="manager" className="text-sm font-medium">

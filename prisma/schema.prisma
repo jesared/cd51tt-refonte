@@ -26,6 +26,7 @@ enum CalendarEventType {
   CONVOCATION
   INSCRIPTION
   RESULTAT
+  REUNION
 }
 
 enum AdminUserRole {
@@ -159,6 +160,7 @@ model CalendarEvent {
   type          CalendarEventType
   date          DateTime
   location      String
+  organizerClub String?
   published     Boolean           @default(false)
   sortOrder     Int               @default(0)
   createdAt     DateTime          @default(now())

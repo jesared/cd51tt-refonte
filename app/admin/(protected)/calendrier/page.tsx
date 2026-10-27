@@ -63,7 +63,7 @@ function getCalendarEventIncompleteReasons(
   return [
     !event.title ? "Libellé manquant" : null,
     !event.location ? "Lieu manquant" : null,
-    !event.competitionId ? "Compétition non liée" : null,
+    !event.competitionId && event.type !== "REUNION" ? "Compétition non liée" : null,
     event.competitionId && !competitionTitles.has(event.competitionId)
       ? "Compétition liée introuvable"
       : null,
@@ -91,6 +91,7 @@ export default async function AdminCalendrierPage({
     title: event.title,
     type: getCalendarEventTypeLabel(event.type),
     location: event.location,
+    organizerClub: event.organizerClub,
     status: event.published ? ("published" as const) : ("draft" as const),
   }));
   const query = normalizeSearchValue(searchParams?.q ?? "");
@@ -125,7 +126,7 @@ export default async function AdminCalendrierPage({
       const matchesSearch =
         !query ||
         normalizeSearchValue(
-          `${competitionTitle} ${event.title} ${typeLabel} ${event.location}`,
+          `${competitionTitle} ${event.title} ${typeLabel} ${event.location} ${event.organizerClub ?? ""}`,
         ).includes(query);
       const matchesCompetition =
         !competitionFilter ||
@@ -347,6 +348,7 @@ export default async function AdminCalendrierPage({
                           <MapPin className="size-4 text-primary" />
                           {event.location}
                         </span>
+                        {event.organizerClub ? <span>Club organisateur : {event.organizerClub}</span> : null}
                       </div>
                     </div>
 

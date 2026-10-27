@@ -7,6 +7,7 @@ import { ConfirmableAdminForm } from "@/components/admin/confirmable-admin-form"
 import { PlaceAutocompleteInput } from "@/components/admin/place-autocomplete-input";
 import { SaveResultActions } from "@/components/admin/save-result-actions";
 import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
+import { CalendarEventTypeFields } from "@/components/admin/calendar-event-type-fields";
 
 type CalendarCompetitionOption = {
   id: string;
@@ -31,13 +32,6 @@ function toDateInputValue(date: Date | null | undefined) {
   return new Date(date).toISOString().slice(0, 10);
 }
 
-const eventTypes = [
-  { value: CalendarEventType.JOURNEE, label: "Journée" },
-  { value: CalendarEventType.CONVOCATION, label: "Convocation" },
-  { value: CalendarEventType.INSCRIPTION, label: "Inscription" },
-  { value: CalendarEventType.RESULTAT, label: "Résultat" },
-];
-
 export function CalendarEventForm({
   competitionOptions,
   defaultCompetitionId,
@@ -48,7 +42,6 @@ export function CalendarEventForm({
   canPublish = true,
 }: CalendarEventFormProps) {
   const isEdit = mode === "edit";
-  const hasCompetitions = competitionOptions.length > 0;
 
   return (
     <div className="space-y-6">
@@ -62,8 +55,8 @@ export function CalendarEventForm({
               {isEdit ? "Modifier l'échéance" : "Nouvelle échéance"}
             </h2>
             <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-              Rattachez une échéance à une compétition pour alimenter la page
-              publique des échéances et la page compétition.
+              Ajoutez une date au calendrier. Vous pouvez la rattacher à une
+              compétition ou créer une réunion indépendante.
             </p>
           </div>
 
@@ -104,39 +97,13 @@ export function CalendarEventForm({
         <section className="rounded-[1.5rem] border border-border bg-background p-6">
           <h3 className="text-lg font-semibold">Informations</h3>
           <div className="mt-5 grid gap-4">
-            <div className="grid gap-2">
-              <label htmlFor="competitionId" className="text-sm font-medium">
-                Compétition
-              </label>
-              <select
-                id="competitionId"
-                name="competitionId"
-                defaultValue={event?.competitionId ?? defaultCompetitionId ?? ""}
-                required
-                className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
-              >
-                <option value="" disabled>
-                  Choisir une compétition
-                </option>
-                {competitionOptions.map((competition) => (
-                  <option key={competition.id} value={competition.id}>
-                    {competition.title}
-                  </option>
-                ))}
-              </select>
-              <p className="text-xs leading-5 text-muted-foreground">
-                L’échéance sera affichée sur la page publique des échéances et
-                sur la page détail de cette compétition.
-              </p>
-              {!hasCompetitions ? (
-                <p className="text-sm text-muted-foreground">
-                  Créez d&apos;abord une compétition pour pouvoir ajouter une
-                  échéance.
-                </p>
-              ) : null}
-            </div>
+            <CalendarEventTypeFields
+              competitionOptions={competitionOptions}
+              defaultCompetitionId={event?.competitionId ?? defaultCompetitionId}
+              initialType={event?.type ?? CalendarEventType.JOURNEE}
+            />
 
-            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_180px_220px]">
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_180px]">
               <div className="grid gap-2">
                 <label htmlFor="title" className="text-sm font-medium">
                   Libellé
@@ -150,8 +117,7 @@ export function CalendarEventForm({
                   className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
                 />
                 <p className="text-xs leading-5 text-muted-foreground">
-                  Exemple : Journée 1, Tour 2, limite d’inscription, convocation
-                  phase 1.
+                  Exemple : Journée 1, Tour 2, convocation ou réunion du comité.
                 </p>
               </div>
 
@@ -172,30 +138,10 @@ export function CalendarEventForm({
                 </p>
               </div>
 
-              <div className="grid gap-2">
-                <label htmlFor="type" className="text-sm font-medium">
-                  Type
-                </label>
-                <select
-                  id="type"
-                  name="type"
-                  defaultValue={event?.type ?? CalendarEventType.JOURNEE}
-                  className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
-                >
-                  {eventTypes.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-xs leading-5 text-muted-foreground">
-                  Choisissez la nature de l’échéance pour aider les visiteurs à
-                  comprendre l’action attendue.
-                </p>
-              </div>
             </div>
 
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_180px] lg:items-start">
+              <div className="grid gap-4">
               <PlaceAutocompleteInput
                 id="location"
                 name="location"
@@ -206,6 +152,11 @@ export function CalendarEventForm({
                 hint="Exemple : Complexe René Tys, club recevant, extranet, lieu à confirmer."
                 className="min-w-0"
               />
+              <div className="grid gap-2">
+                <label htmlFor="organizerClub" className="text-sm font-medium">Club organisateur</label>
+                <input id="organizerClub" name="organizerClub" defaultValue={event?.organizerClub ?? ""} placeholder="Nom du club organisateur" className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20" />
+              </div>
+              </div>
 
               <div className="grid min-w-0 gap-2">
                 <label htmlFor="sortOrder" className="text-sm font-medium">
@@ -246,7 +197,6 @@ export function CalendarEventForm({
         <div className="flex justify-end">
           <button
             type="submit"
-            disabled={!hasCompetitions}
             className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:opacity-90"
           >
             <Save className="size-4" />

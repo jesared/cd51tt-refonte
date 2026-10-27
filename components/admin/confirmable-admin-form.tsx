@@ -31,8 +31,6 @@ function getString(formData: FormData, key: string) {
 function getMissingCompetitionFields(formData: FormData) {
   const missingFields = [
     ["title", "titre"],
-    ["registrationDeadline", "date limite d’inscription"],
-    ["location", "lieu"],
     ["manager", "responsable"],
   ]
     .filter(([key]) => !getString(formData, key))

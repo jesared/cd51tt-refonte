@@ -6,6 +6,7 @@ export function getCalendarEventTypeLabel(type: CalendarEventType) {
     CONVOCATION: "Convocation",
     INSCRIPTION: "Inscription",
     RESULTAT: "Résultat",
+    REUNION: "Réunion",
   };
 
   return labels[type];

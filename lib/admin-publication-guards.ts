@@ -20,8 +20,6 @@ type PublishableCompetition = Pick<
   | "imageUrl"
   | "period"
   | "format"
-  | "registrationDeadline"
-  | "location"
   | "manager"
   | "actions"
 >;
@@ -33,7 +31,7 @@ type PublishableDocument = Pick<
 
 type PublishableCalendarEvent = Pick<
   CalendarEvent,
-  "title" | "competitionId" | "date" | "location"
+  "title" | "competitionId" | "date" | "location" | "type"
 >;
 
 function hasText(value: string | null | undefined, minLength = 1) {
@@ -86,15 +84,11 @@ export function assertCompetitionCanBePublished(
     competition.imageUrl && !isValidLink(competition.imageUrl)
       ? "corriger le lien de l’image"
       : null,
-    !hasText(competition.registrationDeadline)
-      ? "indiquer la date limite d’inscription"
-      : null,
     !hasText(competition.summary)
       ? "renseigner une information courte ou laisser le texte par défaut"
       : null,
     !hasText(competition.period) ? "indiquer la période" : null,
     !hasText(competition.format) ? "indiquer le format" : null,
-    !hasText(competition.location) ? "indiquer le lieu" : null,
     !hasText(competition.manager) ? "indiquer le responsable" : null,
     invalidActions.length > 0 ? "corriger les liens d’action invalides" : null,
   ].filter(Boolean) as string[];
@@ -123,7 +117,9 @@ export function assertCalendarEventCanBePublished(
 ) {
   const issues = [
     !event.date ? "indiquer une date" : null,
-    !hasText(event.competitionId) ? "lier une compétition" : null,
+    event.type !== "REUNION" && !hasText(event.competitionId)
+      ? "lier une compétition (sauf pour une réunion)"
+      : null,
     event.competitionId && !competitionExists
       ? "choisir une compétition existante"
       : null,

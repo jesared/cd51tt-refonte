@@ -75,8 +75,6 @@ function getCompetitionIncompleteReasons(
   return [
     !competition.imageUrl ? "Image manquante" : null,
     !competition.summary ? "Résumé manquant" : null,
-    !competition.registrationDeadline ? "Date limite d’inscription manquante" : null,
-    !competition.location ? "Lieu manquant" : null,
   ].filter((reason): reason is string => Boolean(reason));
 }
 
@@ -109,7 +107,7 @@ export default async function AdminCompetitionsPage({
       const matchesSearch =
         !query ||
         normalizeSearchValue(
-          `${competition.title} ${competition.summary} ${competition.manager} ${competition.location}`,
+          `${competition.title} ${competition.summary} ${competition.manager}`,
         ).includes(query);
       const matchesPublication =
         !publicationFilter ||

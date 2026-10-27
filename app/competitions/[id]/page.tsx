@@ -196,6 +196,7 @@ export default async function CompetitionDetailPage({
                           {event.location}
                         </a>
                       </p>
+                      {event.organizerClub ? <p className="text-sm text-muted-foreground">Club organisateur : {event.organizerClub}</p> : null}
                     </div>
                     <p className="text-sm font-medium">
                       {formatEventDate(event.date)}
@@ -251,28 +252,6 @@ export default async function CompetitionDetailPage({
             Organisation
           </h2>
           <dl className="mt-5 space-y-4 text-sm">
-            <div>
-              <dt className="text-xs font-medium uppercase text-muted-foreground">
-                Limite d&apos;inscription
-              </dt>
-              <dd className="mt-1">{competition.registrationDeadline}</dd>
-            </div>
-            <div>
-              <dt className="flex items-center gap-1.5 text-xs font-medium uppercase text-muted-foreground">
-                <MapPin className="size-3.5" />
-                Lieu
-              </dt>
-              <dd className="mt-1">
-                <a
-                  href={getGoogleMapsSearchUrl(competition.location)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="font-medium text-primary transition-colors hover:text-foreground hover:underline"
-                >
-                  {competition.location}
-                </a>
-              </dd>
-            </div>
             <div>
               <dt className="flex items-center gap-1.5 text-xs font-medium uppercase text-muted-foreground">
                 <UserRound className="size-3.5" />

@@ -16,9 +16,10 @@ import { prisma } from "@/lib/prisma";
 
 const calendarEventFormSchema = z.object({
   id: z.string().optional(),
-  competitionId: z.string().trim().min(1, "Choisissez une compétition."),
+  competitionId: z.string().trim().optional(),
   title: z.string().trim().min(3, "Le libellé doit contenir au moins 3 caractères."),
   type: z.nativeEnum(CalendarEventType),
+  organizerClub: z.string().trim().optional(),
   date: z.string().trim().min(1, "La date est requise."),
   location: z.string().trim().min(2, "Le lieu est requis."),
   published: z.boolean(),
@@ -157,6 +158,7 @@ export async function saveCalendarEvent(formData: FormData) {
       competitionId: getStringValue(formData, "competitionId"),
       title: getStringValue(formData, "title"),
       type: getStringValue(formData, "type"),
+      organizerClub: getStringValue(formData, "organizerClub"),
       date: getStringValue(formData, "date"),
       location: getStringValue(formData, "location"),
       published:
@@ -166,27 +168,32 @@ export async function saveCalendarEvent(formData: FormData) {
       sortOrder: getStringValue(formData, "sortOrder") || "0",
     });
 
-    const competition = await prisma.competitionResource.findUnique({
-      where: { id: values.competitionId },
-      select: { id: true },
-    });
+    const competition = values.competitionId
+      ? await prisma.competitionResource.findUnique({
+          where: { id: values.competitionId }, select: { id: true },
+        })
+      : null;
 
-    if (!competition) {
+    if (values.competitionId && !competition) {
       throw new Error("Choisissez une compétition existante.");
+    }
+    if (!values.competitionId && values.type !== CalendarEventType.REUNION) {
+      throw new Error("Choisissez une compétition (sauf pour une réunion).");
     }
 
     const payload = {
-      competitionId: values.competitionId,
+      competitionId: values.competitionId || null,
       title: values.title,
       type: values.type,
       date: toEventDate(values.date),
       location: values.location,
+      organizerClub: values.organizerClub || null,
       published: values.published,
       sortOrder: values.sortOrder,
     };
 
     if (payload.published) {
-      assertCalendarEventCanBePublished(payload, true);
+      assertCalendarEventCanBePublished(payload, Boolean(competition));
     }
 
     const savedEvent = values.id
