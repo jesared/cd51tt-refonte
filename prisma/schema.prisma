@@ -103,6 +103,7 @@ model NewsArticle {
   category    String
   targetUrl   String?
   imageUrl    String?
+  attachments Json?
   readTime    String
   status      NewsArticleStatus @default(DRAFT)
   featured    Boolean           @default(false)

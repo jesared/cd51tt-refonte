@@ -263,6 +263,7 @@ export function ConfirmableAdminForm({
       <form
         ref={formRef}
         action={action}
+        encType="multipart/form-data"
         aria-busy={pending}
         className={className}
         onSubmit={handleSubmit}

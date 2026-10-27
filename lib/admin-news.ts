@@ -23,6 +23,8 @@ import { assertNewsArticleCanBePublished } from "@/lib/admin-publication-guards"
 import {
   formatFrenchDate,
   slugifyArticleTitle,
+  parseNewsArticleAttachments,
+  type NewsArticleAttachment,
   type ArticleCardItem,
   type ArticleDetailItem,
 } from "@/lib/news";
@@ -181,6 +183,7 @@ function toArticleCard(article: NewsArticle): ArticleCardItem {
     category: article.category,
     targetUrl: article.targetUrl,
     imageUrl: article.imageUrl,
+    attachments: parseNewsArticleAttachments(article.attachments),
     date: formatFrenchDate(article.publishedAt ?? article.createdAt),
     readTime: article.readTime,
     featured: article.featured,
@@ -294,7 +297,12 @@ export async function saveNewsArticle(formData: FormData) {
     const existingArticle = id
       ? await prisma.newsArticle.findUnique({
           where: { id },
-          select: { imageUrl: true, status: true, publishedAt: true },
+          select: {
+            imageUrl: true,
+            status: true,
+            publishedAt: true,
+            attachments: true,
+          },
         })
       : null;
     const status =
@@ -324,6 +332,58 @@ export async function saveNewsArticle(formData: FormData) {
       "image",
     );
     const imageUrl = uploadedImageUrl ?? values.imageUrl;
+    const removedAttachmentUrls = new Set(
+      formData.getAll("removeAttachmentUrl").map((value) => String(value)),
+    );
+    const existingAttachments = parseNewsArticleAttachments(
+      existingArticle?.attachments,
+    ).filter((attachment) => !removedAttachmentUrls.has(attachment.url));
+    const uploadedAttachmentFiles = formData
+      .getAll("attachmentUploads")
+      .filter((value): value is File => value instanceof File && value.size > 0);
+    const allowedAttachmentExtensions = new Set([
+      "pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "odt", "ods",
+      "jpg", "jpeg", "png", "zip",
+    ]);
+
+    if (
+      uploadedAttachmentFiles.some((file) => {
+        const extension = file.name.split(".").pop()?.toLowerCase();
+
+        return !extension || !allowedAttachmentExtensions.has(extension);
+      })
+    ) {
+      throw new Error("Format non accepté. Ajoutez un PDF, document bureautique, image ou ZIP.");
+    }
+
+    if (uploadedAttachmentFiles.some((file) => file.size > 15 * 1024 * 1024)) {
+      throw new Error("Chaque pièce jointe doit faire 15 Mo maximum.");
+    }
+
+    if (existingAttachments.length + uploadedAttachmentFiles.length > 10) {
+      throw new Error("Vous pouvez joindre jusqu’à 10 fichiers à une information.");
+    }
+
+    if (
+      uploadedAttachmentFiles.reduce((total, file) => total + file.size, 0) >
+      45 * 1024 * 1024
+    ) {
+      throw new Error("La taille totale des pièces jointes ne peut pas dépasser 45 Mo.");
+    }
+
+    const uploadedAttachmentUrls = await Promise.all(
+      uploadedAttachmentFiles.map((file) =>
+        uploadFileToCloudinary(file, "document"),
+      ),
+    );
+    const attachments: NewsArticleAttachment[] = [
+      ...existingAttachments,
+      ...uploadedAttachmentFiles.flatMap((file, index) => {
+        const url = uploadedAttachmentUrls[index];
+
+        return url ? [{ name: file.name, url }] : [];
+      }),
+    ];
 
     const normalizedSlug = values.slug
       ? slugifyArticleTitle(values.slug)
@@ -341,6 +401,7 @@ export async function saveNewsArticle(formData: FormData) {
       category: toCanonicalNewsCategory(values.category),
       targetUrl: values.targetUrl,
       imageUrl: imageUrl || existingArticle?.imageUrl || null,
+      attachments: attachments as Prisma.InputJsonValue,
       readTime: estimateReadTime(values.content || values.excerpt),
       status: values.status,
       featured: false,

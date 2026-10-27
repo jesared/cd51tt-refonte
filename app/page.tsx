@@ -5,6 +5,7 @@ import {
   Download,
   FileText,
   MapPin,
+  Paperclip,
   Newspaper,
   Trophy,
   Users,
@@ -247,11 +248,8 @@ export default async function HomePage() {
                 };
 
                 return (
-                  <li key={item.slug}>
-                    <Link
-                      href={destination.href}
-                      className="group grid gap-2 p-4 transition-colors hover:bg-accent sm:grid-cols-[9rem_1fr_auto] sm:items-center sm:gap-5 sm:px-5"
-                    >
+                  <li key={item.slug} className="p-4 transition-colors hover:bg-accent sm:px-5">
+                    <Link href={destination.href} className="group grid gap-2 sm:grid-cols-[9rem_1fr_auto] sm:items-center sm:gap-5">
                       <time className="text-sm text-muted-foreground">
                         {item.date}
                       </time>
@@ -265,9 +263,26 @@ export default async function HomePage() {
                       </span>
                       <span className="inline-flex items-center gap-1 text-sm font-medium text-primary">
                         {destination.label}
-                        <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                        <ArrowRight className="size-4" />
                       </span>
                     </Link>
+                    {item.attachments?.length ? (
+                      <ul className="mt-3 flex flex-wrap gap-2 sm:ml-[calc(9rem+1.25rem)]">
+                        {item.attachments.map((attachment) => (
+                          <li key={attachment.url}>
+                            <a
+                              href={attachment.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-primary hover:bg-accent"
+                            >
+                              <Paperclip className="size-3.5 shrink-0" />
+                              <span className="break-all">{attachment.name}</span>
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
                   </li>
                 );
               })}

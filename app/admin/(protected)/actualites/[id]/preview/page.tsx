@@ -1,14 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CalendarDays, Clock, Edit3, ExternalLink } from "lucide-react";
+import { ArrowLeft, CalendarDays, Clock, Download, Edit3, ExternalLink, Paperclip } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { requireEditorSession } from "@/lib/admin-auth";
 import { getAdminNewsArticleById } from "@/lib/admin-news";
 import { createPageMetadata } from "@/lib/metadata";
-import { formatFrenchDate } from "@/lib/news";
+import {
+  formatFrenchDate,
+  parseNewsArticleAttachments,
+} from "@/lib/news";
 import { cn } from "@/lib/utils";
 
 export const metadata = createPageMetadata({
@@ -39,6 +42,7 @@ export default async function AdminArticlePreviewPage({
     .split(/\n{2,}/)
     .map((paragraph) => paragraph.trim())
     .filter(Boolean);
+  const attachments = parseNewsArticleAttachments(article.attachments);
   const publicHref =
     article.status === "PUBLISHED" ? "/" : null;
 
@@ -129,6 +133,30 @@ export default async function AdminArticlePreviewPage({
             <p key={paragraph}>{paragraph}</p>
           ))}
         </div>
+
+        {attachments.length > 0 ? (
+          <section className="rounded-xl border border-border bg-card p-5">
+            <h2 className="flex items-center gap-2 text-lg font-semibold">
+              <Paperclip className="size-5 text-primary" />
+              Pièces jointes
+            </h2>
+            <ul className="mt-3 grid gap-2">
+              {attachments.map((attachment) => (
+                <li key={attachment.url}>
+                  <a
+                    href={attachment.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+                  >
+                    <Download className="size-4" />
+                    {attachment.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
       </article>
     </div>
   );

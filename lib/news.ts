@@ -5,10 +5,34 @@ export type ArticleCardItem = {
   category: string;
   targetUrl?: string | null;
   imageUrl?: string | null;
+  attachments?: NewsArticleAttachment[];
   date: string;
   readTime: string;
   featured?: boolean;
 };
+
+export type NewsArticleAttachment = {
+  name: string;
+  url: string;
+};
+
+export function parseNewsArticleAttachments(value: unknown): NewsArticleAttachment[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter(
+    (attachment): attachment is NewsArticleAttachment =>
+      typeof attachment === "object" &&
+      attachment !== null &&
+      "name" in attachment &&
+      typeof attachment.name === "string" &&
+      "url" in attachment &&
+      typeof attachment.url === "string" &&
+      Boolean(attachment.name.trim()) &&
+      Boolean(attachment.url.trim()),
+  );
+}
 
 export type ArticleDetailItem = ArticleCardItem & {
   content: string;

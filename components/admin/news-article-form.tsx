@@ -1,11 +1,12 @@
 import Link from "next/link";
 import type { NewsArticle } from "@prisma/client";
-import { ArrowLeft, Eye, ExternalLink, Save } from "lucide-react";
+import { ArrowLeft, Download, Eye, ExternalLink, Paperclip, Save } from "lucide-react";
 
 import { saveNewsArticle } from "@/lib/admin-news";
 import { ConfirmableAdminForm } from "@/components/admin/confirmable-admin-form";
 import { SaveResultActions } from "@/components/admin/save-result-actions";
 import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
+import { parseNewsArticleAttachments } from "@/lib/news";
 import {
   NEWS_CATEGORY_DESTINATIONS,
   NEWS_CATEGORY_OPTIONS,
@@ -58,6 +59,7 @@ export function NewsArticleForm({
   const defaultTargetUrl =
     article?.targetUrl ??
     NEWS_CATEGORY_DESTINATIONS[selectedCategory ?? "Compétitions"].href;
+  const attachments = parseNewsArticleAttachments(article?.attachments);
 
   return (
     <div className="space-y-6">
@@ -213,6 +215,55 @@ export function NewsArticleForm({
               />
             </div>
 
+          </div>
+        </section>
+
+        <section className="rounded-[1.5rem] border border-border bg-background p-6">
+          <div className="flex items-center gap-2">
+            <Paperclip className="size-5 text-primary" />
+            <h3 className="text-lg font-semibold">Pièces jointes</h3>
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Ajoutez des fichiers à télécharger depuis le fil info. 10 fichiers maximum, 15 Mo par fichier.
+          </p>
+
+          {attachments.length > 0 ? (
+            <ul className="mt-4 divide-y divide-border rounded-xl border border-border">
+              {attachments.map((attachment) => (
+                <li key={attachment.url} className="flex flex-wrap items-center justify-between gap-3 px-3 py-3">
+                  <a
+                    href={attachment.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex min-w-0 items-center gap-2 text-sm font-medium text-primary hover:underline"
+                  >
+                    <Download className="size-4 shrink-0" />
+                    <span className="break-all">{attachment.name}</span>
+                  </a>
+                  <label className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                    <input type="checkbox" name="removeAttachmentUrl" value={attachment.url} className="size-4 rounded border border-input" />
+                    Retirer
+                  </label>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+
+          <div className="mt-4 grid gap-2">
+            <label htmlFor="attachmentUploads" className="text-sm font-medium">
+              Ajouter des fichiers
+            </label>
+            <input
+              id="attachmentUploads"
+              name="attachmentUploads"
+              type="file"
+              multiple
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.odt,.ods,.jpg,.jpeg,.png,.zip"
+              className="block w-full rounded-xl border border-input bg-background px-3 py-2 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-sm file:font-medium"
+            />
+            <p className="text-xs leading-5 text-muted-foreground">
+              PDF, documents bureautiques, images ou ZIP. Les pièces jointes existantes restent conservées si vous n’en cochez aucune pour les retirer.
+            </p>
           </div>
         </section>
 
