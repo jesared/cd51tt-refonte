@@ -6,7 +6,6 @@ import {
   ArrowRight,
   CalendarDays,
   FileText,
-  MapPin,
   Trophy,
   UserRound,
 } from "lucide-react";
