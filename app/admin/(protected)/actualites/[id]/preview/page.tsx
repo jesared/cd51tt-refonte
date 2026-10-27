@@ -40,7 +40,7 @@ export default async function AdminArticlePreviewPage({
     .map((paragraph) => paragraph.trim())
     .filter(Boolean);
   const publicHref =
-    article.status === "PUBLISHED" ? `/actualites/${article.slug}` : null;
+    article.status === "PUBLISHED" ? "/" : null;
 
   return (
     <div className="space-y-6">

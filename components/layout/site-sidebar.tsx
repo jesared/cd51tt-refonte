@@ -12,7 +12,6 @@ import {
   Mail,
   Monitor,
   MoonStar,
-  Newspaper,
   ShieldCheck,
   SunMedium,
   Trophy,
@@ -34,7 +33,6 @@ type SiteSidebarProps = {
 
 const navigationIcons: Record<string, LucideIcon> = {
   "/": Home,
-  "/actualites": Newspaper,
   "/competitions": Trophy,
   "/clubs": Building2,
   "/documents": FileText,

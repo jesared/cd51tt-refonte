@@ -69,7 +69,7 @@ const adminNavigation = [
   },
   {
     href: "/admin/actualites",
-    label: "Actualités",
+    label: "Fil info",
     icon: Newspaper,
     section: "Contenu",
     roles: ["ADMIN", "EDITOR", "USER"],

@@ -100,9 +100,11 @@ function CompetitionBadges({ competition }: { competition: Competition }) {
 function CompetitionActions({
   competition,
   compact = false,
+  inline = false,
 }: {
   competition: Competition;
   compact?: boolean;
+  inline?: boolean;
 }) {
   const primaryAction =
     competition.actions.find((action) => action.primary) ??
@@ -120,14 +122,19 @@ function CompetitionActions({
   return (
     <div
       className={cn(
-        "flex flex-col gap-2 border-t border-border pt-3 sm:flex-row sm:items-center",
-        compact ? "sm:justify-end" : "sm:justify-start lg:justify-end",
+        "flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center",
+        inline
+          ? "sm:justify-end"
+          : cn(
+              "border-t border-border pt-3",
+              compact ? "sm:justify-end" : "sm:justify-start lg:justify-end",
+            ),
       )}
     >
       <Link
         href={primaryAction.href}
         className={cn(
-          buttonVariants({ variant: "default", size: "lg" }),
+          buttonVariants({ variant: "default", size: inline ? "sm" : "lg" }),
           "w-full sm:w-auto",
         )}
       >
@@ -140,7 +147,7 @@ function CompetitionActions({
         <DropdownMenu>
           <DropdownMenuTrigger
             className={cn(
-              buttonVariants({ variant: "outline", size: "lg" }),
+              buttonVariants({ variant: "outline", size: inline ? "sm" : "lg" }),
               "w-full sm:w-auto",
             )}
           >
@@ -340,71 +347,78 @@ function CompetitionCard({ competition }: { competition: Competition }) {
 
 function CompetitionListRow({ competition }: { competition: Competition }) {
   return (
-    <article className="interactive-card rounded-lg border border-border bg-card p-4 hover:bg-accent sm:p-5">
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+    <article className="interactive-card rounded-lg border border-border bg-card p-4 transition-colors hover:border-primary/25 sm:p-5 lg:p-6">
+      <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-center">
+        <div className="flex min-w-0 items-start gap-4">
         {competition.imageUrl ? (
-          <div className="relative aspect-[16/9] overflow-hidden rounded-md bg-muted lg:hidden">
+          <div className="relative hidden h-24 w-32 shrink-0 overflow-hidden rounded-md bg-muted sm:block">
             <Image
               src={competition.imageUrl}
               alt=""
               fill
-              sizes="100vw"
+              sizes="128px"
               className="object-cover"
             />
           </div>
         ) : null}
-        <div className="min-w-0">
-          <CompetitionBadges competition={competition} />
-          <h2 className="mt-3 text-xl font-semibold tracking-tight">
-            {competition.title}
-          </h2>
-          <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">
-            {competition.summary}
-          </p>
+          <div className="min-w-0 flex-1">
+            <CompetitionBadges competition={competition} />
+            <h2 className="mt-3 break-words text-xl font-semibold tracking-tight sm:text-2xl">
+              {competition.title}
+            </h2>
+            <p className="mt-2 break-words text-sm leading-6 text-muted-foreground">
+              {competition.summary}
+            </p>
+          </div>
         </div>
 
-        <div className="grid gap-3 text-sm sm:grid-cols-3 lg:min-w-[520px]">
-          <div>
-            <p className="text-xs font-medium uppercase text-muted-foreground">
+        <dl className="grid min-w-0 grid-cols-2 gap-x-4 gap-y-4 text-sm sm:grid-cols-3">
+          <div className="min-w-0">
+            <dt className="text-xs font-medium uppercase text-muted-foreground">
               Prochaine date
-            </p>
-            <p className="mt-1 font-medium">{competition.nextDate}</p>
+            </dt>
+            <dd className="mt-1 break-words font-medium">{competition.nextDate}</dd>
           </div>
-          <div>
-            <p className="text-xs font-medium uppercase text-muted-foreground">
+          <div className="min-w-0">
+            <dt className="text-xs font-medium uppercase text-muted-foreground">
               Limite
-            </p>
-            <p className="mt-1">{competition.registrationDeadline}</p>
+            </dt>
+            <dd className="mt-1 break-words">{competition.registrationDeadline}</dd>
           </div>
-          <div>
-            <p className="text-xs font-medium uppercase text-muted-foreground">
+          <div className="min-w-0">
+            <dt className="text-xs font-medium uppercase text-muted-foreground">
               Responsable
-            </p>
-            <p className="mt-1">{competition.manager}</p>
+            </dt>
+            <dd className="mt-1 break-words">{competition.manager}</dd>
           </div>
-        </div>
+        </dl>
       </div>
 
-      <div className="mt-4 flex flex-col gap-3 border-t border-border pt-4 lg:flex-row lg:items-center lg:justify-between">
-        <p className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground">
-          <MapPin className="size-4 shrink-0 text-primary" />
+      <div className="mt-5 flex min-w-0 flex-col gap-4 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
+        <p className="flex min-w-0 items-start gap-2 text-sm text-muted-foreground">
+          <MapPin className="mt-0.5 size-4 shrink-0 text-primary" />
           <a
             href={getGoogleMapsSearchUrl(competition.location)}
             target="_blank"
             rel="noreferrer"
-            className="truncate font-medium text-primary transition-colors hover:text-foreground hover:underline"
+            className="min-w-0 break-words font-medium text-primary transition-colors hover:text-foreground hover:underline"
           >
             {competition.location}
           </a>
         </p>
-        <CompetitionActions competition={competition} />
-        <Link
-          href={`/competitions/${competition.id}`}
-          className={buttonVariants({ variant: "outline", size: "lg" })}
-        >
-          Voir le détail
-          <ArrowRight className="size-4" />
-        </Link>
+        <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+          <CompetitionActions competition={competition} compact inline />
+          <Link
+            href={`/competitions/${competition.id}`}
+            className={cn(
+              buttonVariants({ variant: "outline", size: "sm" }),
+              "w-full sm:w-auto",
+            )}
+          >
+            Voir le détail
+            <ArrowRight className="size-4" />
+          </Link>
+        </div>
       </div>
       <div className="mt-4">
         <CompetitionDocumentLinks competition={competition} compact />

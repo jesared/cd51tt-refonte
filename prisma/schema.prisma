@@ -100,6 +100,7 @@ model NewsArticle {
   excerpt     String
   content     String
   category    String
+  targetUrl   String?
   imageUrl    String?
   readTime    String
   status      NewsArticleStatus @default(DRAFT)

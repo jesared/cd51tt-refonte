@@ -33,8 +33,13 @@ const articleFormSchema = z.object({
   title: z.string().trim().min(6, "Le titre doit contenir au moins 6 caracteres."),
   slug: z.string().trim().optional(),
   excerpt: z.string().trim().min(20, "L'extrait doit contenir au moins 20 caracteres."),
-  content: z.string().trim().min(40, "Le contenu doit contenir au moins 40 caracteres."),
+  content: z.string().trim().optional(),
   category: z.string().trim().min(2, "La categorie est requise."),
+  targetUrl: z
+    .string()
+    .trim()
+    .min(1, "Choisissez une page de destination.")
+    .refine((value) => value.startsWith("/"), "Choisissez une page interne."),
   imageUrl: z
     .string()
     .trim()
@@ -174,6 +179,7 @@ function toArticleCard(article: NewsArticle): ArticleCardItem {
     title: article.title,
     excerpt: article.excerpt,
     category: article.category,
+    targetUrl: article.targetUrl,
     imageUrl: article.imageUrl,
     date: formatFrenchDate(article.publishedAt ?? article.createdAt),
     readTime: article.readTime,
@@ -239,7 +245,6 @@ export async function getPublishedNewsArticleCards(
         status: NewsArticleStatus.PUBLISHED,
       },
       orderBy: [
-        { featured: "desc" },
         { publishedAt: "desc" },
         { createdAt: "desc" },
       ],
@@ -306,8 +311,9 @@ export async function saveNewsArticle(formData: FormData) {
       title: getStringValue(formData, "title"),
       slug: getStringValue(formData, "slug") || undefined,
       excerpt: getStringValue(formData, "excerpt"),
-      content: getStringValue(formData, "content"),
+      content: getStringValue(formData, "content") || undefined,
       category: getStringValue(formData, "category"),
+      targetUrl: getStringValue(formData, "targetUrl"),
       imageUrl: getStringValue(formData, "imageUrl") || undefined,
       status,
       featured: getBooleanValue(formData, "featured"),
@@ -331,12 +337,13 @@ export async function saveNewsArticle(formData: FormData) {
       title: values.title,
       slug: normalizedSlug,
       excerpt: values.excerpt,
-      content: values.content,
+      content: values.content || values.excerpt,
       category: toCanonicalNewsCategory(values.category),
-      imageUrl: imageUrl || null,
-      readTime: estimateReadTime(values.content),
+      targetUrl: values.targetUrl,
+      imageUrl: imageUrl || existingArticle?.imageUrl || null,
+      readTime: estimateReadTime(values.content || values.excerpt),
       status: values.status,
-      featured: values.featured,
+      featured: false,
       publishedAt: toPublishedDate(values.publishedAt ?? "", values.status),
     };
 

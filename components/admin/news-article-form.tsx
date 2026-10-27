@@ -7,6 +7,7 @@ import { ConfirmableAdminForm } from "@/components/admin/confirmable-admin-form"
 import { SaveResultActions } from "@/components/admin/save-result-actions";
 import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
 import {
+  NEWS_CATEGORY_DESTINATIONS,
   NEWS_CATEGORY_OPTIONS,
   normalizeNewsCategory,
 } from "@/lib/content-categories";
@@ -17,6 +18,7 @@ type NewsArticleFormProps = {
   errorMessage?: string | null;
   saved?: boolean;
   canPublish?: boolean;
+  targetOptions?: Array<{ value: string; label: string }>;
 };
 
 function toDatetimeLocalValue(date: Date | null | undefined) {
@@ -37,14 +39,25 @@ export function NewsArticleForm({
   errorMessage,
   saved = false,
   canPublish = true,
+  targetOptions = [],
 }: NewsArticleFormProps) {
   const isEdit = mode === "edit";
   const previewHref = article ? `/admin/actualites/${article.id}/preview` : null;
   const publicHref =
-    article?.status === "PUBLISHED" ? `/actualites/${article.slug}` : null;
+    article?.status === "PUBLISHED" ? "/" : null;
   const selectedCategory = article?.category
     ? normalizeNewsCategory(article.category)
     : null;
+  const pageOptions = [
+    ...NEWS_CATEGORY_OPTIONS.map((category) => ({
+      value: NEWS_CATEGORY_DESTINATIONS[category].href,
+      label: `${category} → ${NEWS_CATEGORY_DESTINATIONS[category].label}`,
+    })),
+    ...targetOptions,
+  ];
+  const defaultTargetUrl =
+    article?.targetUrl ??
+    NEWS_CATEGORY_DESTINATIONS[selectedCategory ?? "Compétitions"].href;
 
   return (
     <div className="space-y-6">
@@ -52,14 +65,14 @@ export function NewsArticleForm({
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-2">
             <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-              Actualités
+              Fil info
             </p>
             <h2 className="text-2xl font-semibold tracking-tight">
-              {isEdit ? "Modifier l'article" : "Créer un nouvel article"}
+              {isEdit ? "Modifier une information" : "Ajouter une information"}
             </h2>
             <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-              Renseignez les champs utiles pour le site public. Le slug et le
-              temps de lecture sont générés automatiquement.
+              Une information publiée apparaît sur l’accueil. La rubrique
+              choisie détermine la page vers laquelle elle renvoie.
             </p>
           </div>
 
@@ -97,7 +110,7 @@ export function NewsArticleForm({
       {saved ? (
         <SaveResultActions
           message="Actualité enregistrée."
-          publicHref={publicHref ?? "/actualites"}
+          publicHref={publicHref}
           createHref="/admin/actualites/nouveau"
           listHref="/admin/actualites"
         />
@@ -137,7 +150,7 @@ export function NewsArticleForm({
 
             <div className="grid gap-2">
               <label htmlFor="category" className="text-sm font-medium">
-                Catégorie
+                Rubrique
               </label>
               <select
                 id="category"
@@ -147,25 +160,48 @@ export function NewsArticleForm({
                 className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
               >
                 <option value="" disabled>
-                  Choisir une catégorie
+                  Choisir une rubrique
                 </option>
                 {NEWS_CATEGORY_OPTIONS.map((category) => (
                   <option key={category} value={category}>
-                    {category}
+                    {category} → {NEWS_CATEGORY_DESTINATIONS[category].label}
                   </option>
                 ))}
               </select>
               {article?.category && !selectedCategory ? (
                 <p className="text-xs text-amber-700 dark:text-amber-300">
-                  Catégorie actuelle non harmonisée : {article.category}.
+                  Page actuelle non reconnue : {article.category}.
                   Choisissez une valeur de la liste avant d’enregistrer.
                 </p>
               ) : null}
             </div>
 
             <div className="grid gap-2">
+              <label htmlFor="targetUrl" className="text-sm font-medium">
+                Page de destination
+              </label>
+              <select
+                id="targetUrl"
+                name="targetUrl"
+                required
+                defaultValue={defaultTargetUrl}
+                className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
+              >
+                {pageOptions.map((option) => (
+                  <option key={`${option.value}-${option.label}`} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs leading-5 text-muted-foreground">
+                Les fiches de compétition publiées apparaissent ici comme pages
+                enfants.
+              </p>
+            </div>
+
+            <div className="grid gap-2">
               <label htmlFor="excerpt" className="text-sm font-medium">
-                Résumé
+                Texte de l’information
               </label>
               <textarea
                 id="excerpt"
@@ -177,47 +213,6 @@ export function NewsArticleForm({
               />
             </div>
 
-            <div className="grid gap-2">
-              <label htmlFor="content" className="text-sm font-medium">
-                Contenu
-              </label>
-              <textarea
-                id="content"
-                name="content"
-                rows={12}
-                required
-                defaultValue={article?.content ?? ""}
-                className="rounded-xl border border-input bg-background px-3 py-3 text-sm leading-6 outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
-              />
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="grid gap-2">
-                <label htmlFor="imageUrl" className="text-sm font-medium">
-                  Image existante
-                </label>
-                <input
-                  id="imageUrl"
-                  name="imageUrl"
-                  defaultValue={article?.imageUrl ?? ""}
-                  placeholder="https://res.cloudinary.com/... ou /images/actu.jpg"
-                  className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <label htmlFor="imageUpload" className="text-sm font-medium">
-                  Image Cloudinary
-                </label>
-                <input
-                  id="imageUpload"
-                  name="imageUpload"
-                  type="file"
-                  accept="image/*"
-                  className="h-11 rounded-xl border border-input bg-background px-3 py-2 text-sm outline-none transition file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1 file:text-sm file:text-foreground focus:border-ring focus:ring-2 focus:ring-ring/20"
-                />
-              </div>
-            </div>
           </div>
         </section>
 
@@ -251,19 +246,10 @@ export function NewsArticleForm({
                   defaultChecked={article?.status === "PUBLISHED"}
                   className="size-4 rounded border border-input"
                 />
-                Publier cette actualité
+                Publier dans le fil info
               </label>
             ) : null}
 
-            <label className="flex min-h-12 items-center gap-3 rounded-xl border border-border px-3 text-sm text-muted-foreground">
-              <input
-                type="checkbox"
-                name="featured"
-                defaultChecked={article?.featured ?? false}
-                className="size-4 rounded border border-input"
-              />
-              Mettre en avant
-            </label>
           </div>
         </section>
 
@@ -273,7 +259,7 @@ export function NewsArticleForm({
             className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:opacity-90"
           >
             <Save className="size-4" />
-            {isEdit ? "Enregistrer les modifications" : "Créer l'article"}
+            {isEdit ? "Enregistrer" : "Créer l’information"}
           </button>
         </div>
       </ConfirmableAdminForm>

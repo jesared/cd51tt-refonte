@@ -37,7 +37,6 @@ type SiteHeaderProps = {
 };
 
 const primaryHeaderHrefs = [
-  "/actualites",
   "/competitions",
   "/clubs",
   "/documents",

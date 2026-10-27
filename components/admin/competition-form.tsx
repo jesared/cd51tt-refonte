@@ -24,7 +24,7 @@ import {
   formatCalendarEventDate,
   getCalendarEventTypeLabel,
 } from "@/lib/calendar";
-import type { CompetitionAction, CompetitionTag } from "@/lib/mock-data";
+import type { CompetitionAction } from "@/lib/mock-data";
 
 type CompetitionFormProps = {
   mode: "create" | "edit";
@@ -124,7 +124,6 @@ export function CompetitionForm({
   canPublish = true,
 }: CompetitionFormProps) {
   const isEdit = mode === "edit";
-  const selectedTags = parseJsonArray<CompetitionTag>(competition?.tags, []);
   const actions = parseJsonArray<CompetitionAction>(
     competition?.actions,
     defaultActions,
@@ -153,6 +152,10 @@ export function CompetitionForm({
             <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
               Préparez tous les champs nécessaires pour alimenter la page
               publique, les échéances et les documents liés.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Les champs marqués d’un astérisque sont obligatoires pour
+              enregistrer la fiche.
             </p>
           </div>
 
@@ -219,7 +222,7 @@ export function CompetitionForm({
           <div className="mt-5 grid gap-4">
             <div className="grid gap-2">
               <label htmlFor="title" className="text-sm font-medium">
-                Titre
+                Titre *
               </label>
               <input
                 id="title"
@@ -252,7 +255,7 @@ export function CompetitionForm({
             <div className="grid gap-4 md:grid-cols-3">
               <div className="grid gap-2">
                 <label htmlFor="period" className="text-sm font-medium">
-                  Période / saison
+                  Période / saison *
                 </label>
                 <input
                   id="period"
@@ -288,26 +291,9 @@ export function CompetitionForm({
                 </p>
               </div>
 
-              <div className="grid gap-2">
-                <label htmlFor="statusDetail" className="text-sm font-medium">
-                  Détail du statut
-                </label>
-                <input
-                  id="statusDetail"
-                  name="statusDetail"
-                  placeholder="Phase 2 en cours"
-                  defaultValue={competition?.statusDetail ?? ""}
-                  className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
-                />
-                <p className="text-xs leading-5 text-muted-foreground">
-                  Facultatif. Servez-vous-en pour préciser le statut, par
-                  exemple : Phase 2 en cours, inscriptions ouvertes, finales à
-                  venir.
-                </p>
-              </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-[1fr_2fr_160px]">
+            <div className="grid gap-4 md:grid-cols-[1fr_160px]">
               <div className="grid gap-2">
                 <label htmlFor="format" className="text-sm font-medium">
                   Format
@@ -328,31 +314,6 @@ export function CompetitionForm({
                   Sélectionnez le format principal affiché en badge.
                 </p>
               </div>
-
-              <fieldset className="grid gap-2">
-                <legend className="text-sm font-medium">Tags</legend>
-                <div className="grid gap-2 rounded-xl border border-border p-3 sm:grid-cols-2 lg:grid-cols-4">
-                  {COMPETITION_TAG_OPTIONS.map((tag) => (
-                    <label
-                      key={tag}
-                      className="flex items-center gap-2 text-sm text-muted-foreground"
-                    >
-                      <input
-                        type="checkbox"
-                        name="tags"
-                        value={tag}
-                        defaultChecked={selectedTags.includes(tag)}
-                        className="size-4 rounded border border-input"
-                      />
-                      {tag}
-                    </label>
-                  ))}
-                </div>
-                <p className="text-xs leading-5 text-muted-foreground">
-                  Les tags servent aux filtres de la page compétitions. Cochez
-                  tous les publics concernés.
-                </p>
-              </fieldset>
 
               <div className="grid gap-2">
                 <label htmlFor="sortOrder" className="text-sm font-medium">
@@ -382,7 +343,8 @@ export function CompetitionForm({
               <p className="text-sm font-medium">Prochaine échéance</p>
               <p className="text-sm text-muted-foreground">
                 Elle est calculée automatiquement à partir des échéances liées
-                à cette compétition.
+                à cette compétition. Vous pouvez publier la fiche sans en
+                ajouter.
               </p>
               {competition ? (
                 <Link
@@ -410,7 +372,7 @@ export function CompetitionForm({
                 htmlFor="registrationDeadline"
                 className="text-sm font-medium"
               >
-                Date limite d’inscription
+                Date limite d’inscription *
               </label>
               <input
                 id="registrationDeadline"
@@ -429,7 +391,7 @@ export function CompetitionForm({
             <PlaceAutocompleteInput
               id="location"
               name="location"
-              label="Lieu"
+              label="Lieu *"
               required
               defaultValue={competition?.location ?? ""}
               placeholder="Complexe René Tys, salles des clubs recevants..."
@@ -438,7 +400,7 @@ export function CompetitionForm({
 
             <div className="grid gap-2">
               <label htmlFor="manager" className="text-sm font-medium">
-                Responsable
+                Responsable *
               </label>
               <input
                 id="manager"

@@ -84,7 +84,7 @@ const competitionFormSchema = z.object({
   manager: z.string().trim().min(2, "Le responsable est requis."),
   tags: z
     .array(z.enum(COMPETITION_TAG_OPTIONS))
-    .min(1, "Choisissez au moins un tag."),
+    .default([]),
   actions: z.array(actionFormSchema),
   status: z.nativeEnum(CompetitionResourceStatus),
   sortOrder: z.coerce.number().int().default(0),
@@ -340,7 +340,7 @@ export async function saveCompetition(formData: FormData) {
     const existingCompetition = id
       ? await prisma.competitionResource.findUnique({
           where: { id },
-          select: { imageUrl: true, status: true },
+          select: { imageUrl: true, status: true, statusDetail: true, tags: true },
         })
       : null;
     const status =
@@ -361,7 +361,6 @@ export async function saveCompetition(formData: FormData) {
       imageUrl,
       period: getStringValue(formData, "period"),
       sportStatus: getStringValue(formData, "sportStatus"),
-      statusDetail: getStringValue(formData, "statusDetail"),
       format: getStringValue(formData, "format"),
       nextDate: getStringValue(formData, "nextDate"),
       registrationDeadline: getStringValue(formData, "registrationDeadline"),
@@ -409,26 +408,23 @@ export async function saveCompetition(formData: FormData) {
       imageUrl: values.imageUrl || null,
       period: values.period,
       sportStatus: values.sportStatus,
-      statusDetail: values.statusDetail ?? "",
+      statusDetail: existingCompetition?.statusDetail ?? "",
       format: values.format,
       nextDate: values.nextDate || "Aucune échéance planifiée",
       registrationDeadline: formatDateInputValue(values.registrationDeadline),
       location: values.location,
       manager: values.manager,
-      tags: values.tags,
+      tags:
+        values.tags.length > 0
+          ? values.tags
+          : normalizeJsonArray<CompetitionTag>(existingCompetition?.tags, []),
       actions,
       status: values.status,
       sortOrder: values.sortOrder,
     };
 
     if (payload.status === CompetitionResourceStatus.PUBLISHED) {
-      const linkedEventsCount = values.id
-        ? await prisma.calendarEvent.count({
-            where: { competitionId: values.id },
-          })
-        : 0;
-
-      assertCompetitionCanBePublished(payload, linkedEventsCount);
+      assertCompetitionCanBePublished(payload);
     }
 
     const savedCompetition = values.id
@@ -533,11 +529,7 @@ export async function toggleCompetitionPublication(formData: FormData) {
         throw new Error("Compétition introuvable.");
       }
 
-      const linkedEventsCount = await prisma.calendarEvent.count({
-        where: { competitionId: id },
-      });
-
-      assertCompetitionCanBePublished(competition, linkedEventsCount);
+      assertCompetitionCanBePublished(competition);
     }
 
     const updatedCompetition = await prisma.competitionResource.update({

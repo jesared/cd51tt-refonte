@@ -16,9 +16,9 @@ import { createPageMetadata } from "@/lib/metadata";
 import { formatFrenchDate } from "@/lib/news";
 
 export const metadata = createPageMetadata({
-  title: "Admin actualités",
+  title: "Admin fil info",
   description:
-    "Administration des articles, annonces et publications du comité.",
+    "Gestion des informations publiées dans le fil de la page d'accueil.",
   path: "/admin/actualites",
 });
 
@@ -52,8 +52,8 @@ function getArticleIncompleteReasons(
   return [
     !article.title ? "Titre manquant" : null,
     !article.excerpt ? "Extrait manquant" : null,
-    !article.content ? "Contenu manquant" : null,
-    !article.imageUrl ? "Image manquante" : null,
+    article.excerpt.trim().length < 20 ? "Information trop courte" : null,
+    !article.category ? "Page liée manquante" : null,
   ].filter((reason): reason is string => Boolean(reason));
 }
 
@@ -131,13 +131,13 @@ export default async function AdminActualitesPage({
     });
   const message =
     searchParams?.saved === "1"
-      ? "L'article a été enregistré."
+      ? "L'information a été enregistrée."
       : searchParams?.deleted === "1"
-        ? "L'article a été supprimé."
+        ? "L'information a été supprimée."
         : searchParams?.published === "1"
-          ? "L'actualité est publiée."
+          ? "L'information est publiée dans le fil."
             : searchParams?.unpublished === "1"
-              ? "L'actualité est dépubliée."
+              ? "L'information a été retirée du fil."
               : searchParams?.seeded === "1"
                 ? "Les articles existants ont été importés."
                 : searchParams?.seeded === "0"
@@ -156,14 +156,14 @@ export default async function AdminActualitesPage({
       <section className="grid gap-6 rounded-[1.5rem] border border-border bg-background p-6 lg:grid-cols-[minmax(0,1fr)_minmax(220px,280px)] lg:items-stretch">
         <div className="flex min-w-0 flex-col justify-between gap-5">
           <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            Actualités
+            Fil info
           </p>
           <h2 className="text-2xl font-semibold tracking-tight">
-            Gérer les actualités
+            Gérer le fil info
           </h2>
           <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-            Consultez les informations visibles sur le site public. Les rôles
-            ADMIN et EDITOR peuvent aussi les créer ou les modifier.
+            Ajoutez des informations courtes depuis l’administration. Une
+            publication renvoie vers la page liée à la rubrique choisie.
           </p>
           <div className="flex flex-wrap gap-2">
             <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
@@ -179,7 +179,7 @@ export default async function AdminActualitesPage({
               className="admin-action admin-action-primary h-11 w-full"
             >
               <Plus className="size-4" />
-              Nouvel article
+              Ajouter une info
             </Link>
           ) : null}
         </div>
@@ -202,9 +202,9 @@ export default async function AdminActualitesPage({
       <section className="rounded-[1.5rem] border border-border bg-background">
         <div className="space-y-4 border-b border-border px-6 py-4">
           <div>
-            <h3 className="font-medium">Liste des articles</h3>
+            <h3 className="font-medium">Informations du fil</h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              {filteredArticles.length} sur {articles.length} article(s)
+              {filteredArticles.length} sur {articles.length} information(s)
             </p>
           </div>
           <AdminListControls
@@ -260,13 +260,13 @@ export default async function AdminActualitesPage({
 
         {articles.length === 0 ? (
           <div className="px-6 py-8 text-sm leading-6 text-muted-foreground">
-            Aucun article n&apos;est encore en base.
+            Aucune information n&apos;est encore enregistrée.
           </div>
         ) : (
           <div className="divide-y divide-border">
             {filteredArticles.length === 0 ? (
               <div className="px-6 py-8 text-sm leading-6 text-muted-foreground">
-                Aucun article ne correspond aux filtres.
+                Aucune information ne correspond aux filtres.
               </div>
             ) : null}
             {filteredArticles.map((article) => {
@@ -339,7 +339,7 @@ export default async function AdminActualitesPage({
                           deleteAction={deleteNewsArticle}
                           deleteId={article.id}
                           deleteLabel={article.title}
-                          deleteMessage="Supprimer cette actualité ? Cette action est définitive."
+                          deleteMessage="Supprimer cette information ? Cette action est définitive."
                         />
                       </>
                     ) : canEditContent ? (

@@ -20,24 +20,18 @@ import { getPublicClubs } from "@/lib/admin-clubs";
 import { getPublishedCompetitionItems } from "@/lib/admin-competitions";
 import { getPublishedNewsArticleCards } from "@/lib/admin-news";
 import { getPublicLicenseeTotal } from "@/lib/admin-stats";
+import { NEWS_CATEGORY_DESTINATIONS } from "@/lib/content-categories";
 import { createPageMetadata } from "@/lib/metadata";
 import type { ArticleCardItem } from "@/lib/news";
-import { cn } from "@/lib/utils";
 
 export const metadata = createPageMetadata({
   title: "Accueil",
   description:
-    "Actualités, compétitions, clubs et documents du Comité Marne de tennis de table.",
+    "Compétitions, clubs et documents du Comité Marne de tennis de table.",
   path: "/",
 });
 
 const quickLinks = [
-  {
-    href: "/actualites",
-    label: "Actualités",
-    description: "Les infos du moment",
-    icon: Newspaper,
-  },
   {
     href: "/competitions",
     label: "Compétitions",
@@ -61,21 +55,12 @@ const quickLinks = [
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const databaseArticles = await getPublishedNewsArticleCards(3);
-  const publishedArticles: ArticleCardItem[] = databaseArticles ?? [];
+  const databaseArticles = await getPublishedNewsArticleCards(7);
+  const infoItems: ArticleCardItem[] = databaseArticles ?? [];
   const publishedCompetitions = (await getPublishedCompetitionItems()) ?? [];
   const databaseClubs = await getPublicClubs();
   const licenseeTotal = await getPublicLicenseeTotal();
   const directory = databaseClubs ?? [];
-  const highlightedArticles = publishedArticles.slice(0, 3);
-  const featuredArticle = highlightedArticles.find(
-    (article) => article.featured,
-  );
-  const secondaryArticles = featuredArticle
-    ? highlightedArticles.filter(
-        (article) => article.slug !== featuredArticle.slug,
-      )
-    : highlightedArticles;
   const cities = Array.from(new Set(directory.map((club) => club.city)));
   const homeMetrics = [
     {
@@ -111,16 +96,15 @@ export default async function HomePage() {
               Le tennis de table dans la Marne
             </h1>
             <p className="max-w-2xl text-lg leading-8 text-muted-foreground">
-              Actualités, compétitions, clubs et documents utiles du comité
-              départemental.
+              Compétitions, clubs et documents utiles du comité départemental.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link
-              href="/actualites"
+              href="/competitions"
               className={buttonVariants({ variant: "default", size: "lg" })}
             >
-              Voir les actualités
+              Voir les compétitions
               <ArrowRight className="size-4" />
             </Link>
             <Link
@@ -196,7 +180,7 @@ export default async function HomePage() {
 
       <section
         aria-label="Accès rapides"
-        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
       >
         {quickLinks.map((item) => {
           const Icon = item.icon;
@@ -219,75 +203,82 @@ export default async function HomePage() {
         })}
       </section>
 
-      {featuredArticle ? (
-        <ScrollReveal>
-          <section className="grid gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
-            <div className="interactive-card overflow-hidden rounded-lg border border-border bg-card">
-              {featuredArticle.imageUrl ? (
-                <div className="relative aspect-[16/9] bg-muted">
-                  <Image
-                    src={featuredArticle.imageUrl}
-                    alt=""
-                    fill
-                    sizes="(min-width: 1024px) 46rem, 100vw"
-                    className="object-cover"
-                  />
-                </div>
-              ) : null}
+      <section aria-labelledby="fil-info-title" className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Newspaper className="size-5 text-primary" />
+          <div>
+            <p className="text-sm font-medium text-primary">
+              Les dernières nouvelles
+            </p>
+            <h2
+              id="fil-info-title"
+              className="text-2xl font-semibold tracking-tight"
+            >
+              Fil info
+            </h2>
+          </div>
+        </div>
+        <div className="overflow-hidden rounded-lg border border-border bg-card">
+          {infoItems.length ? (
+            <ul className="divide-y divide-border">
+              {infoItems.map((item) => {
+                const categoryDestination =
+                  NEWS_CATEGORY_DESTINATIONS[
+                    item.category as keyof typeof NEWS_CATEGORY_DESTINATIONS
+                  ] ?? {
+                    href: "/documents",
+                    label: "Documents",
+                  };
+                const linkedCompetition = publishedCompetitions.find(
+                  (competition) =>
+                    item.targetUrl === `/competitions/${competition.id}`,
+                );
+                const destination = {
+                  href:
+                    item.targetUrl?.startsWith("/competitions/") &&
+                    !linkedCompetition
+                      ? "/competitions"
+                      : item.targetUrl ?? categoryDestination.href,
+                  label:
+                    linkedCompetition?.title ??
+                    (item.targetUrl?.startsWith("/competitions/")
+                      ? "Compétitions"
+                      : categoryDestination.label),
+                };
 
-              <div className="p-6 sm:p-7">
-                <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                  <Badge>{featuredArticle.category}</Badge>
-                  <span>{featuredArticle.date}</span>
-                  <span>{featuredArticle.readTime}</span>
-                </div>
-                <h2 className="mt-5 max-w-3xl text-2xl font-semibold tracking-tight sm:text-3xl">
-                  {featuredArticle.title}
-                </h2>
-                <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">
-                  {featuredArticle.excerpt}
-                </p>
-                <Link
-                  href={`/actualites/${featuredArticle.slug}`}
-                  className={cn(
-                    buttonVariants({ variant: "outline", size: "sm" }),
-                    "mt-6",
-                  )}
-                >
-                  Lire l&apos;actualité
-                  <ArrowRight className="size-3.5" />
-                </Link>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Newspaper className="size-4 text-primary" />
-                <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  À la une
-                </h2>
-              </div>
-              {secondaryArticles.map((article) => (
-                <Link
-                  key={article.slug}
-                  href={`/actualites/${article.slug}`}
-                  className="interactive-card block rounded-lg border border-border bg-card p-5 hover:bg-accent"
-                >
-                  <p className="text-sm font-medium text-primary">
-                    {article.category}
-                  </p>
-                  <h3 className="mt-2 text-base font-semibold leading-6">
-                    {article.title}
-                  </h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {article.date}
-                  </p>
-                </Link>
-              ))}
-            </div>
-          </section>
-        </ScrollReveal>
-      ) : null}
+                return (
+                  <li key={item.slug}>
+                    <Link
+                      href={destination.href}
+                      className="group grid gap-2 p-4 transition-colors hover:bg-accent sm:grid-cols-[9rem_1fr_auto] sm:items-center sm:gap-5 sm:px-5"
+                    >
+                      <time className="text-sm text-muted-foreground">
+                        {item.date}
+                      </time>
+                      <span className="min-w-0">
+                        <span className="block font-semibold leading-6 group-hover:text-primary">
+                          {item.title}
+                        </span>
+                        <span className="mt-1 block text-sm leading-6 text-muted-foreground">
+                          {item.excerpt}
+                        </span>
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-sm font-medium text-primary">
+                        {destination.label}
+                        <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p className="p-5 text-sm text-muted-foreground">
+              Aucune information publiée pour le moment.
+            </p>
+          )}
+        </div>
+      </section>
 
       <section className="grid gap-5 lg:grid-cols-2">
         <ScrollReveal>

@@ -3,7 +3,7 @@ export const siteConfig = {
   shortName: "CD51TT",
   url: "https://www.cd51tt.fr",
   description:
-    "Le site officiel du Comité Départemental de Tennis de Table de la Marne pour suivre l'actualité, les compétitions, les clubs et les ressources utiles du territoire.",
+    "Le site officiel du Comité Départemental de Tennis de Table de la Marne pour suivre les compétitions, les clubs et les ressources utiles du territoire.",
   location: "Maison des Sports, Reims",
   addressLine1: "Maison des Sports",
   addressLine2: "122 bis rue du Barbâtre",
@@ -64,12 +64,6 @@ export const mainNavigation: NavigationItem[] = [
     href: "/",
     label: "Accueil",
     description: "Vue d'ensemble du comité",
-  },
-  {
-    href: "/actualites",
-    label: "Actualités",
-    description: "Vie du comité et annonces",
-    badge: "Nouveau",
   },
   {
     href: "/competitions",
@@ -138,7 +132,6 @@ export const footerNavigation = {
     { href: "/contact", label: "Contact" },
   ],
   activites: [
-    { href: "/actualites", label: "Actualités" },
     { href: "/competitions", label: "Compétitions" },
     { href: "/calendrier", label: "Calendrier" },
     { href: "/clubs", label: "Clubs" },
@@ -171,12 +164,6 @@ export const routeCopy = {
     eyebrow: "Comité départemental",
     description:
       "Le point d'entrée officiel pour suivre la saison, valoriser les clubs et accéder aux informations utiles du tennis de table marnais.",
-  },
-  "/actualites": {
-    title: "Actualités",
-    eyebrow: "Informations",
-    description:
-      "Retrouvez les annonces officielles, les temps forts du comité et les actualités des acteurs du territoire.",
   },
   "/competitions": {
     title: "Compétitions",

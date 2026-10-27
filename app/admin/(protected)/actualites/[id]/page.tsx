@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { NewsArticleForm } from "@/components/admin/news-article-form";
 import { requireEditorSession } from "@/lib/admin-auth";
 import { getAdminNewsArticleById } from "@/lib/admin-news";
+import { getPublishedCompetitionItems } from "@/lib/admin-competitions";
 import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata = createPageMetadata({
@@ -25,9 +26,10 @@ export default async function AdminEditArticlePage({
   params,
   searchParams,
 }: AdminEditArticlePageProps) {
-  const [article, session] = await Promise.all([
+  const [article, session, competitions] = await Promise.all([
     getAdminNewsArticleById(params.id),
     requireEditorSession("/admin/actualites"),
+    getPublishedCompetitionItems(),
   ]);
 
   if (!article) {
@@ -38,6 +40,10 @@ export default async function AdminEditArticlePage({
     <NewsArticleForm
       mode="edit"
       article={article}
+      targetOptions={(competitions ?? []).map((competition) => ({
+        value: `/competitions/${competition.id}`,
+        label: `Compétitions → ${competition.title}`,
+      }))}
       canPublish={session.role === "ADMIN" || session.role === "EDITOR"}
       errorMessage={searchParams?.error ? decodeURIComponent(searchParams.error) : null}
       saved={searchParams?.saved === "1"}

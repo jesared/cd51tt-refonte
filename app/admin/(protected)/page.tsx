@@ -75,10 +75,10 @@ function getModules(
   const modules = [
     {
       href: "/admin/actualites",
-      title: "Actualités",
-      description: "Consulter ou mettre à jour les annonces du site.",
+      title: "Fil info",
+      description: "Publier et gérer les informations affichées sur l’accueil.",
       count: data.articles.length,
-      unit: "articles",
+      unit: "infos",
       state: "Prêt",
       icon: Newspaper,
     },
@@ -194,7 +194,7 @@ const checks = [
     done: true,
   },
   {
-    label: "Actualités et documents",
+    label: "Fil info et documents",
     detail: "Édition branchée sur la base.",
     done: true,
   },
@@ -291,7 +291,7 @@ export default async function AdminDashboardPage() {
               href="/admin/actualites/nouveau"
               className="inline-flex h-9 items-center justify-center rounded-md bg-foreground px-3 text-sm font-medium text-background transition-colors hover:opacity-85"
             >
-              Nouvelle actualité
+              Ajouter une info au fil
             </Link>
           ) : null}
         </div>

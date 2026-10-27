@@ -66,13 +66,10 @@ function buildPublicationError(contentLabel: string, issues: string[]) {
 
 export function assertNewsArticleCanBePublished(article: PublishableNewsArticle) {
   const issues = [
-    !hasText(article.imageUrl) ? "ajouter une image" : null,
-    article.imageUrl && !isValidLink(article.imageUrl)
-      ? "corriger le lien de l’image"
-      : null,
     !article.publishedAt ? "indiquer une date de publication" : null,
-    !hasText(article.excerpt, 40) ? "rédiger un extrait plus complet" : null,
-    !hasText(article.content, 120) ? "rédiger un contenu plus complet" : null,
+    !hasText(article.excerpt, 20)
+      ? "rédiger une information de 20 caractères minimum"
+      : null,
   ].filter(Boolean) as string[];
 
   buildPublicationError(`l’actualité "${article.title}"`, issues);
@@ -80,7 +77,6 @@ export function assertNewsArticleCanBePublished(article: PublishableNewsArticle)
 
 export function assertCompetitionCanBePublished(
   competition: PublishableCompetition,
-  linkedEventsCount: number,
 ) {
   const invalidActions = getCompetitionActions(competition.actions).filter(
     (action) => action.href && !isValidLink(action.href),
@@ -90,7 +86,6 @@ export function assertCompetitionCanBePublished(
     competition.imageUrl && !isValidLink(competition.imageUrl)
       ? "corriger le lien de l’image"
       : null,
-    linkedEventsCount <= 0 ? "ajouter une échéance liée" : null,
     !hasText(competition.registrationDeadline)
       ? "indiquer la date limite d’inscription"
       : null,

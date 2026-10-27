@@ -23,6 +23,17 @@ export const DOCUMENT_CATEGORY_OPTIONS = [
 export type NewsCategory = (typeof NEWS_CATEGORY_OPTIONS)[number];
 export type DocumentCategory = (typeof DOCUMENT_CATEGORY_OPTIONS)[number];
 
+export const NEWS_CATEGORY_DESTINATIONS: Record<
+  NewsCategory,
+  { href: string; label: string }
+> = {
+  "Vie fédérale": { href: "/comite", label: "Comité" },
+  Clubs: { href: "/clubs", label: "Clubs" },
+  Jeunes: { href: "/calendrier", label: "Calendrier" },
+  Formation: { href: "/cadres-techniques", label: "Cadres techniques" },
+  Compétitions: { href: "/competitions", label: "Compétitions" },
+};
+
 const NEWS_CATEGORY_ALIASES: Record<string, NewsCategory> = {
   federation: "Vie fédérale",
   federale: "Vie fédérale",

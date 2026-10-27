@@ -3,6 +3,7 @@ export type ArticleCardItem = {
   title: string;
   excerpt: string;
   category: string;
+  targetUrl?: string | null;
   imageUrl?: string | null;
   date: string;
   readTime: string;
