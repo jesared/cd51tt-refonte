@@ -31,6 +31,20 @@ export function formatCalendarEventDate(date: Date) {
   }).format(date);
 }
 
+export function getUpcomingCalendarEvents(
+  events: CalendarEvent[],
+  fromDate = new Date(),
+) {
+  const today = new Date(fromDate);
+  today.setHours(0, 0, 0, 0);
+
+  return events.filter((event) => {
+    const eventDay = new Date(event.date);
+    eventDay.setHours(0, 0, 0, 0);
+    return eventDay >= today;
+  });
+}
+
 export function getNextCompetitionEvent(
   events: CalendarEvent[],
   competitionId: string,

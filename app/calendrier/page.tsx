@@ -9,7 +9,11 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { getPublishedCalendarEvents } from "@/lib/admin-calendar";
 import { getPublishedCompetitionItems } from "@/lib/admin-competitions";
-import { getCalendarEventTypeLabel, getCompetitionTitle } from "@/lib/calendar";
+import {
+  getCalendarEventTypeLabel,
+  getCompetitionTitle,
+  getUpcomingCalendarEvents,
+} from "@/lib/calendar";
 import { getGoogleMapsSearchUrl } from "@/lib/maps";
 import { createPageMetadata } from "@/lib/metadata";
 
@@ -52,7 +56,7 @@ export default async function CalendrierPage() {
     organizerClub: event.organizerClub,
     status: "published",
   }));
-  const nextEvents = publishedEvents.slice(0, 6);
+  const nextEvents = getUpcomingCalendarEvents(publishedEvents).slice(0, 6);
 
   return (
     <div className="space-y-8">

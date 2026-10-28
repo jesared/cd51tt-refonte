@@ -7,7 +7,11 @@ import { buttonVariants } from "@/components/ui/button";
 import { getPublishedCalendarEvents } from "@/lib/admin-calendar";
 import { getPublishedCompetitionItems } from "@/lib/admin-competitions";
 import { getPublishedDocumentCards } from "@/lib/admin-documents";
-import { getCalendarEventTypeLabel, getCompetitionTitle } from "@/lib/calendar";
+import {
+  getCalendarEventTypeLabel,
+  getCompetitionTitle,
+  getUpcomingCalendarEvents,
+} from "@/lib/calendar";
 import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata = createPageMetadata({
@@ -34,6 +38,7 @@ export default async function CompetitionsPage() {
     getPublishedCalendarEvents(),
   ]);
   const calendarEvents = publishedEvents ?? [];
+  const upcomingCalendarEvents = getUpcomingCalendarEvents(calendarEvents);
   const competitionDocuments =
     databaseDocuments?.filter((document) => document.competitionId) ?? [];
   const displayCompetitions = (databaseCompetitions ?? []).map((competition) => {
@@ -66,7 +71,7 @@ export default async function CompetitionsPage() {
   const nextCompetitionPrimaryAction = nextCompetition?.actions.find(
     (action) => action.primary,
   );
-  const nextCalendarEvent = calendarEvents[0];
+  const nextCalendarEvent = upcomingCalendarEvents[0];
   const competitionTitles = new Map(
     displayCompetitions.map((competition) => [competition.id, competition.title]),
   );
@@ -163,7 +168,7 @@ export default async function CompetitionsPage() {
         </section>
       ) : null}
 
-      {calendarEvents.length > 0 ? (
+      {upcomingCalendarEvents.length > 0 ? (
         <section className="space-y-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -184,7 +189,7 @@ export default async function CompetitionsPage() {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-3">
-            {calendarEvents.slice(0, 3).map((event) => (
+            {upcomingCalendarEvents.slice(0, 3).map((event) => (
               <article
                 key={event.id}
                 className="rounded-lg border border-border bg-card p-5"
