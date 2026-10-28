@@ -28,10 +28,7 @@ const documentFormSchema = z.object({
   title: z.string().trim().min(6, "Le titre doit contenir au moins 6 caracteres."),
   category: z.string().trim().min(2, "La categorie est requise."),
   format: z.string().trim().min(2, "Le format est requis."),
-  description: z
-    .string()
-    .trim()
-    .min(20, "La description doit contenir au moins 20 caracteres."),
+  description: z.string().trim().optional(),
   fileUrl: z
     .string()
     .trim()
@@ -234,7 +231,7 @@ export async function saveDocument(formData: FormData) {
       title: values.title,
       category: toCanonicalDocumentCategory(values.category),
       format: values.format,
-      description: values.description,
+      description: values.description || "",
       fileUrl: values.fileUrl,
       competitionId: values.competitionId || null,
       status: values.status,

@@ -258,7 +258,6 @@ export function DocumentResourceForm({
                 id="description"
                 name="description"
                 rows={6}
-                required
                 defaultValue={document?.description ?? ""}
                 className="rounded-xl border border-input bg-background px-3 py-3 text-sm leading-6 outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
               />

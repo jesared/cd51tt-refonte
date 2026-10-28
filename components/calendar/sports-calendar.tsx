@@ -83,6 +83,7 @@ export function SportsCalendar({ events }: SportsCalendarProps) {
         initialView="dayGridMonth"
         locale="fr"
         firstDay={1}
+        allDayText="Toute la journée"
         height="auto"
         events={toCalendarEvents(events)}
         dayMaxEvents={3}

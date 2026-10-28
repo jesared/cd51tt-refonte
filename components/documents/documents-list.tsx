@@ -213,9 +213,11 @@ export function DocumentsList({ documents }: DocumentsListProps) {
                     <h2 className="text-xl font-semibold tracking-tight">
                       {document.title}
                     </h2>
-                    <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-                      {document.description}
-                    </p>
+                    {document.description ? (
+                      <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+                        {document.description}
+                      </p>
+                    ) : null}
                   </div>
                 </div>
               </div>

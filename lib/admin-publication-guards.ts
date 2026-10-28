@@ -102,9 +102,6 @@ export function assertDocumentCanBePublished(document: PublishableDocument) {
     document.fileUrl && !isValidLink(document.fileUrl)
       ? "corriger le lien du document"
       : null,
-    !hasText(document.description, 40)
-      ? "rédiger une description plus complète"
-      : null,
     !hasText(document.format) ? "indiquer le format" : null,
   ].filter(Boolean) as string[];
 

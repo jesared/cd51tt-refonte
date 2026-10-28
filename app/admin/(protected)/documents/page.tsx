@@ -61,7 +61,6 @@ function getDocumentIncompleteReasons(
 ) {
   return [
     !document.title ? "Titre manquant" : null,
-    !document.description ? "Description manquante" : null,
     !document.fileUrl ? "Fichier ou lien manquant" : null,
   ].filter((reason): reason is string => Boolean(reason));
 }
