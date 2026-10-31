@@ -13,6 +13,10 @@ import {
   NEWS_CATEGORY_OPTIONS,
   normalizeNewsCategory,
 } from "@/lib/content-categories";
+import { Button } from "@/components/ui/button";
+import { FormField, nativeControlClassName } from "@/components/ui/form-field";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 type NewsArticleFormProps = {
   mode: "create" | "edit";
@@ -138,18 +142,14 @@ export function NewsArticleForm({
         <section className="rounded-[1.5rem] border border-border bg-background p-6">
           <h3 className="text-lg font-semibold">Contenu</h3>
           <div className="mt-5 grid gap-4">
-            <div className="grid gap-2">
-              <label htmlFor="title" className="text-sm font-medium">
-                Titre
-              </label>
-              <input
+            <FormField label="Titre" htmlFor="title">
+              <Input
                 id="title"
                 name="title"
                 required
                 defaultValue={article?.title ?? ""}
-                className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
               />
-            </div>
+            </FormField>
 
             <div className="grid gap-2">
               <label htmlFor="category" className="text-sm font-medium">
@@ -160,7 +160,7 @@ export function NewsArticleForm({
                 name="category"
                 required
                 defaultValue={selectedCategory ?? ""}
-                className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
+                className={nativeControlClassName}
               >
                 <option value="" disabled>
                   Choisir une rubrique
@@ -188,7 +188,7 @@ export function NewsArticleForm({
                 name="targetUrl"
                 required
                 defaultValue={defaultTargetUrl}
-                className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
+                className={nativeControlClassName}
               >
                 {pageOptions.map((option) => (
                   <option key={`${option.value}-${option.label}`} value={option.value}>
@@ -202,18 +202,14 @@ export function NewsArticleForm({
               </p>
             </div>
 
-            <div className="grid gap-2">
-              <label htmlFor="excerpt" className="text-sm font-medium">
-                Texte de l’information
-              </label>
-              <textarea
+            <FormField label="Texte de l’information" htmlFor="excerpt">
+              <Textarea
                 id="excerpt"
                 name="excerpt"
                 rows={4}
                 defaultValue={article?.excerpt ?? ""}
-                className="rounded-xl border border-input bg-background px-3 py-3 text-sm leading-6 outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
               />
-            </div>
+            </FormField>
 
           </div>
         </section>
@@ -281,18 +277,14 @@ export function NewsArticleForm({
           </h3>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             {canPublish ? (
-              <div className="grid gap-2">
-                <label htmlFor="publishedAt" className="text-sm font-medium">
-                  Date
-                </label>
-                <input
+              <FormField label="Date" htmlFor="publishedAt">
+                <Input
                   id="publishedAt"
                   name="publishedAt"
                   type="datetime-local"
                   defaultValue={toDatetimeLocalValue(article?.publishedAt)}
-                  className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
                 />
-              </div>
+              </FormField>
             ) : null}
           </div>
 
@@ -313,13 +305,10 @@ export function NewsArticleForm({
         </section>
 
         <div className="flex justify-end">
-          <button
-            type="submit"
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:opacity-90"
-          >
+          <Button type="submit" size="lg">
             <Save className="size-4" />
             {isEdit ? "Enregistrer" : "Créer l’information"}
-          </button>
+          </Button>
         </div>
       </ConfirmableAdminForm>
     </div>

@@ -7,6 +7,9 @@ import { PlaceAutocompleteInput } from "@/components/admin/place-autocomplete-in
 import { SaveResultActions } from "@/components/admin/save-result-actions";
 import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
 import { ImageUploadField } from "@/components/admin/image-upload-field";
+import { Button } from "@/components/ui/button";
+import { FormField } from "@/components/ui/form-field";
+import { Input } from "@/components/ui/input";
 
 type ClubFormProps = {
   mode: "create" | "edit";
@@ -72,18 +75,14 @@ export function ClubForm({
         <section className="rounded-[1.5rem] border border-border bg-background p-6">
           <h3 className="text-lg font-semibold">Fiche club</h3>
           <div className="mt-5 grid gap-4">
-            <div className="grid gap-2">
-              <label htmlFor="name" className="text-sm font-medium">
-                Nom
-              </label>
-              <input
+            <FormField label="Nom" htmlFor="name">
+              <Input
                 id="name"
                 name="name"
                 required
                 defaultValue={club?.name ?? ""}
-                className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
               />
-            </div>
+            </FormField>
 
             <div className="grid gap-2">
               <label className="text-sm font-medium">Photo du club</label>
@@ -94,18 +93,14 @@ export function ClubForm({
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="grid gap-2">
-                <label htmlFor="city" className="text-sm font-medium">
-                  Ville
-                </label>
-                <input
+              <FormField label="Ville" htmlFor="city">
+                <Input
                   id="city"
                   name="city"
                   required
                   defaultValue={club?.city ?? ""}
-                  className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
                 />
-              </div>
+              </FormField>
 
               <PlaceAutocompleteInput
                 id="venue"
@@ -118,63 +113,47 @@ export function ClubForm({
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
-              <div className="grid gap-2">
-                <label htmlFor="audience" className="text-sm font-medium">
-                  Public
-                </label>
-                <input
+              <FormField label="Public" htmlFor="audience">
+                <Input
                   id="audience"
                   name="audience"
                   required
                   defaultValue={club?.audience ?? ""}
                   placeholder="Jeunes, loisir, compétition..."
-                  className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
                 />
-              </div>
+              </FormField>
 
-              <div className="grid gap-2">
-                <label htmlFor="tables" className="text-sm font-medium">
-                  Nombre de tables
-                </label>
-                <input
+              <FormField label="Nombre de tables" htmlFor="tables">
+                <Input
                   id="tables"
                   name="tables"
                   type="number"
                   min={0}
                   required
                   defaultValue={club?.tables ?? 0}
-                  className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
                 />
-              </div>
+              </FormField>
 
-              <div className="grid gap-2">
-                <label htmlFor="contact" className="text-sm font-medium">
-                  Contact
-                </label>
-                <input
+              <FormField label="Contact" htmlFor="contact">
+                <Input
                   id="contact"
                   name="contact"
                   required
                   defaultValue={club?.contact ?? ""}
                   placeholder="email, téléphone ou URL"
-                  className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
                 />
-              </div>
+              </FormField>
             </div>
 
             <div className="grid gap-4 md:grid-cols-[1fr_1fr]">
-              <div className="grid gap-2">
-                <label htmlFor="ffttId" className="text-sm font-medium">
-                  Identifiant FFTT
-                </label>
-                <input
+              <FormField label="Identifiant FFTT" htmlFor="ffttId">
+                <Input
                   id="ffttId"
                   name="ffttId"
                   defaultValue={club?.ffttId ?? ""}
                   placeholder="Renseigné par la synchronisation"
-                  className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
                 />
-              </div>
+              </FormField>
 
               <label className="flex min-h-11 items-center gap-3 rounded-xl border border-border px-3 text-sm text-muted-foreground md:mt-7">
                 <input
@@ -190,13 +169,10 @@ export function ClubForm({
         </section>
 
         <div className="flex justify-end">
-          <button
-            type="submit"
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:opacity-90"
-          >
+          <Button type="submit" size="lg">
             <Save className="size-4" />
             {isEdit ? "Enregistrer les modifications" : "Ajouter le club"}
-          </button>
+          </Button>
         </div>
       </form>
     </div>

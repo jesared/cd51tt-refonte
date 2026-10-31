@@ -2,6 +2,7 @@ import {
   ArrowRight,
   Building2,
   CalendarDays,
+  Clock3,
   Download,
   FileText,
   MapPin,
@@ -21,9 +22,15 @@ import { CompetitionStatusBadge } from "@/components/competitions/competition-st
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { getPublicClubs } from "@/lib/admin-clubs";
+import { getPublishedCalendarEvents } from "@/lib/admin-calendar";
 import { getPublishedCompetitionItems } from "@/lib/admin-competitions";
 import { getPublishedNewsArticleCards } from "@/lib/admin-news";
 import { getPublicLicenseeTotal } from "@/lib/admin-stats";
+import {
+  formatCalendarEventDate,
+  getCalendarEventTypeLabel,
+  getUpcomingCalendarEvents,
+} from "@/lib/calendar";
 import { NEWS_CATEGORY_DESTINATIONS } from "@/lib/content-categories";
 import { createPageMetadata } from "@/lib/metadata";
 import type { ArticleCardItem } from "@/lib/news";
@@ -59,12 +66,48 @@ const quickLinks = [
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const databaseArticles = await getPublishedNewsArticleCards(7);
+  const [
+    databaseArticles,
+    publishedCompetitionItems,
+    databaseClubs,
+    licenseeTotal,
+    publishedCalendarEvents,
+  ] = await Promise.all([
+    getPublishedNewsArticleCards(7),
+    getPublishedCompetitionItems(),
+    getPublicClubs(),
+    getPublicLicenseeTotal(),
+    getPublishedCalendarEvents(),
+  ]);
   const infoItems: ArticleCardItem[] = databaseArticles ?? [];
-  const publishedCompetitions = (await getPublishedCompetitionItems()) ?? [];
-  const databaseClubs = await getPublicClubs();
-  const licenseeTotal = await getPublicLicenseeTotal();
+  const publishedCompetitions = publishedCompetitionItems ?? [];
   const directory = databaseClubs ?? [];
+  const competitionTitles = new Map(
+    publishedCompetitions.map((competition) => [
+      competition.id,
+      competition.title,
+    ]),
+  );
+  const nextEvent = getUpcomingCalendarEvents(publishedCalendarEvents ?? [])
+    .sort(
+      (first, second) =>
+        first.date.getTime() - second.date.getTime() ||
+        first.sortOrder - second.sortOrder,
+    )[0];
+  const openCompetition = publishedCompetitions.find(
+    (competition) => competition.status === "Ouvert",
+  );
+  const registrationAction =
+    openCompetition?.actions.find((action) => action.type === "registration") ??
+    openCompetition?.actions.find((action) => action.primary);
+  const latestArticle = infoItems[0];
+  const latestArticleDestination = latestArticle
+    ? latestArticle.targetUrl ??
+      NEWS_CATEGORY_DESTINATIONS[
+        latestArticle.category as keyof typeof NEWS_CATEGORY_DESTINATIONS
+      ]?.href ??
+      "/"
+    : null;
   const cities = Array.from(new Set(directory.map((club) => club.city)));
   const homeMetrics = [
     {
@@ -181,6 +224,134 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {(nextEvent || openCompetition || latestArticle) ? (
+        <section aria-labelledby="home-highlight-title" className="space-y-4">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium text-primary">À ne pas manquer</p>
+              <h2
+                id="home-highlight-title"
+                className="section-heading mt-1 text-2xl font-semibold tracking-tight"
+              >
+                En ce moment au CD51TT
+              </h2>
+            </div>
+            <Link
+              href="/calendrier"
+              className={buttonVariants({ variant: "ghost", size: "sm" })}
+            >
+              Tout le calendrier
+              <ArrowRight className="size-4" />
+            </Link>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.65fr)]">
+            {nextEvent ? (
+              <Link
+                href={
+                  nextEvent.competitionId
+                    ? `/competitions/${nextEvent.competitionId}`
+                    : "/calendrier"
+                }
+                className="interactive-card group relative flex min-h-64 overflow-hidden rounded-xl border border-primary/30 bg-primary text-primary-foreground shadow-sm"
+              >
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.22),transparent_42%)]" />
+                <div className="relative flex w-full flex-col justify-between gap-8 p-6 sm:p-8">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <Badge className="border-white/25 bg-white/15 text-white">
+                      <CalendarDays className="size-3.5" />
+                      Prochaine échéance
+                    </Badge>
+                    <span className="text-sm font-medium text-white/80">
+                      {getCalendarEventTypeLabel(nextEvent.type)}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="flex items-center gap-2 text-sm font-medium text-white/75">
+                      <Clock3 className="size-4" />
+                      {formatCalendarEventDate(nextEvent.date)}
+                    </p>
+                    <h3 className="mt-3 max-w-3xl text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
+                      {nextEvent.title}
+                    </h3>
+                    <p className="mt-3 text-base text-white/80">
+                      {nextEvent.competitionId
+                        ? competitionTitles.get(nextEvent.competitionId) ??
+                          "Compétition départementale"
+                        : "Événement du comité"}
+                      {nextEvent.location ? ` · ${nextEvent.location}` : ""}
+                    </p>
+                    <span className="mt-5 inline-flex items-center gap-2 font-semibold">
+                      Voir le détail
+                      <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ) : null}
+
+            <div className="grid gap-4">
+              {openCompetition ? (
+                <Link
+                  href={registrationAction?.href ?? `/competitions/${openCompetition.id}`}
+                  className="interactive-card group flex min-h-32 flex-col justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-5"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <CompetitionStatusBadge status={openCompetition.status} />
+                    <Trophy className="size-5 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div className="mt-5">
+                    <h3 className="text-lg font-semibold tracking-tight group-hover:text-primary">
+                      {openCompetition.title}
+                    </h3>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {registrationAction?.label ?? "Consulter la compétition"}
+                    </p>
+                  </div>
+                </Link>
+              ) : null}
+
+              {latestArticle && latestArticleDestination ? (
+                <Link
+                  href={latestArticleDestination}
+                  className="interactive-card group grid min-h-32 overflow-hidden rounded-xl border border-border bg-card sm:grid-cols-[minmax(0,1fr)_8rem]"
+                >
+                  <div className="flex flex-col justify-between p-5">
+                    <div className="flex items-center gap-2 text-sm font-medium text-primary">
+                      <Newspaper className="size-4" />
+                      Dernière actualité
+                    </div>
+                    <div className="mt-5">
+                      <h3 className="font-semibold leading-6 group-hover:text-primary">
+                        {latestArticle.title}
+                      </h3>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {latestArticle.date}
+                      </p>
+                    </div>
+                  </div>
+                  {latestArticle.imageUrl ? (
+                    <div className="relative hidden min-h-32 bg-muted sm:block">
+                      <Image
+                        src={latestArticle.imageUrl}
+                        alt=""
+                        fill
+                        sizes="128px"
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </div>
+                  ) : (
+                    <div className="hidden place-items-center bg-muted text-muted-foreground sm:grid">
+                      <Newspaper className="size-8" />
+                    </div>
+                  )}
+                </Link>
+              ) : null}
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <section
         aria-label="Accès rapides"
