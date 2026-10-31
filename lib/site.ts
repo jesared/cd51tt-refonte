@@ -153,7 +153,7 @@ export const socialLinks = [
     label: "Facebook",
   },
   {
-    href: "https://www.instagram.com/",
+    href: "https://www.instagram.com/cd51tt/",
     label: "Instagram",
   },
 ];

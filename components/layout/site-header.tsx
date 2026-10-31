@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  ExternalLink,
   MapPin,
   Monitor,
   MoonStar,
@@ -76,6 +75,7 @@ export function SiteHeader({
   );
   const activeTheme = mounted ? (theme ?? "system") : "system";
   const facebookLink = socialLinks.find((link) => link.label === "Facebook");
+  const instagramLink = socialLinks.find((link) => link.label === "Instagram");
 
   useEffect(() => {
     setMounted(true);
@@ -218,13 +218,36 @@ export function SiteHeader({
               rel="noreferrer"
               aria-label="Suivre le CD51TT sur Facebook"
               title="Suivre le CD51TT sur Facebook"
-              className={cn(
-                buttonVariants({ variant: "outline", size: "sm" }),
-                "hidden h-10 gap-2 px-3 sm:inline-flex",
-              )}
+              className="hidden size-8 shrink-0 items-center justify-center rounded-full border border-border bg-background text-[#1877f2] transition-colors hover:border-[#1877f2]/40 hover:bg-[#1877f2]/10 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1877f2]/25 sm:inline-flex"
             >
-              <span className="hidden xl:inline">Facebook</span>
-              <ExternalLink className="size-4" />
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                className="size-4 fill-current"
+              >
+                <path d="M13.5 21v-8h2.75l.41-3H13.5V8.08c0-.87.24-1.46 1.58-1.46h1.69V3.94a22.7 22.7 0 0 0-2.46-.13c-2.43 0-4.1 1.49-4.1 4.22V10H7.45v3h2.76v8h3.29Z" />
+              </svg>
+            </a>
+          ) : null}
+          {instagramLink ? (
+            <a
+              href={instagramLink.href}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Suivre le CD51TT sur Instagram"
+              title="Suivre le CD51TT sur Instagram"
+              className="hidden size-8 shrink-0 items-center justify-center rounded-full border border-border bg-background text-[#e1306c] transition-colors hover:border-[#e1306c]/40 hover:bg-[#e1306c]/10 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#e1306c]/25 sm:inline-flex"
+            >
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                className="size-4 fill-none stroke-current"
+                strokeWidth="2"
+              >
+                <rect x="3.5" y="3.5" width="17" height="17" rx="5" />
+                <circle cx="12" cy="12" r="4" />
+                <circle cx="17.4" cy="6.8" r="1" className="fill-current stroke-none" />
+              </svg>
             </a>
           ) : null}
           <div className="lg:hidden">{mobileMenuTrigger}</div>
