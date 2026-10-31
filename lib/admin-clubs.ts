@@ -8,6 +8,7 @@ import { z } from "zod";
 
 import { requireAdministratorSession } from "@/lib/admin-auth";
 import { recordAdminActivity } from "@/lib/admin-activity";
+import { uploadFileToCloudinary } from "@/lib/cloudinary";
 import { ffttApiReadiness, ffttClient } from "@/lib/fftt/client";
 import { clubs, type Club } from "@/lib/mock-data";
 import { prisma } from "@/lib/prisma";
@@ -21,6 +22,14 @@ const clubFormSchema = z.object({
   audience: z.string().trim().min(2, "Le public est requis."),
   tables: z.coerce.number().int().min(0, "Le nombre de tables est invalide."),
   contact: z.string().trim().min(2, "Le contact est requis."),
+  imageUrl: z
+    .string()
+    .trim()
+    .optional()
+    .refine(
+      (value) => !value || value.startsWith("/") || URL.canParse(value),
+      "Le lien de l’image n’est pas valide.",
+    ),
   active: z.boolean(),
 });
 
@@ -39,13 +48,13 @@ function buildClubPath(id?: string) {
 function isClubTableMissingError(error: unknown) {
   return (
     error instanceof Prisma.PrismaClientKnownRequestError &&
-    error.code === "P2021"
+    (error.code === "P2021" || error.code === "P2022")
   );
 }
 
 function serializeErrorMessage(error: unknown) {
   if (isClubTableMissingError(error)) {
-    return "La table des clubs n'existe pas encore. Lancez prisma db push.";
+    return "Le schéma des clubs n'est pas à jour. Lancez prisma db push.";
   }
 
   if (error instanceof z.ZodError) {
@@ -84,6 +93,7 @@ function toClub(resource: ClubResource): Club {
     audience: resource.audience,
     tables: resource.tables,
     contact: resource.contact,
+    imageUrl: resource.imageUrl,
   };
 }
 
@@ -146,8 +156,20 @@ export async function saveClub(formData: FormData) {
       audience: getStringValue(formData, "audience"),
       tables: getStringValue(formData, "tables") || "0",
       contact: getStringValue(formData, "contact"),
+      imageUrl: getStringValue(formData, "imageUrl"),
       active: getBooleanValue(formData, "active"),
     });
+
+    const existingClub = values.id
+      ? await prisma.clubResource.findUnique({
+          where: { id: values.id },
+          select: { imageUrl: true },
+        })
+      : null;
+    const uploadedImageUrl = await uploadFileToCloudinary(
+      formData.get("imageUpload") as File | null,
+      "image",
+    );
 
     const payload = {
       ffttId: values.ffttId || null,
@@ -157,6 +179,9 @@ export async function saveClub(formData: FormData) {
       audience: values.audience,
       tables: values.tables,
       contact: values.contact,
+      imageUrl: getBooleanValue(formData, "removeImage")
+        ? null
+        : uploadedImageUrl || values.imageUrl || existingClub?.imageUrl || null,
       active: values.active,
     };
 

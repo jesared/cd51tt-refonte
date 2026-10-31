@@ -14,6 +14,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { CompetitionStatusBadge } from "@/components/competitions/competition-status-badge";
 import { requireEditorSession } from "@/lib/admin-auth";
 import { getAdminCalendarEvents } from "@/lib/admin-calendar";
 import {
@@ -113,9 +114,7 @@ export default async function AdminCompetitionPreviewPage({
       <section className="grid gap-6 border-b border-border pb-8 lg:grid-cols-[minmax(0,1fr)_minmax(320px,460px)] lg:items-start">
         <div className="space-y-5">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant={competition.status === "En cours" ? "default" : "secondary"}>
-              {competition.status}
-            </Badge>
+            <CompetitionStatusBadge status={competition.status} />
             {competition.ffttApprovalStatus ? (
               <Badge variant="outline">
                 {competition.ffttApprovalStatus === "HOMOLOGUE"

@@ -400,7 +400,10 @@ export async function saveNewsArticle(formData: FormData) {
       content: values.content || values.excerpt || "",
       category: toCanonicalNewsCategory(values.category),
       targetUrl: values.targetUrl,
-      imageUrl: imageUrl || existingArticle?.imageUrl || null,
+      imageUrl:
+        getBooleanValue(formData, "removeImage")
+          ? null
+          : imageUrl || existingArticle?.imageUrl || null,
       attachments: attachments as Prisma.InputJsonValue,
       readTime: estimateReadTime(values.content || values.excerpt || ""),
       status: values.status,

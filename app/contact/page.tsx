@@ -115,7 +115,7 @@ export default async function ContactPage() {
 
       <section className="grid gap-6 rounded-lg border border-border bg-card p-5 sm:p-6 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)]">
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight">
+          <h2 className="section-heading text-2xl font-semibold tracking-tight">
             Envoyer un message
           </h2>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">

@@ -1,6 +1,5 @@
-import { FolderKanban } from "lucide-react";
-
 import { DocumentsList } from "@/components/documents/documents-list";
+import { RubricMarker } from "@/components/shared/rubric-marker";
 import { Badge } from "@/components/ui/badge";
 import { getPublishedDocumentCards } from "@/lib/admin-documents";
 import type { DocumentCardItem } from "@/lib/documents";
@@ -26,10 +25,7 @@ export default async function DocumentsPage() {
     <div className="space-y-8">
       <section className="grid gap-6 border-b border-border pb-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
         <div className="max-w-3xl space-y-4">
-          <div className="flex items-center gap-2 text-sm font-medium text-primary">
-            <FolderKanban className="size-4" />
-            Ressources
-          </div>
+          <RubricMarker rubric="documents" />
           <div className="space-y-3">
             <h1 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
               Documents

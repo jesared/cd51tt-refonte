@@ -50,12 +50,7 @@ function getMissingNewsFields(formData: FormData) {
     ["content", "contenu"],
   ]
     .filter(([key]) => !getString(formData, key))
-    .map(([, label]) => label)
-    .concat(
-      !isProvidedFile(formData.get("imageUpload")) && !getString(formData, "imageUrl")
-        ? ["image"]
-        : [],
-    );
+    .map(([, label]) => label);
 }
 
 function getMissingDocumentFields(formData: FormData) {

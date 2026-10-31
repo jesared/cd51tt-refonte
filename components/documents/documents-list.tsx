@@ -6,6 +6,7 @@ import { Download, FileText, Mail, Search, X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { IllustratedEmptyState } from "@/components/shared/illustrated-empty-state";
 import type { DocumentCardItem } from "@/lib/documents";
 import { cn } from "@/lib/utils";
 
@@ -187,9 +188,15 @@ export function DocumentsList({ documents }: DocumentsListProps) {
       </div>
 
       {filteredDocuments.length === 0 ? (
-        <div className="rounded-lg border border-border bg-card p-8 text-sm leading-6 text-muted-foreground">
-          Aucun document ne correspond à cette recherche.
-        </div>
+        <IllustratedEmptyState
+          icon={FileText}
+          title={documents.length > 0 ? "Aucun document trouvé" : "La bibliothèque est vide pour le moment"}
+          description={
+            documents.length > 0
+              ? "Aucun document ne correspond à votre recherche ou à la catégorie choisie. Essayez d’autres filtres."
+              : "Les règlements, formulaires et ressources utiles seront disponibles ici dès leur publication."
+          }
+        />
       ) : (
         <div className="divide-y divide-border rounded-lg border border-border bg-card">
           {filteredDocuments.map((document) => (

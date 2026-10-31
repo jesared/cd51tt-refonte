@@ -58,6 +58,7 @@ export type Club = {
   audience: string;
   tables: number;
   contact: string;
+  imageUrl?: string | null;
 };
 
 export type DocumentItem = {

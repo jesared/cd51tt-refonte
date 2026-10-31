@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -13,6 +12,8 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { CoverImage } from "@/components/shared/cover-image";
+import { CompetitionStatusBadge } from "@/components/competitions/competition-status-badge";
 import { getPublishedCalendarEvents } from "@/lib/admin-calendar";
 import { getPublishedCompetitionItemById } from "@/lib/admin-competitions";
 import { getPublishedDocumentCards } from "@/lib/admin-documents";
@@ -98,13 +99,7 @@ export default async function CompetitionDetailPage({
       <section className="grid gap-6 border-b border-border pb-8 lg:grid-cols-[minmax(0,1fr)_minmax(320px,460px)] lg:items-start">
         <div className="space-y-5">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge
-              variant={
-                competition.status === "En cours" ? "default" : "secondary"
-              }
-            >
-              {competition.status}
-            </Badge>
+            <CompetitionStatusBadge status={competition.status} />
             {competition.ffttApprovalStatus ? (
               <Badge variant="outline">
                 {competition.ffttApprovalStatus === "HOMOLOGUE"
@@ -158,22 +153,13 @@ export default async function CompetitionDetailPage({
           ) : null}
         </div>
 
-        <div className="relative aspect-[4/3] overflow-hidden rounded-lg border border-border bg-card">
-          {competition.imageUrl ? (
-            <Image
-              src={competition.imageUrl}
-              alt=""
-              fill
-              priority
-              sizes="(min-width: 1024px) 460px, 100vw"
-              className="object-cover"
-            />
-          ) : (
-            <div className="grid h-full place-items-center text-muted-foreground">
-              <Trophy className="size-12" />
-            </div>
-          )}
-        </div>
+        <CoverImage
+          src={competition.imageUrl}
+          priority
+          fallbackIcon={Trophy}
+          sizes="(min-width: 1024px) 460px, 100vw"
+          className="rounded-lg border border-border bg-card"
+        />
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
@@ -182,7 +168,7 @@ export default async function CompetitionDetailPage({
             <section className="rounded-lg border border-border bg-card p-5">
               <div className="flex items-center gap-2">
                 <FileText className="size-5 text-primary" />
-                <h2 className="text-xl font-semibold tracking-tight">
+                <h2 className="section-heading text-xl font-semibold tracking-tight">
                   Informations liées
                 </h2>
               </div>
@@ -222,7 +208,7 @@ export default async function CompetitionDetailPage({
           <section className="rounded-lg border border-border bg-card p-5">
             <div className="flex items-center gap-2">
               <CalendarDays className="size-5 text-primary" />
-              <h2 className="text-xl font-semibold tracking-tight">
+              <h2 className="section-heading text-xl font-semibold tracking-tight">
                 Échéances liées
               </h2>
             </div>
@@ -271,7 +257,7 @@ export default async function CompetitionDetailPage({
           <section className="rounded-lg border border-border bg-card p-5">
             <div className="flex items-center gap-2">
               <FileText className="size-5 text-primary" />
-              <h2 className="text-xl font-semibold tracking-tight">
+              <h2 className="section-heading text-xl font-semibold tracking-tight">
                 Documents
               </h2>
             </div>
@@ -304,7 +290,7 @@ export default async function CompetitionDetailPage({
         </div>
 
         <aside className="h-fit rounded-lg border border-border bg-card p-5">
-          <h2 className="text-xl font-semibold tracking-tight">
+          <h2 className="section-heading text-xl font-semibold tracking-tight">
             Organisation
           </h2>
           <dl className="mt-5 space-y-4 text-sm">

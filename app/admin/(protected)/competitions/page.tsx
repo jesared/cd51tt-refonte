@@ -10,6 +10,7 @@ import {
 import { AdminUserRole, CompetitionResourceStatus } from "@prisma/client";
 
 import { AdminListControls } from "@/components/admin/admin-list-controls";
+import { getCompetitionStatusClassName } from "@/components/competitions/competition-status-badge";
 import { AdminRowActionsMenu } from "@/components/admin/admin-row-actions-menu";
 import { PublicationConfirmationForm } from "@/components/admin/publication-confirmation-form";
 import { Badge } from "@/components/ui/badge";
@@ -49,18 +50,6 @@ type AdminCompetitionsPageProps = {
     tri?: string;
   };
 };
-
-function getSportStatusTone(status: string) {
-  if (status === "En cours") {
-    return "bg-sky-500/10 text-sky-700 dark:text-sky-300";
-  }
-
-  if (status === "À venir" || status === "Ouvert") {
-    return "bg-amber-500/10 text-amber-700 dark:text-amber-300";
-  }
-
-  return "border border-border text-muted-foreground";
-}
 
 function normalizeSearchValue(value: string) {
   return value
@@ -334,7 +323,7 @@ export default async function AdminCompetitionsPage({
                         {isPublished ? "Publié" : "Brouillon"}
                       </span>
                       <span
-                        className={`rounded-full px-2 py-0.5 text-xs ${getSportStatusTone(
+                        className={`rounded-full border px-2 py-0.5 text-xs ${getCompetitionStatusClassName(
                           competition.sportStatus,
                         )}`}
                       >

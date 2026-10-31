@@ -9,8 +9,21 @@
     @apply transition-[background-color,border-color,box-shadow,transform] duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/45 hover:shadow-sm active:translate-y-0;
   }
 
+  .section-heading {
+    @apply relative border-b border-border/70 border-s-2 border-primary/50 pb-2 ps-3;
+  }
+
+  .section-heading::after {
+    content: "";
+    @apply absolute bottom-[-1px] start-3 h-0.5 w-10 rounded-full bg-primary/65;
+  }
+
+  .interactive-card:focus-within {
+    @apply -translate-y-0.5 border-primary/60 shadow-md ring-2 ring-ring/30;
+  }
+
   .admin-action {
-    @apply inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border bg-background px-3 text-sm font-medium text-muted-foreground transition duration-200 ease-out hover:-translate-y-px hover:border-primary/35 hover:bg-muted hover:text-foreground active:translate-y-0 disabled:pointer-events-none disabled:opacity-60;
+    @apply inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border bg-background px-3 text-sm font-medium text-muted-foreground transition duration-200 ease-out hover:-translate-y-px hover:border-primary/35 hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 active:translate-y-0 disabled:pointer-events-none disabled:opacity-60;
   }
 
   .admin-action-primary {
@@ -27,6 +40,10 @@
 
   .admin-list-row {
     @apply transition duration-200 ease-out hover:bg-muted/35;
+  }
+
+  .admin-list-row:focus-within {
+    @apply bg-muted/40;
   }
 
   .admin-list-row:hover .admin-action {

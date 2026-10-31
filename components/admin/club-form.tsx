@@ -6,6 +6,7 @@ import { saveClub } from "@/lib/admin-clubs";
 import { PlaceAutocompleteInput } from "@/components/admin/place-autocomplete-input";
 import { SaveResultActions } from "@/components/admin/save-result-actions";
 import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
+import { ImageUploadField } from "@/components/admin/image-upload-field";
 
 type ClubFormProps = {
   mode: "create" | "edit";
@@ -82,6 +83,14 @@ export function ClubForm({
                 defaultValue={club?.name ?? ""}
                 className="h-11 rounded-xl border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
               />
+            </div>
+
+            <div className="grid gap-2">
+              <label className="text-sm font-medium">Photo du club</label>
+              <p className="text-xs leading-5 text-muted-foreground">
+                Facultative. Les photos sont affichées au même format que les visuels des compétitions.
+              </p>
+              <ImageUploadField initialImageUrl={club?.imageUrl} />
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">

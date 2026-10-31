@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { ArrowRight, CalendarDays, Trophy } from "lucide-react";
+import { ArrowRight, CalendarDays } from "lucide-react";
 
 import { CompetitionsList } from "@/components/competitions/competitions-list";
+import { RubricMarker } from "@/components/shared/rubric-marker";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { getPublishedCalendarEvents } from "@/lib/admin-calendar";
@@ -83,10 +84,7 @@ export default async function CompetitionsPage() {
     <div className="space-y-8">
       <section className="grid gap-6 border-b border-border pb-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
         <div className="max-w-3xl space-y-4">
-          <div className="flex items-center gap-2 text-sm font-medium text-primary">
-            <Trophy className="size-4" />
-            Saison sportive
-          </div>
+          <RubricMarker rubric="competitions" />
           <div className="space-y-3">
             <h1 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
               Compétitions
@@ -117,7 +115,7 @@ export default async function CompetitionsPage() {
               <p className="text-xs font-semibold uppercase text-primary">
                 Prochaine échéance
               </p>
-              <h2 className="text-balance text-2xl font-semibold tracking-tight sm:text-3xl">
+              <h2 className="section-heading text-balance text-2xl font-semibold tracking-tight sm:text-3xl">
                 {nextCalendarEvent.title} ·{" "}
                 {formatEventDate(nextCalendarEvent.date)}
               </h2>
@@ -147,7 +145,7 @@ export default async function CompetitionsPage() {
               <p className="text-xs font-semibold uppercase text-primary">
                 Prochaine échéance
               </p>
-              <h2 className="text-balance text-2xl font-semibold tracking-tight sm:text-3xl">
+              <h2 className="section-heading text-balance text-2xl font-semibold tracking-tight sm:text-3xl">
                 {nextCompetition.nextDate}
               </h2>
               <p className="text-sm leading-6 text-muted-foreground">
@@ -175,7 +173,7 @@ export default async function CompetitionsPage() {
               <p className="text-sm font-medium text-primary">
                 Calendrier sportif
               </p>
-              <h2 className="text-2xl font-semibold tracking-tight">
+              <h2 className="section-heading text-2xl font-semibold tracking-tight">
                 Prochaines dates publiées
               </h2>
             </div>

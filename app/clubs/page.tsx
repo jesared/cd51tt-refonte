@@ -1,6 +1,5 @@
-import { Search } from "lucide-react";
-
 import { ClubsList } from "@/components/clubs/clubs-list";
+import { RubricMarker } from "@/components/shared/rubric-marker";
 import { Badge } from "@/components/ui/badge";
 import { getPublicClubs } from "@/lib/admin-clubs";
 import { createPageMetadata } from "@/lib/metadata";
@@ -22,10 +21,7 @@ export default async function ClubsPage() {
     <div className="space-y-8">
       <section className="grid gap-6 border-b border-border pb-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
         <div className="max-w-3xl space-y-4">
-          <div className="flex items-center gap-2 text-sm font-medium text-primary">
-            <Search className="size-4" />
-            Annuaire
-          </div>
+          <RubricMarker rubric="clubs" />
           <div className="space-y-3">
             <h1 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
               Clubs

@@ -14,6 +14,8 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { CoverImage } from "@/components/shared/cover-image";
+import { IllustratedEmptyState } from "@/components/shared/illustrated-empty-state";
 import { getGoogleMapsSearchUrl } from "@/lib/maps";
 import type { Club } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
@@ -158,9 +160,15 @@ export function ClubsList({ clubs }: ClubsListProps) {
       </div>
 
       {filteredClubs.length === 0 ? (
-        <div className="rounded-lg border border-border bg-card p-8 text-sm leading-6 text-muted-foreground">
-          Aucun club ne correspond à cette recherche.
-        </div>
+        <IllustratedEmptyState
+          icon={Building2}
+          title={clubs.length > 0 ? "Aucun club trouvé" : "L’annuaire sera bientôt disponible"}
+          description={
+            clubs.length > 0
+              ? "Aucun club ne correspond à votre recherche. Essayez un autre nom ou une autre ville."
+              : "Les clubs de la Marne apparaîtront ici dès que l’annuaire sera publié."
+          }
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filteredClubs.map((club) => {
@@ -170,52 +178,56 @@ export function ClubsList({ clubs }: ClubsListProps) {
             return (
               <article
                 key={club.name}
-                className="interactive-card flex min-h-56 flex-col justify-between rounded-lg border border-border bg-card p-5 hover:bg-accent"
+                className="interactive-card flex min-h-56 flex-col justify-between overflow-hidden rounded-lg border border-border bg-card hover:bg-accent"
               >
-                <div>
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="rounded-md border border-border bg-background p-2 text-primary">
-                      <Building2 className="size-5" />
+                <CoverImage
+                  src={club.imageUrl}
+                  fallbackIcon={Building2}
+                  sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
+                />
+                <div className="flex flex-1 flex-col justify-between p-5">
+                  <div>
+                    <div className="flex justify-end">
+                      <Badge variant="secondary">{club.city}</Badge>
                     </div>
-                    <Badge variant="secondary">{club.city}</Badge>
+                    <h2 className="mt-4 text-xl font-semibold tracking-tight">
+                      {club.name}
+                    </h2>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      {club.audience}
+                    </p>
                   </div>
-                  <h2 className="mt-5 text-xl font-semibold tracking-tight">
-                    {club.name}
-                  </h2>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {club.audience}
-                  </p>
-                </div>
 
-                <div className="mt-6 space-y-3 text-sm text-muted-foreground">
-                  <div className="flex items-start gap-2">
-                    <MapPin className="mt-0.5 size-4 shrink-0 text-primary" />
-                    <span>{club.venue}</span>
-                  </div>
-                  {contact.email ? (
-                    <a
-                      href={`mailto:${contact.email}`}
-                      className="flex min-w-0 items-center gap-2 text-sm font-medium text-primary transition-colors hover:text-foreground"
-                    >
-                      <Mail className="size-4 shrink-0" />
-                      <span className="truncate">{contact.email}</span>
-                    </a>
-                  ) : null}
-                  {contact.phone ? (
-                    <div className="flex items-center gap-2">
-                      <Phone className="size-4 shrink-0 text-primary" />
-                      <span>{contact.phone}</span>
+                  <div className="mt-6 space-y-3 text-sm text-muted-foreground">
+                    <div className="flex items-start gap-2">
+                      <MapPin className="mt-0.5 size-4 shrink-0 text-primary" />
+                      <span>{club.venue}</span>
                     </div>
-                  ) : null}
-                  <a
-                    href={mapsUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex h-9 w-fit items-center gap-2 rounded-lg border border-border bg-background px-3 text-sm font-medium text-primary transition-colors hover:border-primary/45 hover:bg-accent hover:text-foreground"
-                  >
-                    Itinéraire
-                    <Navigation className="size-4" />
-                  </a>
+                    {contact.email ? (
+                      <a
+                        href={`mailto:${contact.email}`}
+                        className="flex min-w-0 items-center gap-2 text-sm font-medium text-primary transition-colors hover:text-foreground"
+                      >
+                        <Mail className="size-4 shrink-0" />
+                        <span className="truncate">{contact.email}</span>
+                      </a>
+                    ) : null}
+                    {contact.phone ? (
+                      <div className="flex items-center gap-2">
+                        <Phone className="size-4 shrink-0 text-primary" />
+                        <span>{contact.phone}</span>
+                      </div>
+                    ) : null}
+                    <a
+                      href={mapsUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex h-9 w-fit items-center gap-2 rounded-lg border border-border bg-background px-3 text-sm font-medium text-primary transition-colors hover:border-primary/45 hover:bg-accent hover:text-foreground"
+                    >
+                      Itinéraire
+                      <Navigation className="size-4" />
+                    </a>
+                  </div>
                 </div>
               </article>
             );

@@ -6,6 +6,7 @@ import { saveNewsArticle } from "@/lib/admin-news";
 import { ConfirmableAdminForm } from "@/components/admin/confirmable-admin-form";
 import { SaveResultActions } from "@/components/admin/save-result-actions";
 import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
+import { ImageUploadField } from "@/components/admin/image-upload-field";
 import { parseNewsArticleAttachments } from "@/lib/news";
 import {
   NEWS_CATEGORY_DESTINATIONS,
@@ -215,6 +216,14 @@ export function NewsArticleForm({
             </div>
 
           </div>
+        </section>
+
+        <section className="rounded-[1.5rem] border border-border bg-background p-6">
+          <h3 className="text-lg font-semibold">Illustration</h3>
+          <p className="mb-5 mt-1 text-sm text-muted-foreground">
+            Facultative : ajoutez une image pour mettre en avant cette actualité.
+          </p>
+          <ImageUploadField initialImageUrl={article?.imageUrl} />
         </section>
 
         <section className="rounded-[1.5rem] border border-border bg-background p-6">

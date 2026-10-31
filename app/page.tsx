@@ -6,7 +6,6 @@ import {
   FileText,
   MapPin,
   Paperclip,
-  Newspaper,
   Trophy,
   Users,
 } from "lucide-react";
@@ -15,6 +14,9 @@ import Link from "next/link";
 
 import { AnimatedMetrics } from "@/components/home/animated-metrics";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
+import { RubricMarker } from "@/components/shared/rubric-marker";
+import { IllustratedEmptyState } from "@/components/shared/illustrated-empty-state";
+import { CompetitionStatusBadge } from "@/components/competitions/competition-status-badge";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { getPublicClubs } from "@/lib/admin-clubs";
@@ -205,15 +207,12 @@ export default async function HomePage() {
       </section>
 
       <section aria-labelledby="fil-info-title" className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Newspaper className="size-5 text-primary" />
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-sm font-medium text-primary">
-              Les dernières nouvelles
-            </p>
+            <RubricMarker rubric="news" />
             <h2
               id="fil-info-title"
-              className="text-2xl font-semibold tracking-tight"
+              className="section-heading mt-2 text-2xl font-semibold tracking-tight"
             >
               Fil info
             </h2>
@@ -249,7 +248,7 @@ export default async function HomePage() {
 
                 return (
                   <li key={item.slug} className="p-4 transition-colors hover:bg-accent sm:px-5">
-                    <Link href={destination.href} className="group grid gap-2 sm:grid-cols-[9rem_1fr_auto] sm:items-center sm:gap-5">
+                    <Link href={destination.href} className="group grid gap-3 sm:grid-cols-[9rem_minmax(0,1fr)_auto_auto] sm:items-center sm:gap-5">
                       <time className="text-sm text-muted-foreground">
                         {item.date}
                       </time>
@@ -261,6 +260,17 @@ export default async function HomePage() {
                           {item.excerpt}
                         </span>
                       </span>
+                      {item.imageUrl ? (
+                        <span className="relative block aspect-[16/9] w-full overflow-hidden rounded-lg border border-border bg-muted sm:w-36">
+                          <Image
+                            src={item.imageUrl}
+                            alt=""
+                            fill
+                            sizes="(min-width: 640px) 144px, 100vw"
+                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                          />
+                        </span>
+                      ) : null}
                       <span className="inline-flex items-center gap-1 text-sm font-medium text-primary">
                         {destination.label}
                         <ArrowRight className="size-4" />
@@ -288,9 +298,13 @@ export default async function HomePage() {
               })}
             </ul>
           ) : (
-            <p className="p-5 text-sm text-muted-foreground">
-              Aucune information publiée pour le moment.
-            </p>
+            <IllustratedEmptyState
+              icon={Newspaper}
+              title="Rien de nouveau pour le moment"
+              description="Les informations du comité apparaîtront ici dès leur publication."
+              headingLevel="h3"
+              className="m-3"
+            />
           )}
         </div>
       </section>
@@ -300,7 +314,7 @@ export default async function HomePage() {
           <div className="mb-4 flex items-center justify-between gap-4">
             <div>
               <p className="text-sm font-medium text-primary">Sport</p>
-              <h2 className="text-2xl font-semibold tracking-tight">
+              <h2 className="section-heading text-2xl font-semibold tracking-tight">
                 Temps forts
               </h2>
             </div>
@@ -320,7 +334,7 @@ export default async function HomePage() {
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="font-semibold">{competition.title}</h3>
-                  <Badge variant="secondary">{competition.status}</Badge>
+                  <CompetitionStatusBadge status={competition.status} />
                 </div>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">
                   {competition.period}
@@ -339,7 +353,7 @@ export default async function HomePage() {
           <div className="mb-4 flex items-center justify-between gap-4">
             <div>
               <p className="text-sm font-medium text-primary">Territoire</p>
-              <h2 className="text-2xl font-semibold tracking-tight">
+              <h2 className="section-heading text-2xl font-semibold tracking-tight">
                 Clubs proches
               </h2>
             </div>

@@ -63,7 +63,7 @@ export default async function ComitePage() {
             <UserRoundCheck className="size-4" />
             Encadrement
           </div>
-          <h2 className="text-xl font-semibold tracking-tight">
+          <h2 className="section-heading text-xl font-semibold tracking-tight">
             Cadres techniques
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">

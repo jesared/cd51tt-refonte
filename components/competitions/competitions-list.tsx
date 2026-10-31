@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -14,12 +13,16 @@ import {
   List as ListIcon,
   ListChecks,
   PenLine,
+  Trophy,
   UserRound,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { CoverImage } from "@/components/shared/cover-image";
+import { IllustratedEmptyState } from "@/components/shared/illustrated-empty-state";
+import { CompetitionStatusBadge } from "@/components/competitions/competition-status-badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -70,11 +73,7 @@ function matchesFilter(competition: Competition, filter: CompetitionFilter) {
 function CompetitionBadges({ competition }: { competition: Competition }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Badge
-        variant={competition.status === "En cours" ? "default" : "secondary"}
-      >
-        {competition.status}
-      </Badge>
+      <CompetitionStatusBadge status={competition.status} />
       {competition.ffttApprovalStatus ? (
         <Badge variant="outline">
           {competition.ffttApprovalStatus === "HOMOLOGUE"
@@ -274,17 +273,11 @@ function CompetitionDetails({
 function CompetitionCard({ competition }: { competition: Competition }) {
   return (
     <article className="interactive-card flex min-h-full flex-col overflow-hidden rounded-lg border border-border bg-card">
-      {competition.imageUrl ? (
-        <div className="relative aspect-[16/9] bg-muted">
-          <Image
-            src={competition.imageUrl}
-            alt=""
-            fill
-            sizes="(min-width: 1536px) 33vw, (min-width: 1024px) 50vw, 100vw"
-            className="object-cover"
-          />
-        </div>
-      ) : null}
+      <CoverImage
+        src={competition.imageUrl}
+        fallbackIcon={Trophy}
+        sizes="(min-width: 1536px) 33vw, (min-width: 1024px) 50vw, 100vw"
+      />
       <div className="flex flex-1 flex-col p-5">
         <div className="min-w-0">
           <CompetitionBadges competition={competition} />
@@ -319,15 +312,12 @@ function CompetitionListRow({ competition }: { competition: Competition }) {
       <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-center">
         <div className="flex min-w-0 items-start gap-4">
         {competition.imageUrl ? (
-          <div className="relative hidden h-24 w-32 shrink-0 overflow-hidden rounded-md bg-muted sm:block">
-            <Image
-              src={competition.imageUrl}
-              alt=""
-              fill
-              sizes="128px"
-              className="object-cover"
-            />
-          </div>
+          <CoverImage
+            src={competition.imageUrl}
+            fallbackIcon={Trophy}
+            sizes="160px"
+            className="hidden w-40 shrink-0 rounded-md sm:block"
+          />
         ) : null}
           <div className="min-w-0 flex-1">
             <CompetitionBadges competition={competition} />
@@ -457,7 +447,21 @@ export function CompetitionsList({
         </div>
       </div>
 
-      {activeView === "cards" ? (
+      {filteredCompetitions.length === 0 ? (
+        <IllustratedEmptyState
+          icon={Trophy}
+          title={
+            competitions.length > 0
+              ? "Aucune compétition à afficher"
+              : "Aucune compétition publiée pour le moment"
+          }
+          description={
+            competitions.length > 0
+              ? "Aucune épreuve ne correspond aux filtres sélectionnés. Essayez une autre recherche ou choisissez « Toutes »."
+              : "Les compétitions publiées par le comité apparaîtront ici."
+          }
+        />
+      ) : activeView === "cards" ? (
         <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
           {filteredCompetitions.map((competition) => (
             <CompetitionCard
