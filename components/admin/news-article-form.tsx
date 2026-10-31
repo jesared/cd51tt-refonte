@@ -209,7 +209,6 @@ export function NewsArticleForm({
                 id="excerpt"
                 name="excerpt"
                 rows={4}
-                required
                 defaultValue={article?.excerpt ?? ""}
                 className="rounded-xl border border-input bg-background px-3 py-3 text-sm leading-6 outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
               />

@@ -65,9 +65,6 @@ function buildPublicationError(contentLabel: string, issues: string[]) {
 export function assertNewsArticleCanBePublished(article: PublishableNewsArticle) {
   const issues = [
     !article.publishedAt ? "indiquer une date de publication" : null,
-    !hasText(article.excerpt, 20)
-      ? "rédiger une information de 20 caractères minimum"
-      : null,
   ].filter(Boolean) as string[];
 
   buildPublicationError(`l’actualité "${article.title}"`, issues);

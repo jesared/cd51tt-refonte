@@ -6,6 +6,7 @@ import {
   ArrowRight,
   CalendarDays,
   FileText,
+  Paperclip,
   Trophy,
   UserRound,
 } from "lucide-react";
@@ -15,6 +16,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { getPublishedCalendarEvents } from "@/lib/admin-calendar";
 import { getPublishedCompetitionItemById } from "@/lib/admin-competitions";
 import { getPublishedDocumentCards } from "@/lib/admin-documents";
+import { getPublishedNewsArticleCards } from "@/lib/admin-news";
 import { getCalendarEventTypeLabel } from "@/lib/calendar";
 import { getGoogleMapsSearchUrl } from "@/lib/maps";
 import { createPageMetadata } from "@/lib/metadata";
@@ -57,10 +59,11 @@ function formatEventDate(date: Date) {
 export default async function CompetitionDetailPage({
   params,
 }: CompetitionDetailPageProps) {
-  const [competition, publishedDocuments, publishedEvents] = await Promise.all([
+  const [competition, publishedDocuments, publishedEvents, publishedNews] = await Promise.all([
     getPublishedCompetitionItemById(params.id),
     getPublishedDocumentCards(),
     getPublishedCalendarEvents(),
+    getPublishedNewsArticleCards(),
   ]);
 
   if (!competition) {
@@ -74,6 +77,10 @@ export default async function CompetitionDetailPage({
   const events =
     publishedEvents?.filter((event) => event.competitionId === competition.id) ??
     [];
+  const news =
+    publishedNews?.filter(
+      (article) => article.targetUrl === `/competitions/${competition.id}`,
+    ) ?? [];
   const primaryAction =
     competition.actions.find((action) => action.primary) ??
     competition.actions[0];
@@ -171,6 +178,47 @@ export default async function CompetitionDetailPage({
 
       <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="space-y-6">
+          {news.length > 0 ? (
+            <section className="rounded-lg border border-border bg-card p-5">
+              <div className="flex items-center gap-2">
+                <FileText className="size-5 text-primary" />
+                <h2 className="text-xl font-semibold tracking-tight">
+                  Informations liées
+                </h2>
+              </div>
+              <ul className="mt-5 divide-y divide-border">
+                {news.map((article) => (
+                  <li key={article.slug} className="py-4 first:pt-0 last:pb-0">
+                    <p className="text-xs text-muted-foreground">{article.date}</p>
+                    <h3 className="mt-1 font-semibold">{article.title}</h3>
+                    {article.excerpt ? (
+                      <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                        {article.excerpt}
+                      </p>
+                    ) : null}
+                    {article.attachments?.length ? (
+                      <ul className="mt-3 flex flex-wrap gap-2">
+                        {article.attachments.map((attachment) => (
+                          <li key={attachment.url}>
+                            <a
+                              href={attachment.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-primary hover:bg-accent"
+                            >
+                              <Paperclip className="size-3.5" />
+                              {attachment.name}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
           <section className="rounded-lg border border-border bg-card p-5">
             <div className="flex items-center gap-2">
               <CalendarDays className="size-5 text-primary" />
