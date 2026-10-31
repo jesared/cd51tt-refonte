@@ -318,7 +318,7 @@ export default async function HomePage() {
               {latestArticle && latestArticleDestination ? (
                 <Link
                   href={latestArticleDestination}
-                  className="interactive-card group grid min-h-32 overflow-hidden rounded-xl border border-border bg-card sm:grid-cols-[minmax(0,1fr)_8rem]"
+                  className="interactive-card group flex min-h-32 flex-col overflow-hidden rounded-xl border border-border bg-card"
                 >
                   <div className="flex flex-col justify-between p-5">
                     <div className="flex items-center gap-2 text-sm font-medium text-primary">
@@ -335,17 +335,17 @@ export default async function HomePage() {
                     </div>
                   </div>
                   {latestArticle.imageUrl ? (
-                    <div className="relative hidden min-h-32 bg-muted sm:block">
+                    <div className="relative order-first aspect-[16/7] w-full bg-muted">
                       <Image
                         src={latestArticle.imageUrl}
                         alt=""
                         fill
-                        sizes="128px"
+                        sizes="(min-width: 1024px) 33vw, 100vw"
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                     </div>
                   ) : (
-                    <div className="hidden place-items-center bg-muted text-muted-foreground sm:grid">
+                    <div className="order-first grid aspect-[16/7] place-items-center bg-muted text-muted-foreground">
                       <Newspaper className="size-8" />
                     </div>
                   )}
