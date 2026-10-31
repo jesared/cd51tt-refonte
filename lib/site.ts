@@ -9,7 +9,7 @@ export const siteConfig = {
   addressLine2: "122 bis rue du Barbâtre",
   postalCode: "51100",
   city: "Reims",
-  season: "Saison 2025-2026",
+  season: "Saison 2026-2027",
   email: "contact@cd51tt.fr",
   phone: "03 26 00 51 51",
   organization: "Association sportive affiliée à la FFTT",

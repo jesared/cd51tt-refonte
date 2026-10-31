@@ -34,6 +34,7 @@ import {
 import { NEWS_CATEGORY_DESTINATIONS } from "@/lib/content-categories";
 import { createPageMetadata } from "@/lib/metadata";
 import type { ArticleCardItem } from "@/lib/news";
+import { getPublicSiteSettings } from "@/lib/site-settings";
 
 export const metadata = createPageMetadata({
   title: "Accueil",
@@ -72,12 +73,14 @@ export default async function HomePage() {
     databaseClubs,
     licenseeTotal,
     publishedCalendarEvents,
+    publicSiteSettings,
   ] = await Promise.all([
     getPublishedNewsArticleCards(7),
     getPublishedCompetitionItems(),
     getPublicClubs(),
     getPublicLicenseeTotal(),
     getPublishedCalendarEvents(),
+    getPublicSiteSettings(),
   ]);
   const infoItems: ArticleCardItem[] = databaseArticles ?? [];
   const publishedCompetitions = publishedCompetitionItems ?? [];
@@ -136,7 +139,7 @@ export default async function HomePage() {
       <section className="grid items-center gap-8 py-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.65fr)] lg:py-8">
         <div className="max-w-3xl space-y-7">
           <Badge variant="secondary" className="rounded-full px-3 py-1">
-            Saison 2025-2026
+            {publicSiteSettings.siteConfig.season}
           </Badge>
           <div className="space-y-4">
             <h1 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
