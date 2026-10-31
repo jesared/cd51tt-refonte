@@ -13,6 +13,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { AnimatedMetrics } from "@/components/home/animated-metrics";
+import { TableTennisMotif } from "@/components/home/table-tennis-motif";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { RubricMarker } from "@/components/shared/rubric-marker";
 import { IllustratedEmptyState } from "@/components/shared/illustrated-empty-state";
@@ -122,7 +123,8 @@ export default async function HomePage() {
 
         <div className="relative min-h-[280px] overflow-hidden rounded-lg border border-border bg-card">
           <div className="absolute inset-0 bg-muted" />
-          <div className="relative flex h-full min-h-[280px] flex-col justify-between p-6">
+          <TableTennisMotif />
+          <div className="relative z-10 flex h-full min-h-[280px] flex-col justify-between p-6">
             <div className="flex items-center justify-between">
               <div className="relative size-24 overflow-hidden rounded-md shadow-sm ring-1 ring-border">
                 {/* Logo thème clair */}
