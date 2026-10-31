@@ -5,6 +5,7 @@ import {
   Download,
   FileText,
   MapPin,
+  Newspaper,
   Paperclip,
   Trophy,
   Users,
