@@ -297,11 +297,16 @@ export class FfttClient {
 
     const xml = await this.requestSmartping("xml_liste_joueur_o.php", {
       club: clubId,
+      valid: "1",
     });
 
-    return readItems(xml, "joueur")
+    const licensees = readItems(xml, "joueur")
       .map(toLicenseeRecord)
       .filter((player): player is FfttLicenseeRecord => Boolean(player));
+
+    return Array.from(
+      new Map(licensees.map((licensee) => [licensee.licence, licensee])).values(),
+    );
   }
 
   async getNews(): Promise<FfttNewsRecord[]> {
